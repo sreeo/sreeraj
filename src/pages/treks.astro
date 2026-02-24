@@ -1,0 +1,15 @@
+---
+import { getCollection } from 'astro:content';
+import TagLayout from '../layouts/TagLayout.astro';
+
+const posts = (await getCollection('blog'))
+  .filter((p) => p.data.tags.some((t) => ['treks', 'trek'].includes(t)))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<TagLayout
+  title="Treks"
+  description="Trekking adventures and trail stories."
+  posts={posts}
+  theme="trek"
+/>

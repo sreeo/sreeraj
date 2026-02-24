@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import TagLayout from '../../layouts/TagLayout.astro';
+import { getThemeForTags } from '../../utils/theme';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+
+  const tagSet = new Set<string>();
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      tagSet.add(tag);
+    }
+  }
+
+  return [...tagSet].map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts
+        .filter((p) => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+const theme = getThemeForTags([tag]);
+---
+
+<TagLayout
+  title={`#${tag}`}
+  description={`Posts tagged with "${tag}"`}
+  posts={posts}
+  theme={theme}
+/>

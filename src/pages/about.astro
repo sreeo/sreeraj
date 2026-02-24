@@ -1,0 +1,21 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const pages = await getCollection('pages');
+const aboutPage = pages.find((p) => p.data.slug === 'about');
+const { Content } = aboutPage ? await render(aboutPage) : { Content: null };
+---
+
+<BaseLayout title="About — sreeraj.dev" theme="tech">
+  <article class="max-w-[720px] mx-auto">
+    <h1 class="page-title text-3xl mb-8">About</h1>
+    {Content ? (
+      <div class="prose">
+        <Content />
+      </div>
+    ) : (
+      <p class="page-description">About page content not found.</p>
+    )}
+  </article>
+</BaseLayout>

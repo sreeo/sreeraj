@@ -1,0 +1,89 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import TagList from '../components/TagList.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  featureImage?: string;
+  tags?: string[];
+  author?: string;
+  readingTime?: number;
+  theme?: 'tech' | 'trek';
+  prevPost?: { slug: string; title: string } | null;
+  nextPost?: { slug: string; title: string } | null;
+}
+
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  featureImage,
+  tags = [],
+  author,
+  readingTime,
+  theme = 'tech',
+  prevPost,
+  nextPost,
+} = Astro.props;
+---
+
+<BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage} theme={theme}>
+  <article class="max-w-[720px] mx-auto">
+    {featureImage && (
+      <img
+        src={featureImage}
+        alt={title}
+        class="post-hero-image w-full mb-6"
+      />
+    )}
+
+    <header class="mb-8">
+      <h1 class="post-header-title text-3xl sm:text-4xl mb-3">{title}</h1>
+      <div class="post-header-meta flex flex-wrap items-center gap-3">
+        {author && <span>{author}</span>}
+        <span>&middot;</span>
+        <FormattedDate date={pubDate} />
+        {readingTime && (
+          <>
+            <span>&middot;</span>
+            <span>{readingTime} min read</span>
+          </>
+        )}
+      </div>
+      {updatedDate && updatedDate.getTime() !== pubDate.getTime() && (
+        <p class="post-header-meta mt-1 opacity-60">
+          Updated <FormattedDate date={updatedDate} />
+        </p>
+      )}
+      {tags.length > 0 && (
+        <div class="mt-3">
+          <TagList tags={tags} />
+        </div>
+      )}
+    </header>
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    {(prevPost || nextPost) && (
+      <nav class="mt-12 pt-8 post-nav-border border-t flex justify-between gap-4">
+        {prevPost ? (
+          <a href={`/${prevPost.slug}/`} class="post-nav-link">
+            &larr; {prevPost.title}
+          </a>
+        ) : <span />}
+        {nextPost ? (
+          <a href={`/${nextPost.slug}/`} class="post-nav-link text-right">
+            {nextPost.title} &rarr;
+          </a>
+        ) : <span />}
+      </nav>
+    )}
+  </article>
+</BaseLayout>

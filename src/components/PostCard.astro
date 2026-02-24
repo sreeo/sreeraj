@@ -1,0 +1,54 @@
+---
+import FormattedDate from './FormattedDate.astro';
+import TagList from './TagList.astro';
+
+interface Props {
+  title: string;
+  slug: string;
+  description: string;
+  pubDate: Date;
+  featureImage?: string;
+  tags?: string[];
+  readingTime?: number;
+  variant?: 'tech' | 'trek';
+}
+
+const { title, slug, description, pubDate, featureImage, tags = [], readingTime, variant = 'tech' } = Astro.props;
+const isTrek = variant === 'trek';
+---
+
+<article class:list={['post-card group', isTrek && 'trek-card']}>
+  <a href={`/${slug}/`} class="block">
+    {featureImage && (
+      <div class:list={[!isTrek && 'mb-3', isTrek && 'overflow-hidden']}>
+        <img
+          src={featureImage}
+          alt={title}
+          class:list={[
+            'post-card-image w-full object-cover transition-transform duration-300 group-hover:scale-105',
+            !isTrek && 'h-40 rounded-lg',
+            isTrek && 'h-52',
+          ]}
+          loading="lazy"
+        />
+      </div>
+    )}
+    <div class:list={[isTrek && 'post-card-body']}>
+      <h3 class:list={['post-card-title text-lg mb-1 transition-colors', !isTrek && 'font-semibold']}>
+        {title}
+      </h3>
+      <div class="post-card-meta flex items-center gap-2 mb-2">
+        <FormattedDate date={pubDate} />
+        {readingTime && <span>· {readingTime} min read</span>}
+      </div>
+      {description && (
+        <p class="post-card-description text-sm line-clamp-2">{description}</p>
+      )}
+    </div>
+  </a>
+  {tags.length > 0 && (
+    <div class:list={['mt-2', isTrek && 'px-5 pb-4']}>
+      <TagList tags={tags} />
+    </div>
+  )}
+</article>

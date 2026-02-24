@@ -1,0 +1,49 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+
+interface Post {
+  data: {
+    title: string;
+    slug: string;
+    description: string;
+    pubDate: Date;
+    featureImage?: string;
+    tags?: string[];
+    readingTime?: number;
+  };
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  posts: Post[];
+  theme?: 'tech' | 'trek';
+}
+
+const { title, description, posts, theme = 'tech' } = Astro.props;
+---
+
+<BaseLayout title={`${title} — sreeraj.dev`} description={description} theme={theme}>
+  <h1 class="page-title text-3xl mb-2">{title}</h1>
+  {description && <p class="page-description mb-8">{description}</p>}
+
+  {posts.length === 0 ? (
+    <p class="page-description">No posts found.</p>
+  ) : (
+    <div class="grid gap-6 sm:grid-cols-2">
+      {posts.map((post) => (
+        <PostCard
+          title={post.data.title}
+          slug={post.data.slug}
+          description={post.data.description}
+          pubDate={post.data.pubDate}
+          featureImage={post.data.featureImage}
+          tags={post.data.tags}
+          readingTime={post.data.readingTime}
+          variant={theme}
+        />
+      ))}
+    </div>
+  )}
+</BaseLayout>
