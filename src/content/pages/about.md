@@ -7,7 +7,7 @@ updatedDate: "2026-02-27T00:00:00.000+00:00"
 featureImage: "/images/about/dog.jpg"
 ---
 
-I currently work at **Medley Learning**, building a platform for students to bridge the gap.
+I currently work at **[Medley Learning](https://medleylearning.com)**, building a platform for students to bridge the gap.
 
 Before Medley, I spent 6 years as a consultant at **Procedure**, working with 0-1, mid-stage, and late-stage startups across Fintech, Hospitality, and Tech domains. I've worked with Turtlemint, Treebo, Indiagold, and Setu as a consulting backend engineer, and developed a HIPAA-compliant Kubernetes-backed infrastructure for an in-house medtech product.
 
