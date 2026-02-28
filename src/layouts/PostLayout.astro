@@ -2,6 +2,20 @@
 import BaseLayout from './BaseLayout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import TagList from '../components/TagList.astro';
+import WeatherAtmosphere from '../components/WeatherAtmosphere.astro';
+import TrekStatsBar from '../components/TrekStatsBar.astro';
+import ElevationProgress from '../components/ElevationProgress.astro';
+
+interface TrekStats {
+  elevation?: string;
+  distance?: string;
+  duration?: string;
+  difficulty?: string;
+  basecamp?: string;
+  season?: string;
+  startAlt?: number;
+  peakAlt?: number;
+}
 
 interface Props {
   title: string;
@@ -15,6 +29,7 @@ interface Props {
   theme?: 'tech' | 'trek';
   prevPost?: { slug: string; title: string } | null;
   nextPost?: { slug: string; title: string } | null;
+  trekStats?: TrekStats;
 }
 
 const {
@@ -29,17 +44,35 @@ const {
   theme = 'tech',
   prevPost,
   nextPost,
+  trekStats,
 } = Astro.props;
+
+const isTrek = theme === 'trek';
 ---
 
 <BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage} theme={theme}>
-  <article class="max-w-[720px] mx-auto">
+  {isTrek && <WeatherAtmosphere />}
+  {isTrek && trekStats && (
+    <ElevationProgress
+      startAlt={trekStats.startAlt || 1800}
+      peakAlt={trekStats.peakAlt || 4000}
+    />
+  )}
+
+  <article class:list={["max-w-[720px] mx-auto relative z-10", isTrek && "trek-journal"]}>
     {featureImage && (
-      <img
-        src={featureImage}
-        alt={title}
-        class="post-hero-image w-full mb-6"
-      />
+      <div class:list={[isTrek ? "trek-hero-wrap" : ""]}>
+        <img
+          src={featureImage}
+          alt={title}
+          class:list={["post-hero-image w-full", isTrek ? "trek-hero" : "mb-6"]}
+        />
+        {isTrek && (
+          <div class="trek-hero-overlay">
+            <span class="trek-hero-tag">Field Journal</span>
+          </div>
+        )}
+      </div>
     )}
 
     <header class="mb-8">
@@ -65,9 +98,19 @@ const {
           <TagList tags={tags} />
         </div>
       )}
+      {isTrek && trekStats && (
+        <TrekStatsBar
+          elevation={trekStats.elevation}
+          distance={trekStats.distance}
+          duration={trekStats.duration}
+          difficulty={trekStats.difficulty}
+          basecamp={trekStats.basecamp}
+          season={trekStats.season}
+        />
+      )}
     </header>
 
-    <div class="prose">
+    <div class:list={["prose", isTrek && "trek-prose"]}>
       <slot />
     </div>
 

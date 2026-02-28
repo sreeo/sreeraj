@@ -2,17 +2,159 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="404 — Page Not Found" theme="tech">
-  <div class="text-center py-20">
-    <p class="font-mono text-accent text-sm mb-4">$ cat page.html</p>
-    <h1 class="text-6xl font-bold text-tech-text-muted mb-4 font-mono">404</h1>
-    <p class="text-xl text-tech-text-muted mb-2 font-mono">cat: page.html: No such file or directory</p>
-    <p class="text-sm text-tech-text-muted mb-8 font-mono opacity-60">The page you're looking for has been moved or doesn't exist.</p>
-    <a
-      href="/"
-      class="inline-block px-6 py-3 bg-accent text-tech-bg rounded-lg hover:opacity-90 transition-opacity font-mono text-sm"
-    >
-      cd ~
-    </a>
+<BaseLayout title="404 — Trail Not Found" theme="tech" showMountain={false}>
+  <div class="terminal-404">
+    <div class="terminal-404-bar">
+      <span class="t4-dot t4-r"></span>
+      <span class="t4-dot t4-y"></span>
+      <span class="t4-dot t4-g"></span>
+      <span class="t4-title">sreeraj@lost — ~</span>
+    </div>
+    <div class="terminal-404-body" id="t4-body">
+      <div class="t4-line"><span class="t4-prompt">sreeraj</span><span class="t4-path">@???m</span><span class="t4-colon">:</span><span class="t4-cwd">~</span><span class="t4-dollar">$ </span><span class="t4-cmd">cat {Astro.url.pathname}</span></div>
+      <div class="t4-line"><span class="t4-error">cat: {Astro.url.pathname}: No such file or directory</span></div>
+      <div class="t4-line"></div>
+      <div class="t4-line"><span class="t4-muted">You seem lost. You are above the treeline — the trail forks here.</span></div>
+      <div class="t4-line"></div>
+      <div class="t4-line"><span class="t4-muted">Try one of these:</span></div>
+      <div class="t4-line"><span class="t4-accent">  cd /</span><span class="t4-muted">             — go home</span></div>
+      <div class="t4-line"><span class="t4-accent">  cd /devops/</span><span class="t4-muted">      — infrastructure & k8s</span></div>
+      <div class="t4-line"><span class="t4-accent">  cd /treks/</span><span class="t4-muted">       — himalayan adventures</span></div>
+      <div class="t4-line"><span class="t4-accent">  cd /programming/</span><span class="t4-muted"> — code & experiments</span></div>
+      <div class="t4-line"><span class="t4-accent">  cd /postgres/</span><span class="t4-muted">    — database deep dives</span></div>
+      <div class="t4-line"></div>
+      <div class="t4-input-line">
+        <span class="t4-prompt">sreeraj</span><span class="t4-path">@???m</span><span class="t4-colon">:</span><span class="t4-cwd">~</span><span class="t4-dollar">$ </span>
+        <input class="t4-input" id="t4-input" type="text" autocomplete="off" spellcheck="false" autofocus placeholder="type a command..." />
+      </div>
+    </div>
   </div>
+
+  <style>
+    .terminal-404 {
+      max-width: 640px;
+      margin: 2rem auto;
+      background: #0a0e14;
+      border: 1px solid #1e293b;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+    }
+    .terminal-404-bar {
+      background: #1e293b;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .t4-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .t4-r { background: #ff5f56; }
+    .t4-y { background: #ffbd2e; }
+    .t4-g { background: #27c93f; }
+    .t4-title { color: #94a3b8; font-size: 0.6875rem; margin-left: 0.5rem; }
+    .terminal-404-body {
+      padding: 1.25rem;
+      line-height: 1.8;
+      color: #e2e8f0;
+    }
+    .t4-line { white-space: pre; }
+    .t4-prompt { color: #22d3ee; }
+    .t4-path { color: #51cf66; }
+    .t4-colon { color: #e2e8f0; }
+    .t4-cwd { color: #faef5d; }
+    .t4-dollar { color: #e2e8f0; }
+    .t4-cmd { color: #e2e8f0; }
+    .t4-error { color: #ff6b6b; }
+    .t4-muted { color: #94a3b8; }
+    .t4-accent { color: #22d3ee; }
+    .t4-input-line {
+      display: flex;
+      align-items: center;
+    }
+    .t4-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e2e8f0;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      flex: 1;
+      caret-color: #22d3ee;
+    }
+    .t4-input::placeholder {
+      color: #334155;
+    }
+  </style>
+
+  <script>
+    const input = document.getElementById('t4-input') as HTMLInputElement;
+    const body = document.getElementById('t4-body');
+    if (input && body) {
+      input.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        const cmd = input.value.trim();
+        input.value = '';
+
+        if (cmd.startsWith('cd ')) {
+          const path = cmd.slice(3).trim();
+          const routes: Record<string, string> = {
+            '/': '/', '~': '/',
+            '/devops': '/devops/', '/devops/': '/devops/',
+            'devops': '/devops/', 'devops/': '/devops/',
+            '/treks': '/treks/', '/treks/': '/treks/',
+            'treks': '/treks/', 'treks/': '/treks/',
+            '/programming': '/programming/', '/programming/': '/programming/',
+            'programming': '/programming/', 'programming/': '/programming/',
+            '/postgres': '/postgres/', '/postgres/': '/postgres/',
+            'postgres': '/postgres/', 'postgres/': '/postgres/',
+            '/about': '/about/', '/about/': '/about/',
+            'about': '/about/',
+          };
+          const target = routes[path];
+          if (target) {
+            window.location.href = target;
+          } else {
+            addLine(`<span class="t4-error">cd: no such directory: ${path}</span>`);
+          }
+        } else if (cmd === 'ls') {
+          addLine('<span class="t4-accent">devops/  treks/  programming/  postgres/  about.md  contact.md</span>');
+        } else if (cmd === 'help') {
+          addLine('<span class="t4-muted">cd &lt;path&gt; — navigate  |  ls — list  |  whoami — about me</span>');
+        } else if (cmd === 'whoami') {
+          addLine('<span class="t4-muted">Sreeraj Rajan — DevOps at Medley Learning, trekker, builder.</span>');
+        } else if (cmd.startsWith('sudo')) {
+          addLine('<span class="t4-error">Permission denied. You are above the treeline — there is no root here.</span>');
+        } else if (cmd === 'pwd') {
+          addLine('<span class="t4-muted">/404 — you are lost</span>');
+        } else if (cmd) {
+          addLine(`<span class="t4-error">command not found: ${cmd}. Try 'help'</span>`);
+        }
+
+        addPrompt();
+      });
+
+      function addLine(html: string) {
+        const inputLine = body!.querySelector('.t4-input-line')!;
+        // Record current command
+        const cmdDiv = document.createElement('div');
+        cmdDiv.className = 't4-line';
+        cmdDiv.innerHTML = `<span class="t4-prompt">sreeraj</span><span class="t4-path">@???m</span><span class="t4-colon">:</span><span class="t4-cwd">~</span><span class="t4-dollar">$ </span>`;
+        // Add output
+        const outDiv = document.createElement('div');
+        outDiv.className = 't4-line';
+        outDiv.innerHTML = html;
+        body!.insertBefore(outDiv, inputLine);
+        body!.scrollTop = body!.scrollHeight;
+      }
+
+      function addPrompt() {
+        // Just scroll to bottom, input line stays at end
+        body!.scrollTop = body!.scrollHeight;
+        input.focus();
+      }
+
+      body.addEventListener('click', () => input.focus());
+    }
+  </script>
 </BaseLayout>

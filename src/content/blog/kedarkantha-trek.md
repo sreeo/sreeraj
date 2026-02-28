@@ -10,6 +10,15 @@ tags:
   - "treks"
 author: "Sreeraj Rajan"
 readingTime: 3
+trekStats:
+  elevation: "3,800m"
+  distance: "20 km"
+  duration: "3 days"
+  difficulty: "Easy-Moderate"
+  basecamp: "Sankri"
+  season: "Winter '19"
+  startAlt: 1920
+  peakAlt: 3800
 ---
 
 We decided to do a himalayan trek in the winter of 2018-19. After much deliberations, we settled on Kedarkantha, a decent summit trek accessible in winter. The presence of snow also excited us, since most of us had never experience it. We started our journey from Feb 23 2019.

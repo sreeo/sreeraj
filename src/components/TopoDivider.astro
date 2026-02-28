@@ -1,0 +1,65 @@
+---
+interface Props {
+  height?: number;
+  seed?: number;
+}
+
+const { height = 80, seed = Math.random() * 100 } = Astro.props;
+
+// Simple noise function for build-time SVG generation
+function hashNoise(x: number, y: number): number {
+  const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+  return n - Math.floor(n);
+}
+
+function smoothNoise(x: number, y: number): number {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = x - ix, fy = y - iy;
+  const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+  return (hashNoise(ix, iy) * (1 - sx) + hashNoise(ix + 1, iy) * sx) * (1 - sy) +
+         (hashNoise(ix, iy + 1) * (1 - sx) + hashNoise(ix + 1, iy + 1) * sx) * sy;
+}
+
+function fbm(x: number, y: number): number {
+  let v = 0, a = 0.5;
+  for (let i = 0; i < 4; i++) {
+    v += a * smoothNoise(x, y);
+    x *= 2; y *= 2; a *= 0.5;
+  }
+  return v;
+}
+
+const levels = [0.3, 0.45, 0.6, 0.75];
+const opacities = [0.12, 0.2, 0.3, 0.45];
+
+const paths = levels.map((level) => {
+  let d = '';
+  for (let x = 0; x <= 800; x += 4) {
+    const val = fbm(x / 200 + seed, level * 5 + seed * 0.3);
+    const y = 5 + val * (height - 10);
+    d += (x === 0 ? 'M' : 'L') + x + ',' + y.toFixed(1);
+  }
+  return d;
+});
+---
+
+<div class="topo-divider-wrap" role="separator">
+  <svg viewBox={`0 0 800 ${height}`} preserveAspectRatio="none" class="topo-svg">
+    {paths.map((d, i) => (
+      <path d={d} fill="none" stroke="var(--color-accent)" stroke-width="1" opacity={opacities[i]} />
+    ))}
+  </svg>
+</div>
+
+<style>
+  .topo-divider-wrap {
+    position: relative;
+    height: var(--topo-height, 60px);
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+  .topo-svg {
+    width: 100%;
+    height: 100%;
+  }
+</style>

@@ -14,6 +14,15 @@ tags:
   - "treks"
 author: "Sreeraj Rajan"
 readingTime: 6
+trekStats:
+  elevation: "4,130m"
+  distance: "~45 km"
+  duration: "7 days"
+  difficulty: "Moderate-Hard"
+  basecamp: "Sari Village"
+  season: "Nov '21"
+  startAlt: 1400
+  peakAlt: 4130
 ---
 
 **Pro Tips**

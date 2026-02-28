@@ -11,6 +11,15 @@ tags:
   - "treks"
 author: "Sreeraj Rajan"
 readingTime: 3
+trekStats:
+  elevation: "3,876m"
+  distance: "24 km"
+  duration: "3 days"
+  difficulty: "Moderate"
+  basecamp: "Dhak Village"
+  season: "March '22"
+  startAlt: 2100
+  peakAlt: 3876
 ---
 
 After doing the Deorital-Tungnath hike, it was time to get back to the trails. One of my friends at the time wanted to do one as well, so we decided to do Kuari Pass. Kuari Pass is suited for first time hikers, only having three days of hiking and 2 nights of camping in the woods. It's also a rewarding trek in terms of visuals, passing through beautiful forests, with beautiful snow capped peaks in the background. We did it in the first week of March, so we got to experience some snow at higher altitudes and at the pass as well.  

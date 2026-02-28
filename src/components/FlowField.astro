@@ -1,0 +1,97 @@
+---
+interface Props {
+  theme?: 'tech' | 'trek';
+}
+
+const { theme = 'tech' } = Astro.props;
+---
+
+<canvas class="flow-field-canvas" data-theme={theme} aria-hidden="true"></canvas>
+
+<style>
+  .flow-field-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.12;
+  }
+</style>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('.flow-field-canvas');
+  if (canvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      const mode = canvas.dataset.theme || 'tech';
+      const PARTICLE_COUNT = 200;
+      let particles: { x: number; y: number; vx: number; vy: number; life: number }[] = [];
+
+      function resize() {
+        canvas!.width = window.innerWidth * window.devicePixelRatio;
+        canvas!.height = window.innerHeight * window.devicePixelRatio;
+        ctx!.scale(window.devicePixelRatio, window.devicePixelRatio);
+        init();
+      }
+
+      function init() {
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          particles.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            vx: 0, vy: 0,
+            life: Math.random() * 100,
+          });
+        }
+      }
+
+      function noise2d(x: number, y: number): number {
+        return Math.sin(x * 0.01 + y * 0.005) * Math.cos(y * 0.008 - x * 0.003);
+      }
+
+      function frame() {
+        const w = window.innerWidth, h = window.innerHeight;
+        ctx!.fillStyle = mode === 'tech' ? 'rgba(15, 23, 42, 0.06)' : 'rgba(250, 248, 245, 0.06)';
+        ctx!.fillRect(0, 0, w, h);
+
+        const time = performance.now() / 1000;
+
+        particles.forEach(p => {
+          let angle: number;
+          if (mode === 'tech') {
+            angle = Math.round(noise2d(p.x + time * 20, p.y) * 4) * (Math.PI / 4);
+          } else {
+            angle = noise2d(p.x * 0.5 + time * 10, p.y * 0.5) * Math.PI * 2;
+          }
+
+          p.vx = Math.cos(angle) * (mode === 'tech' ? 1 : 0.6);
+          p.vy = Math.sin(angle) * (mode === 'tech' ? 1 : 0.6);
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life++;
+
+          if (p.x < 0 || p.x > w || p.y < 0 || p.y > h || p.life > 200) {
+            p.x = Math.random() * w;
+            p.y = Math.random() * h;
+            p.life = 0;
+          }
+
+          const alpha = Math.min(p.life / 20, 1) * Math.min((200 - p.life) / 20, 1) * 0.5;
+          ctx!.fillStyle = mode === 'tech'
+            ? `rgba(34, 211, 238, ${alpha})`
+            : `rgba(217, 119, 6, ${alpha})`;
+          ctx!.fillRect(p.x, p.y, 1.5, 1.5);
+        });
+
+        requestAnimationFrame(frame);
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+      frame();
+    }
+  }
+</script>

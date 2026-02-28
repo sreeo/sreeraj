@@ -1,0 +1,100 @@
+---
+/**
+ * Trek stats bar — shows key trek data (elevation, duration, distance, difficulty)
+ * as expedition-style data cards at the top of trek posts.
+ * Pass structured data via props or it extracts from post content.
+ */
+interface Props {
+  elevation?: string;
+  distance?: string;
+  duration?: string;
+  difficulty?: string;
+  basecamp?: string;
+  season?: string;
+}
+
+const {
+  elevation,
+  distance,
+  duration,
+  difficulty,
+  basecamp,
+  season,
+} = Astro.props;
+
+const stats = [
+  elevation && { icon: '△', label: 'Peak Alt.', value: elevation },
+  distance && { icon: '⤳', label: 'Distance', value: distance },
+  duration && { icon: '◷', label: 'Duration', value: duration },
+  difficulty && { icon: '◆', label: 'Grade', value: difficulty },
+  basecamp && { icon: '⌂', label: 'Base', value: basecamp },
+  season && { icon: '❄', label: 'Season', value: season },
+].filter(Boolean);
+---
+
+{stats.length > 0 && (
+  <div class="trek-stats-bar">
+    {stats.map((stat) => (
+      <div class="trek-stat">
+        <span class="trek-stat-icon">{stat.icon}</span>
+        <span class="trek-stat-label">{stat.label}</span>
+        <span class="trek-stat-value">{stat.value}</span>
+      </div>
+    ))}
+  </div>
+)}
+
+<style>
+  .trek-stats-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 1.5rem 0 2rem;
+    font-family: var(--font-mono);
+    border: 1px solid var(--color-trek-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: linear-gradient(
+      135deg,
+      rgba(217, 119, 6, 0.03) 0%,
+      transparent 50%,
+      rgba(217, 119, 6, 0.02) 100%
+    );
+  }
+  .trek-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    flex: 1;
+    min-width: 100px;
+    border-right: 1px solid var(--color-trek-border);
+    position: relative;
+  }
+  .trek-stat:last-child {
+    border-right: none;
+  }
+  .trek-stat-icon {
+    font-size: 1rem;
+    color: var(--color-trek-accent);
+    margin-bottom: 0.125rem;
+  }
+  .trek-stat-label {
+    font-size: 0.5625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-trek-text-muted);
+    margin-bottom: 0.125rem;
+  }
+  .trek-stat-value {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-trek-text);
+  }
+  @media (max-width: 640px) {
+    .trek-stat {
+      min-width: 80px;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+</style>

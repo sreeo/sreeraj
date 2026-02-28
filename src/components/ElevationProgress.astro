@@ -1,0 +1,140 @@
+---
+/**
+ * Elevation progress indicator for trek posts.
+ * Shows a vertical altitude gauge on the left side that fills as you scroll.
+ * Displays current "altitude" and weather conditions.
+ */
+interface Props {
+  startAlt?: number;
+  peakAlt?: number;
+}
+
+const { startAlt = 1800, peakAlt = 4000 } = Astro.props;
+---
+
+<div class="elevation-rail" id="elevation-rail" data-start={startAlt} data-peak={peakAlt}>
+  <div class="elev-track">
+    <div class="elev-fill" id="elev-fill"></div>
+    <div class="elev-marker" id="elev-marker">
+      <span class="elev-dot"></span>
+    </div>
+  </div>
+  <div class="elev-labels">
+    <span class="elev-label elev-label-peak">{peakAlt}m</span>
+    <span class="elev-label elev-label-current" id="elev-current">{startAlt}m</span>
+    <span class="elev-label elev-label-base">{startAlt}m</span>
+  </div>
+</div>
+
+<style>
+  .elevation-rail {
+    position: fixed;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 200px;
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .elevation-rail.visible {
+    opacity: 1;
+  }
+  .elev-track {
+    width: 3px;
+    background: var(--color-trek-border);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .elev-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0%;
+    background: linear-gradient(to top, var(--color-trek-accent), #f59e0b);
+    border-radius: 2px;
+    transition: height 0.3s ease;
+  }
+  .elev-marker {
+    position: absolute;
+    bottom: 0%;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    transition: bottom 0.3s ease;
+  }
+  .elev-dot {
+    display: block;
+    width: 8px;
+    height: 8px;
+    background: var(--color-trek-accent);
+    border-radius: 50%;
+    border: 2px solid var(--color-trek-bg);
+    box-shadow: 0 0 6px rgba(217, 119, 6, 0.4);
+  }
+  .elev-labels {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    color: var(--color-trek-text-muted);
+    position: relative;
+  }
+  .elev-label-current {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-trek-accent);
+    font-weight: 600;
+    font-size: 0.625rem;
+    transition: top 0.3s ease;
+    white-space: nowrap;
+  }
+  @media (max-width: 1200px) {
+    .elevation-rail {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const rail = document.getElementById('elevation-rail');
+  const fill = document.getElementById('elev-fill');
+  const marker = document.getElementById('elev-marker');
+  const current = document.getElementById('elev-current');
+
+  if (rail && fill && marker && current) {
+    const startAlt = parseInt(rail.dataset.start || '1800');
+    const peakAlt = parseInt(rail.dataset.peak || '4000');
+
+    function updateElevation() {
+      const scrollPct = Math.min(1, Math.max(0,
+        window.scrollY / (document.body.scrollHeight - window.innerHeight)
+      ));
+
+      // Show rail only when scrolled past header area
+      if (scrollPct > 0.05) {
+        rail.classList.add('visible');
+      } else {
+        rail.classList.remove('visible');
+      }
+
+      const alt = Math.round(startAlt + (peakAlt - startAlt) * scrollPct);
+      const pct = scrollPct * 100;
+
+      fill.style.height = pct + '%';
+      marker.style.bottom = pct + '%';
+      current.textContent = alt + 'm';
+      current.style.top = (100 - pct) + '%';
+    }
+
+    window.addEventListener('scroll', updateElevation, { passive: true });
+    updateElevation();
+  }
+</script>

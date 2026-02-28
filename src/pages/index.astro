@@ -2,15 +2,112 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
+import TopoDivider from '../components/TopoDivider.astro';
 import { getThemeForTags } from '../utils/theme';
 
 const posts = (await getCollection('blog'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const featuredPosts = posts.filter((p) => p.data.featured);
+
+// Build git log data
+function shortHash(slug: string): string {
+  let h = 0;
+  for (let i = 0; i < slug.length; i++) h = ((h << 5) - h + slug.charCodeAt(i)) | 0;
+  return Math.abs(h).toString(16).slice(0, 7);
+}
+
+function getBranch(tags: string[]): { name: string; color: string } {
+  if (tags.some(t => ['treks', 'trek'].includes(t))) return { name: 'treks', color: 'gl-branch-trek' };
+  if (tags.some(t => ['postgres'].includes(t))) return { name: 'postgres', color: 'gl-branch-postgres' };
+  if (tags.some(t => ['devops', 'kubernetes', 'k8s', 'aws'].includes(t))) return { name: 'devops', color: 'gl-branch-devops' };
+  return { name: 'programming', color: 'gl-branch-programming' };
+}
+
+// Group posts into branches and build graph
+type GitEntry = {
+  hash: string;
+  slug: string;
+  title: string;
+  date: string;
+  tags: string[];
+  branch: { name: string; color: string };
+  graph: string;
+};
+
+let lastBranch = '';
+const gitEntries: GitEntry[] = posts.map((post, i) => {
+  const branch = getBranch(post.data.tags);
+  const isMainBranch = branch.name === 'devops' || branch.name === 'programming';
+  const isBranchSwitch = branch.name !== lastBranch;
+
+  let graph = '*   ';
+  if (!isMainBranch) {
+    graph = '| * ';
+  }
+
+  // Show merge/branch points
+  let prefix = '';
+  if (isBranchSwitch && i > 0) {
+    if (!isMainBranch && (lastBranch === 'devops' || lastBranch === 'programming' || lastBranch === '')) {
+      prefix = '| |\n';
+    } else if (isMainBranch && lastBranch !== '' && lastBranch !== 'devops' && lastBranch !== 'programming') {
+      prefix = '|/\n';
+    }
+  }
+
+  lastBranch = branch.name;
+
+  return {
+    hash: shortHash(post.data.slug),
+    slug: post.data.slug,
+    title: post.data.title,
+    date: post.data.pubDate.toISOString().split('T')[0],
+    tags: post.data.tags.slice(0, 3),
+    branch,
+    graph: prefix + graph,
+  };
+});
 ---
 
 <BaseLayout title="sreeraj.dev — DevOps, Programming, and Treks" theme="tech">
+  <div class="mb-8">
+    <p class="font-mono text-xs mb-2" style="color: var(--color-accent); opacity: 0.6;">
+      ~/sreeraj.dev
+    </p>
+    <h1 class="text-3xl font-bold mb-1" style="color: var(--color-tech-text);">
+      sreeraj.dev
+    </h1>
+    <p style="color: var(--color-tech-text-muted); font-size: 0.9375rem;">
+      DevOps engineer, Himalayan trekker, occasional open-source contributor.
+    </p>
+  </div>
+
+  <!-- Git Log Timeline -->
+  <section class="mb-12">
+    <h2 class="section-title text-lg mb-4 font-mono" style="color: var(--color-tech-text-muted); font-size: 0.8125rem;">
+      $ git log --oneline --graph --all
+    </h2>
+    <div class="git-log-timeline">
+      {gitEntries.map((entry) => (
+        <div class="gl-entry">
+          <pre class="gl-graph-col">{entry.graph.split('\n').map(line => <span class="gl-graph">{line}</span>)}</pre>
+          <a href={`/${entry.slug}/`} class="gl-content">
+            <span class="gl-hash">{entry.hash}</span>
+            <span class:list={['gl-tag', entry.branch.color]}>
+              ({entry.tags.join(', ')})
+            </span>
+            <span class="gl-msg">{entry.title}</span>
+            <span class="gl-date">{entry.date}</span>
+          </a>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <TopoDivider seed={42} />
+
+  <!-- Card Grid (secondary view) -->
   {featuredPosts.length > 0 && (
     <section class="mb-12">
       <h2 class="section-title text-2xl mb-6">Featured</h2>

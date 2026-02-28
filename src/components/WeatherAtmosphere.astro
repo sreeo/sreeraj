@@ -1,0 +1,105 @@
+---
+/**
+ * Scroll-driven weather overlay for trek posts.
+ * Clear at top, fog at middle, snow near summit.
+ * Wrap around the main <article> content.
+ */
+---
+
+<div class="weather-wrap" id="weather-wrap">
+  <div class="weather-fog" id="weather-fog"></div>
+  <div class="weather-snow" id="weather-snow"></div>
+  <div class="weather-badge" id="weather-badge"></div>
+</div>
+
+<style>
+  .weather-wrap {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .weather-fog {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(255,255,255,0.02) 30%,
+      rgba(255,255,255,0.06) 60%,
+      rgba(255,255,255,0.12) 100%
+    );
+  }
+  .weather-snow {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    overflow: hidden;
+  }
+  .weather-badge {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: rgba(255,255,255,0.3);
+    pointer-events: none;
+  }
+  :global(.snowflake) {
+    position: absolute;
+    color: white;
+    opacity: 0.5;
+    animation: snowdrift linear infinite;
+  }
+  @keyframes snowdrift {
+    0% { transform: translateY(-20px) translateX(0); opacity: 0; }
+    10% { opacity: 0.5; }
+    90% { opacity: 0.5; }
+    100% { transform: translateY(100vh) translateX(30px); opacity: 0; }
+  }
+</style>
+
+<script>
+  const fog = document.getElementById('weather-fog');
+  const snow = document.getElementById('weather-snow');
+  const badge = document.getElementById('weather-badge');
+
+  if (fog && snow && badge) {
+    // Create snowflakes
+    for (let i = 0; i < 30; i++) {
+      const flake = document.createElement('span');
+      flake.className = 'snowflake';
+      flake.textContent = '\u2022';
+      flake.style.left = Math.random() * 100 + '%';
+      flake.style.animationDuration = (4 + Math.random() * 6) + 's';
+      flake.style.animationDelay = Math.random() * 6 + 's';
+      flake.style.fontSize = (0.25 + Math.random() * 0.35) + 'rem';
+      snow.appendChild(flake);
+    }
+
+    function updateWeather() {
+      const scrollPct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+
+      // Fog: 25% - 65% scroll
+      const fogOpacity = Math.max(0, Math.min(1, (scrollPct - 0.25) * 2.5));
+      fog.style.opacity = String(fogOpacity * 0.8);
+
+      // Snow: 55%+ scroll
+      const snowOpacity = Math.max(0, Math.min(1, (scrollPct - 0.55) * 2.5));
+      snow.style.opacity = String(snowOpacity);
+
+      // Badge
+      let condition = '';
+      if (scrollPct > 0.55) condition = '\u2744 snow';
+      else if (scrollPct > 0.25) condition = '\u2601 fog';
+      else if (scrollPct > 0.1) condition = '\u26C5 clouds';
+      badge.textContent = condition;
+    }
+
+    window.addEventListener('scroll', updateWeather, { passive: true });
+    updateWeather();
+  }
+</script>

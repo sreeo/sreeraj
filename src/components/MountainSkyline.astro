@@ -1,0 +1,149 @@
+---
+interface Props {
+  height?: string;
+  seed?: string;
+}
+
+const { height = '180px', seed = Astro.url.pathname } = Astro.props;
+---
+
+<div class="mountain-skyline" style={`height: ${height};`} data-seed={seed}>
+  <canvas class="mountain-canvas"></canvas>
+</div>
+
+<style>
+  .mountain-skyline {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  .mountain-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+</style>
+
+<script>
+  function initMountain(container: HTMLElement) {
+    const canvas = container.querySelector('.mountain-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+    const gl = canvas.getContext('webgl');
+    if (!gl) {
+      container.style.background = 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)';
+      return;
+    }
+
+    function resize() {
+      const rect = container.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      gl!.viewport(0, 0, canvas.width, canvas.height);
+    }
+    resize();
+
+    const vs = `attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+    const fs = `
+      precision mediump float;
+      uniform vec2 u_res;
+      uniform float u_time;
+      uniform float u_hour;
+      uniform float u_seed;
+
+      float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+      float noise(vec2 p){
+        vec2 i=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);
+        return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+      }
+      float fbm(vec2 p){float v=0.0;float a=0.5;for(int i=0;i<5;i++){v+=a*noise(p);p*=2.0;a*=0.5;}return v;}
+
+      vec3 skyColor(float hour,float y){
+        vec3 dt=vec3(.15,.1,.25),db=vec3(.9,.5,.3);
+        vec3 nt=vec3(.02,.02,.06),nb=vec3(.06,.08,.15);
+        vec3 dayt=vec3(.3,.5,.8),dayb=vec3(.7,.85,1.);
+        vec3 dkt=vec3(.15,.1,.3),dkb=vec3(.85,.35,.2);
+        vec3 top,bot;
+        if(hour<5.){top=nt;bot=nb;}
+        else if(hour<7.){float t=(hour-5.)/2.;top=mix(nt,dt,t);bot=mix(nb,db,t);}
+        else if(hour<8.){float t=hour-7.;top=mix(dt,dayt,t);bot=mix(db,dayb,t);}
+        else if(hour<17.){top=dayt;bot=dayb;}
+        else if(hour<19.){float t=(hour-17.)/2.;top=mix(dayt,dkt,t);bot=mix(dayb,dkb,t);}
+        else if(hour<20.){float t=hour-19.;top=mix(dkt,nt,t);bot=mix(dkb,nb,t);}
+        else{top=nt;bot=nb;}
+        return mix(bot,top,y);
+      }
+
+      void main(){
+        vec2 uv=gl_FragCoord.xy/u_res;
+        vec3 col=skyColor(u_hour,uv.y);
+        for(int i=0;i<3;i++){
+          float fi=float(i);
+          float freq=2.0+fi*1.5;
+          float height=0.25+fi*0.12;
+          float m=fbm(vec2(uv.x*freq+u_seed+fi*3.7,fi*5.0+u_time*0.01))*height+0.1+fi*0.08;
+          float darkness=0.08+fi*0.06;
+          if(uv.y<m)col=mix(col,vec3(darkness),0.7-fi*0.15);
+        }
+        if(u_hour>19.||u_hour<6.){
+          float star=step(.998,hash(floor(uv*200.)));
+          float tw=.5+.5*sin(u_time*2.+hash(floor(uv*200.))*6.28);
+          col+=star*tw*vec3(.8,.9,1.);
+        }
+        gl_FragColor=vec4(col,1.);
+      }
+    `;
+
+    function compile(src: string, type: number) {
+      const s = gl!.createShader(type)!;
+      gl!.shaderSource(s, src);
+      gl!.compileShader(s);
+      return s;
+    }
+
+    const prog = gl.createProgram()!;
+    gl.attachShader(prog, compile(vs, gl.VERTEX_SHADER));
+    gl.attachShader(prog, compile(fs, gl.FRAGMENT_SHADER));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+    const pLoc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(pLoc);
+    gl.vertexAttribPointer(pLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes = gl.getUniformLocation(prog, 'u_res');
+    const uTime = gl.getUniformLocation(prog, 'u_time');
+    const uHour = gl.getUniformLocation(prog, 'u_hour');
+    const uSeed = gl.getUniformLocation(prog, 'u_seed');
+
+    let seed = 0;
+    const seedStr = container.dataset.seed || '/';
+    for (let i = 0; i < seedStr.length; i++) seed += seedStr.charCodeAt(i);
+    seed = (seed % 100) / 10.0;
+
+    const now = new Date();
+    const hour = now.getHours() + now.getMinutes() / 60;
+    const start = performance.now();
+
+    let raf: number;
+    function frame() {
+      const t = (performance.now() - start) / 1000;
+      gl!.uniform2f(uRes, canvas.width, canvas.height);
+      gl!.uniform1f(uTime, t);
+      gl!.uniform1f(uHour, hour);
+      gl!.uniform1f(uSeed, seed);
+      gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4);
+      raf = requestAnimationFrame(frame);
+    }
+    frame();
+
+    // Cleanup on navigation
+    const resizeHandler = () => resize();
+    window.addEventListener('resize', resizeHandler);
+  }
+
+  // Init all mountains on the page
+  document.querySelectorAll<HTMLElement>('.mountain-skyline').forEach(initMountain);
+</script>

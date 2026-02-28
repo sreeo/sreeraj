@@ -1,0 +1,1074 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Design Lab — sreeraj.dev" theme="tech">
+  <link rel="stylesheet" href="/preview-styles.css" />
+
+  <div style="margin-bottom: 3rem;">
+    <p style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-accent); margin-bottom: 0.5rem;">sreeraj.dev / design-lab</p>
+    <h1 class="page-title text-3xl mb-2" style="color: var(--color-tech-text);">Design Lab</h1>
+    <p class="page-description" style="color: var(--color-tech-text-muted); max-width: 640px; line-height: 1.6;">
+      Interactive prototypes for the next version of this site. Each demo uses your real content.
+    </p>
+  </div>
+
+  <!-- ============================================
+       1. SHADER MOUNTAIN SKYLINE
+       ============================================ -->
+  <section class="preview-section">
+    <p class="preview-label">Identity / Header</p>
+    <h2 class="preview-title">Procedural Mountain Skyline</h2>
+    <p class="preview-desc">GLSL-generated mountain range as the page header. Colors shift with your local time of day — dawn, noon, dusk, night. The silhouette is seeded from the page URL so every page gets unique terrain. Pure math, no images.</p>
+    <div class="shader-mountain" id="shader-mountain">
+      <canvas id="mountain-canvas"></canvas>
+      <div class="shader-mountain-overlay" id="shader-time-label"></div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       2. GIT LOG TIMELINE
+       ============================================ -->
+  <section class="preview-section">
+    <p class="preview-label">Navigation / Posts</p>
+    <h2 class="preview-title">Git Log as Blog Timeline</h2>
+    <p class="preview-desc">Your blog listing styled as <code style="color: var(--color-accent);">git log --oneline --graph</code>. Posts are commits, tags are branches. Related posts share branch lines. Click any commit to visit the post.</p>
+    <div class="git-log">
+<pre><span class="gl-graph">*   </span><a href="/reducing-deploy-times/"><span class="gl-hash">a3f7c2d</span> <span class="gl-tag">(devops, k8s)</span> <span class="gl-msg">Reducing our Deployment times by 87%</span></a> <span class="gl-date">2022-01-03</span>
+<span class="gl-graph">|</span>
+<span class="gl-graph">*   </span><a href="/sidecar-containers/"><span class="gl-hash">e91b4a8</span> <span class="gl-tag">(devops, kubernetes)</span> <span class="gl-msg">Using sidecar containers in k8s</span></a> <span class="gl-date">2022-01-22</span>
+<span class="gl-graph">|</span>
+<span class="gl-graph">| * </span><a href="/kedarkantha-trek/"><span class="gl-hash">d4c8f12</span> <span class="gl-tag gl-branch-trek">(treks)</span> <span class="gl-msg">Kedarkantha Trek</span></a> <span class="gl-date">2022-01-11</span>
+<span class="gl-graph">| |</span>
+<span class="gl-graph">* | </span><a href="/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/"><span class="gl-hash">b28e091</span> <span class="gl-tag gl-branch-devops">(devops)</span> <span class="gl-msg">AWS Amplify + Next.js SSR with Terraform</span></a> <span class="gl-date">2022-01-21</span>
+<span class="gl-graph">| |</span>
+<span class="gl-graph">* | </span><a href="/routing-stuff-using-traefik-nginx/"><span class="gl-hash">f5a2c77</span> <span class="gl-tag gl-branch-devops">(devops, nginx)</span> <span class="gl-msg">Routing stuff using traefik/nginx</span></a> <span class="gl-date">2022-04-15</span>
+<span class="gl-graph">| |</span>
+<span class="gl-graph">|/</span>
+<span class="gl-graph">*   </span><a href="/chopta-chandrashila-trek/"><span class="gl-hash">c73d1e5</span> <span class="gl-tag gl-branch-trek">(treks)</span> <span class="gl-msg">Chopta Chandrashila Trek</span></a> <span class="gl-date">2021-11-13</span>
+<span class="gl-graph">|</span>
+<span class="gl-graph">| * </span><a href="/uuid-vs-ulid/"><span class="gl-hash">a8f4b23</span> <span class="gl-tag gl-branch-postgres">(postgres)</span> <span class="gl-msg">Benchmarking UUID v4 vs ULID</span></a> <span class="gl-date">2023-02-22</span>
+<span class="gl-graph">| |</span>
+<span class="gl-graph">| * </span><a href="/comparing-indexes-in-postgres-for-different-column-types/"><span class="gl-hash">92e1d7f</span> <span class="gl-tag gl-branch-postgres">(postgres, python)</span> <span class="gl-msg">UUID vs Serials in Postgres</span></a> <span class="gl-date">2022-12-21</span>
+<span class="gl-graph">|/</span>
+<span class="gl-graph">*   </span><a href="/django-kafka-integration/"><span class="gl-hash">7b3e5f1</span> <span class="gl-tag gl-branch-programming">(django, kafka)</span> <span class="gl-msg">Django Kafka Integration</span></a> <span class="gl-date">2022-10-26</span>
+<span class="gl-graph">|</span>
+<span class="gl-graph">*   </span><a href="/kuari-pass-trek/"><span class="gl-hash">1f9a4c8</span> <span class="gl-tag gl-branch-trek">(treks)</span> <span class="gl-msg">Kuari Pass Trek</span></a> <span class="gl-date">2023-08-20</span>
+<span class="gl-graph">|</span>
+<span class="gl-graph">*   </span><a href="/flashing-esp8266/"><span class="gl-hash">5d2e8b3</span> <span class="gl-tag gl-branch-programming">(arduino, esp8266)</span> <span class="gl-msg">Flashing an ESP8266-01</span></a> <span class="gl-date">2023-08-04</span></pre>
+    </div>
+  </section>
+
+  <!-- ============================================
+       3. GENERATIVE CAIRNS
+       ============================================ -->
+  <section class="preview-section">
+    <p class="preview-label">Identity / Post Cards</p>
+    <h2 class="preview-title">Generative Cairn Illustrations</h2>
+    <p class="preview-desc">Every post gets a unique procedurally-generated stone cairn seeded from its title. Tech posts produce geometric angular cairns. Trek posts produce organic rounded cairns. No stock photos needed.</p>
+    <div class="cairn-grid" id="cairn-grid"></div>
+  </section>
+
+  <!-- ============================================
+       4. TOPOGRAPHIC CONTOUR DIVIDERS
+       ============================================ -->
+  <section class="preview-section">
+    <p class="preview-label">Layout / Dividers</p>
+    <h2 class="preview-title">Topographic Contour Section Dividers</h2>
+    <p class="preview-desc">Section boundaries are elevation bands generated from Perlin noise. Each reload produces different terrain. The contour lines breathe slowly. Elevation labels mark the altitude.</p>
+    <div class="topo-divider" id="topo-divider">
+      <svg id="topo-svg" viewBox="0 0 800 120" preserveAspectRatio="none"></svg>
+    </div>
+  </section>
+
+  <!-- ============================================
+       5. ELEVATION PROFILE SCROLL TRACKER
+       ============================================ -->
+  <section class="preview-section">
+    <p class="preview-label">Reading / Trek Posts</p>
+    <h2 class="preview-title">Scroll-Driven Elevation Profile</h2>
+    <p class="preview-desc">A thin elevation strip tracks your reading progress. As you scroll, a marker climbs the trail. Waypoints annotate key moments — camps, passes, summit. Drag the slider to simulate.</p>
+    <div class="elevation-tracker" id="elevation-tracker">
+      <svg id="elevation-svg" viewBox="0 0 600 80" preserveAspectRatio="none"></svg>
+      <div class="elevation-altitude" id="elevation-alt">2,800m</div>
+    </div>
+    <input
+      type="range"
+      min="0"
+      max="100"
+      value="0"
+      id="elevation-slider"
+      style="width: 100%; max-width: 600px; margin-top: 0.75rem; accent-color: var(--color-trek-accent);"
+    />
+    <p style="font-family: var(--font-mono); font-size: 0.625rem; color: var(--color-tech-text-muted); margin-top: 0.25rem;">
+      Kedarkantha Trek — 2,800m to 3,800m summit
+    </p>
+  </section>
+
+  <!-- ============================================
+       6. PERLIN NOISE FLOW FIELD
+       ============================================ -->
+  <section class="preview-section">
+    <p class="preview-label">Atmosphere / Background</p>
+    <h2 class="preview-title">Perlin Noise Flow Field</h2>
+    <p class="preview-desc">Subtle particles drift behind content. Toggle between tech mode (cyan, grid-like data flow) and trek mode (amber, organic wind currents). This replaces flat solid backgrounds.</p>
+    <div class="flow-field-demo" id="flow-field-demo">
+      <canvas id="flow-canvas"></canvas>
+      <button class="flow-field-toggle" id="flow-toggle">switch to trek</button>
+      <div class="flow-field-label" id="flow-label">mode: tech / particles: 300</div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       7. ALTITUDE TERMINAL
+       ============================================ -->
+  <section class="preview-section">
+    <p class="preview-label">Navigation / Easter Egg</p>
+    <h2 class="preview-title">The Altitude Terminal</h2>
+    <p class="preview-desc">A persistent CLI that knows your content. Try: <code style="color: var(--color-accent);">ls</code>, <code style="color: var(--color-accent);">cd treks</code>, <code style="color: var(--color-accent);">cat kedarkantha-trek</code>, <code style="color: var(--color-accent);">kubectl get pods</code>, <code style="color: var(--color-accent);">altitude</code>, <code style="color: var(--color-accent);">help</code></p>
+    <div class="altitude-terminal">
+      <div class="altitude-terminal-bar">
+        <div class="altitude-terminal-dot altitude-terminal-dot-r"></div>
+        <div class="altitude-terminal-dot altitude-terminal-dot-y"></div>
+        <div class="altitude-terminal-dot altitude-terminal-dot-g"></div>
+        <span class="altitude-terminal-title">sreeraj@summit — ~/blog</span>
+      </div>
+      <div class="altitude-terminal-body" id="terminal-body">
+        <div><span class="term-output">Welcome to sreeraj.dev — type 'help' for commands</span></div>
+        <div><span class="term-output">Session started at <span id="term-time"></span></span></div>
+        <div class="term-input-line">
+          <span class="term-prompt">sreeraj</span><span class="term-path">@3800m</span><span style="color:#e2e8f0">:</span><span class="term-highlight">~/blog</span><span style="color:#e2e8f0">$ </span>
+          <input class="term-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" autofocus />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       8. SIGNAL FLAG NAV MICRO-INTERACTIONS
+       ============================================ -->
+  <section class="preview-section">
+    <p class="preview-label">Navigation / Micro-interactions</p>
+    <h2 class="preview-title">Signal Flag Nav Icons</h2>
+    <p class="preview-desc">Each nav item gets a tiny animated icon. Prayer flags for Treks, blinking LED for DevOps, swaying elephant for Postgres, pulsing radio signal for Contact. Pure CSS, ~40 lines.</p>
+    <div class="signal-nav">
+      <a href="/devops/" class="signal-nav-item">
+        <span class="signal-icon"><span class="led"></span></span>
+        DevOps
+      </a>
+      <a href="/treks/" class="signal-nav-item">
+        <span class="signal-icon">
+          <span class="prayer-flags">
+            <span class="prayer-flag"></span>
+            <span class="prayer-flag"></span>
+            <span class="prayer-flag"></span>
+            <span class="prayer-flag"></span>
+            <span class="prayer-flag"></span>
+          </span>
+        </span>
+        Treks
+      </a>
+      <a href="/postgres/" class="signal-nav-item">
+        <span class="signal-icon"><span class="pg-elephant">🐘</span></span>
+        Postgres
+      </a>
+      <a href="/programming/" class="signal-nav-item">
+        <span class="signal-icon"><span class="code-brackets">{'{ }'}</span></span>
+        Programming
+      </a>
+      <a href="/contact/" class="signal-nav-item">
+        <span class="signal-icon">
+          <span class="radio-pulse">
+            <span class="radio-pulse-center"></span>
+          </span>
+        </span>
+        Contact
+      </a>
+    </div>
+  </section>
+
+  <!-- ============================================
+       9. INFRASTRUCTURE AS LANDSCAPE
+       ============================================ -->
+  <section class="preview-section">
+    <p class="preview-label">Diagrams / DevOps Posts</p>
+    <h2 class="preview-title">Infrastructure as Landscape</h2>
+    <p class="preview-desc">K8s architecture diagrams rendered as mountain terrain. Pods are tents at basecamp. Services are bridges. Ingress is a mountain pass. Hover each element for its real k8s name.</p>
+    <div class="infra-landscape">
+      <svg viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sky gradient -->
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0f172a"/>
+            <stop offset="100%" stop-color="#1e293b"/>
+          </linearGradient>
+          <linearGradient id="mountain-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#334155"/>
+            <stop offset="100%" stop-color="#1e293b"/>
+          </linearGradient>
+        </defs>
+
+        <rect width="800" height="350" fill="url(#sky)"/>
+
+        <!-- Stars -->
+        <circle cx="120" cy="30" r="1" fill="white" opacity="0.4"/>
+        <circle cx="340" cy="45" r="1.2" fill="white" opacity="0.3"/>
+        <circle cx="520" cy="20" r="0.8" fill="white" opacity="0.5"/>
+        <circle cx="680" cy="55" r="1" fill="white" opacity="0.3"/>
+        <circle cx="50" cy="60" r="0.8" fill="white" opacity="0.4"/>
+        <circle cx="750" cy="35" r="1" fill="white" opacity="0.35"/>
+
+        <!-- Far mountains -->
+        <path d="M0,200 L80,140 L150,170 L250,100 L350,150 L400,90 L480,130 L550,80 L620,120 L700,95 L780,140 L800,130 L800,350 L0,350 Z" fill="url(#mountain-fill)" opacity="0.4"/>
+
+        <!-- Near mountains -->
+        <path d="M0,250 L60,210 L120,230 L200,180 L280,220 L350,170 L420,200 L500,160 L580,190 L650,155 L720,185 L800,170 L800,350 L0,350 Z" fill="url(#mountain-fill)" opacity="0.7"/>
+
+        <!-- Ground -->
+        <path d="M0,280 L100,270 L200,275 L350,260 L500,265 L650,255 L800,260 L800,350 L0,350 Z" fill="#1e293b"/>
+
+        <!-- Trail (dashed) connecting elements -->
+        <path class="infra-trail" d="M100,290 C200,280 250,275 350,282 C450,290 500,278 600,285 C650,288 700,280 730,275" fill="none" stroke="#d97706" stroke-width="1.5" opacity="0.5"/>
+
+        <!-- Ingress Controller = Mountain Pass -->
+        <g class="infra-tent" transform="translate(80, 230)">
+          <path d="M0,40 L20,10 L40,40" fill="none" stroke="#22d3ee" stroke-width="1.5"/>
+          <path d="M10,40 L20,20 L30,40" fill="none" stroke="#22d3ee" stroke-width="1" opacity="0.5"/>
+          <line x1="20" y1="10" x2="20" y2="0" stroke="#22d3ee" stroke-width="1"/>
+          <text class="infra-label" x="20" y="52" text-anchor="middle">Mountain Pass</text>
+          <text class="infra-label-tech" x="20" y="60" text-anchor="middle">nginx-ingress</text>
+        </g>
+
+        <!-- Pod 1 = Tent -->
+        <g class="infra-tent" transform="translate(220, 255)">
+          <path d="M0,30 L15,5 L30,30" fill="#22d3ee" fill-opacity="0.15" stroke="#22d3ee" stroke-width="1.5"/>
+          <line x1="15" y1="5" x2="15" y2="30" stroke="#22d3ee" stroke-width="0.5" opacity="0.5"/>
+          <text class="infra-label" x="15" y="42" text-anchor="middle">Tent Alpha</text>
+          <text class="infra-label-tech" x="15" y="50" text-anchor="middle">pod/api-7d4f</text>
+        </g>
+
+        <!-- Pod 2 = Tent -->
+        <g class="infra-tent" transform="translate(320, 248)">
+          <path d="M0,30 L15,5 L30,30" fill="#51cf66" fill-opacity="0.15" stroke="#51cf66" stroke-width="1.5"/>
+          <line x1="15" y1="5" x2="15" y2="30" stroke="#51cf66" stroke-width="0.5" opacity="0.5"/>
+          <text class="infra-label" x="15" y="42" text-anchor="middle">Tent Bravo</text>
+          <text class="infra-label-tech" x="15" y="50" text-anchor="middle">pod/worker-2c</text>
+        </g>
+
+        <!-- Service = Bridge -->
+        <g class="infra-tent" transform="translate(430, 248)">
+          <line x1="0" y1="25" x2="60" y2="25" stroke="#faef5d" stroke-width="2"/>
+          <line x1="0" y1="25" x2="0" y2="35" stroke="#faef5d" stroke-width="1.5"/>
+          <line x1="60" y1="25" x2="60" y2="35" stroke="#faef5d" stroke-width="1.5"/>
+          <line x1="10" y1="23" x2="50" y2="23" stroke="#faef5d" stroke-width="0.5" opacity="0.4"/>
+          <text class="infra-label" x="30" y="45" text-anchor="middle">Bridge</text>
+          <text class="infra-label-tech" x="30" y="53" text-anchor="middle">svc/api-gateway</text>
+        </g>
+
+        <!-- Load Balancer = River Junction -->
+        <g class="infra-tent" transform="translate(560, 250)">
+          <path d="M0,15 Q15,0 30,15 Q45,30 60,15" fill="none" stroke="#3b82f6" stroke-width="2"/>
+          <path d="M20,18 Q30,28 45,15" fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.4"/>
+          <text class="infra-label" x="30" y="38" text-anchor="middle">River Junction</text>
+          <text class="infra-label-tech" x="30" y="46" text-anchor="middle">svc/loadbalancer</text>
+        </g>
+
+        <!-- PV = Cave -->
+        <g class="infra-tent" transform="translate(680, 240)">
+          <path d="M0,35 Q5,15 15,10 Q25,5 35,15 Q40,20 40,35" fill="#0f172a" stroke="#94a3b8" stroke-width="1.5"/>
+          <circle cx="20" cy="25" r="2" fill="#94a3b8" opacity="0.4"/>
+          <text class="infra-label" x="20" y="47" text-anchor="middle">Cave</text>
+          <text class="infra-label-tech" x="20" y="55" text-anchor="middle">pv/data-vol</text>
+        </g>
+
+        <!-- Legend -->
+        <g transform="translate(20, 320)">
+          <text class="infra-label-tech" x="0" y="0" style="font-size:6px; opacity: 0.5;">kubectl get all -n production</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ============================================
+       10. SCROLL-DRIVEN WEATHER ATMOSPHERE
+       ============================================ -->
+  <section class="preview-section" style="border-bottom: none;">
+    <p class="preview-label">Atmosphere / Trek Posts</p>
+    <h2 class="preview-title">Scroll-Driven Weather System</h2>
+    <p class="preview-desc">As you scroll deeper into a trek post, the atmosphere changes. Clear at the start, fog rolls in at middle altitudes, snow appears near the summit. Scroll inside the box to see it.</p>
+    <div class="weather-demo" id="weather-demo">
+      <div class="weather-fog" id="weather-fog"></div>
+      <div class="weather-snow" id="weather-snow"></div>
+      <div class="weather-altitude-badge" id="weather-alt">2,800m — Clear</div>
+      <div class="weather-content" id="weather-content">
+        <p style="font-family: var(--font-serif); font-style: italic; color: var(--color-trek-accent); margin-bottom: 1.5rem;">
+          Kedarkantha Trek — Day 1
+        </p>
+        <p>We started from Sankri village at 2,800 meters. The morning was crisp and clear, the kind of Himalayan morning where you can see every ridge for fifty kilometers. The trail began through a pine forest, soft needles underfoot, shafts of light cutting through the canopy.</p>
+        <br/>
+        <p>By noon we had crossed the first meadow — Juda Ka Talab, a frozen lake at 3,100 meters. The water was perfectly still, mirroring the peaks above. We stopped for chai and aloo parathas, the kind of meal that only tastes this good when you have earned it with your legs.</p>
+        <br/>
+        <p>The afternoon brought the first clouds. Not threatening, but present — wisps curling around the ridgeline like the mountain was breathing. The trail steepened through rhododendron forest, the trees shorter now, bent by years of wind and snow.</p>
+        <br/>
+        <p>At 3,400 meters the forest opened up. Alpine meadows stretched ahead, brown and gold in the winter light. The campsite at Kedarkantha Base appeared — a flat clearing with the peak looming directly above, its summit ridge sharp against the darkening sky.</p>
+        <br/>
+        <p>As evening fell, the temperature dropped fast. We huddled in the dining tent, passing around cups of tomato soup. Someone pointed out the first stars appearing through a gap in the clouds. The Milky Way would be spectacular tonight.</p>
+        <br/>
+        <p style="font-family: var(--font-serif); font-style: italic; color: var(--color-trek-accent); margin-top: 1.5rem;">
+          Day 2 — Summit Push
+        </p>
+        <p>The alarm rang at 3am. We dressed in every layer we had and stepped out into a world transformed. Six inches of fresh snow had fallen overnight. The sky was impossibly clear — every constellation blazing, the Milky Way a river of light from horizon to horizon.</p>
+        <br/>
+        <p>The summit trail was steep, the snow knee-deep in places. We kicked steps, each footfall a small commitment to the mountain. At 3,600 meters, the first light touched the peaks to the east — a thin line of gold that spread like fire across the Himalayan wall.</p>
+        <br/>
+        <p>The final ridge was exposed. Wind hit us sideways, carrying fine ice crystals that stung any exposed skin. We leaned into it, one foot after another, the summit cairn visible just ahead through the blowing snow.</p>
+        <br/>
+        <p>At 3,800 meters, we stood on top. The Swargarohini range spread before us, peak after peak catching the morning light. Bandarpunch, Black Peak, the distant shimmer of Gangotri. For a moment, the wind dropped, and there was perfect silence.</p>
+        <br/>
+        <p>We built a small cairn of our own, five stones balanced carefully. Someone tied a prayer flag. It snapped in the returning wind, its colors impossibly bright against the white summit — blue, white, red, green, yellow — carrying whatever wishes we had left up there into the thin, cold air.</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // ============================================
+    // 1. SHADER MOUNTAIN SKYLINE
+    // ============================================
+    (function() {
+      const canvas = document.getElementById('mountain-canvas');
+      if (!canvas) return;
+      const gl = canvas.getContext('webgl');
+      if (!gl) {
+        // Fallback: CSS gradient
+        canvas.parentElement.style.background = 'linear-gradient(180deg, #0f172a, #1e293b)';
+        return;
+      }
+
+      function resize() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const vs = `attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+      const fs = `
+        precision mediump float;
+        uniform vec2 u_res;
+        uniform float u_time;
+        uniform float u_hour;
+        uniform float u_seed;
+
+        float hash(vec2 p) {
+          return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+        }
+
+        float noise(vec2 p) {
+          vec2 i = floor(p);
+          vec2 f = fract(p);
+          f = f * f * (3.0 - 2.0 * f);
+          return mix(
+            mix(hash(i), hash(i + vec2(1, 0)), f.x),
+            mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x),
+            f.y
+          );
+        }
+
+        float fbm(vec2 p) {
+          float v = 0.0;
+          float a = 0.5;
+          for (int i = 0; i < 5; i++) {
+            v += a * noise(p);
+            p *= 2.0;
+            a *= 0.5;
+          }
+          return v;
+        }
+
+        vec3 skyColor(float hour, float y) {
+          // Dawn (5-7)
+          vec3 dawn_top = vec3(0.15, 0.1, 0.25);
+          vec3 dawn_bot = vec3(0.9, 0.5, 0.3);
+          // Day (8-16)
+          vec3 day_top = vec3(0.3, 0.5, 0.8);
+          vec3 day_bot = vec3(0.7, 0.85, 1.0);
+          // Dusk (17-19)
+          vec3 dusk_top = vec3(0.15, 0.1, 0.3);
+          vec3 dusk_bot = vec3(0.85, 0.35, 0.2);
+          // Night (20-4)
+          vec3 night_top = vec3(0.02, 0.02, 0.06);
+          vec3 night_bot = vec3(0.06, 0.08, 0.15);
+
+          vec3 top, bot;
+          if (hour < 5.0) { top = night_top; bot = night_bot; }
+          else if (hour < 7.0) {
+            float t = (hour - 5.0) / 2.0;
+            top = mix(night_top, dawn_top, t);
+            bot = mix(night_bot, dawn_bot, t);
+          }
+          else if (hour < 8.0) {
+            float t = hour - 7.0;
+            top = mix(dawn_top, day_top, t);
+            bot = mix(dawn_bot, day_bot, t);
+          }
+          else if (hour < 17.0) { top = day_top; bot = day_bot; }
+          else if (hour < 19.0) {
+            float t = (hour - 17.0) / 2.0;
+            top = mix(day_top, dusk_top, t);
+            bot = mix(day_bot, dusk_bot, t);
+          }
+          else if (hour < 20.0) {
+            float t = hour - 19.0;
+            top = mix(dusk_top, night_top, t);
+            bot = mix(dusk_bot, night_bot, t);
+          }
+          else { top = night_top; bot = night_bot; }
+
+          return mix(bot, top, y);
+        }
+
+        void main() {
+          vec2 uv = gl_FragCoord.xy / u_res;
+
+          // Sky
+          vec3 col = skyColor(u_hour, uv.y);
+
+          // Mountain layers
+          for (int i = 0; i < 3; i++) {
+            float fi = float(i);
+            float freq = 2.0 + fi * 1.5;
+            float height = 0.25 + fi * 0.12;
+            float mountain = fbm(vec2(uv.x * freq + u_seed + fi * 3.7, fi * 5.0 + u_time * 0.01)) * height + 0.1 + fi * 0.08;
+            float darkness = 0.08 + fi * 0.06;
+            if (uv.y < mountain) {
+              col = mix(col, vec3(darkness), 0.7 - fi * 0.15);
+            }
+          }
+
+          // Stars (only at night)
+          if (u_hour > 19.0 || u_hour < 6.0) {
+            float star = step(0.998, hash(floor(uv * 200.0)));
+            float twinkle = 0.5 + 0.5 * sin(u_time * 2.0 + hash(floor(uv * 200.0)) * 6.28);
+            col += star * twinkle * vec3(0.8, 0.9, 1.0);
+          }
+
+          gl_FragColor = vec4(col, 1.0);
+        }
+      `;
+
+      function compile(src, type) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+      }
+
+      const prog = gl.createProgram();
+      gl.attachShader(prog, compile(vs, gl.VERTEX_SHADER));
+      gl.attachShader(prog, compile(fs, gl.FRAGMENT_SHADER));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+      const pLoc = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(pLoc);
+      gl.vertexAttribPointer(pLoc, 2, gl.FLOAT, false, 0, 0);
+
+      const uRes = gl.getUniformLocation(prog, 'u_res');
+      const uTime = gl.getUniformLocation(prog, 'u_time');
+      const uHour = gl.getUniformLocation(prog, 'u_hour');
+      const uSeed = gl.getUniformLocation(prog, 'u_seed');
+
+      // Seed from page URL
+      let seed = 0;
+      for (let i = 0; i < window.location.pathname.length; i++) {
+        seed += window.location.pathname.charCodeAt(i);
+      }
+      seed = (seed % 100) / 10.0;
+
+      const now = new Date();
+      const hour = now.getHours() + now.getMinutes() / 60;
+      const timeLabel = document.getElementById('shader-time-label');
+      const periods = ['night','night','night','night','night','dawn','dawn','morning','morning','day','day','day','day','day','day','day','day','dusk','dusk','dusk','night','night','night','night'];
+      if (timeLabel) timeLabel.textContent = `seed: ${seed.toFixed(1)} / time: ${periods[now.getHours()]} (${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')})`;
+
+      const start = performance.now();
+      function frame() {
+        const t = (performance.now() - start) / 1000;
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform1f(uTime, t);
+        gl.uniform1f(uHour, hour);
+        gl.uniform1f(uSeed, seed);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        requestAnimationFrame(frame);
+      }
+      frame();
+    })();
+
+    // ============================================
+    // 3. GENERATIVE CAIRNS
+    // ============================================
+    (function() {
+      const grid = document.getElementById('cairn-grid');
+      if (!grid) return;
+
+      const posts = [
+        { title: 'Sidecar Containers', tag: 'devops', variant: 'tech' },
+        { title: 'Kedarkantha Trek', tag: 'treks', variant: 'trek' },
+        { title: 'UUID v4 vs ULID', tag: 'postgres', variant: 'tech' },
+        { title: 'Django Kafka', tag: 'django', variant: 'tech' },
+        { title: 'Kuari Pass Trek', tag: 'treks', variant: 'trek' },
+        { title: 'Chopta Chandrashila', tag: 'treks', variant: 'trek' },
+        { title: 'Deploy Times -87%', tag: 'devops', variant: 'tech' },
+        { title: 'ESP8266 Flashing', tag: 'arduino', variant: 'tech' },
+      ];
+
+      function hashStr(s) {
+        let h = 0;
+        for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+        return h;
+      }
+
+      function seededRng(seed) {
+        let s = seed;
+        return function() {
+          s = (s * 16807 + 0) % 2147483647;
+          return (s - 1) / 2147483646;
+        };
+      }
+
+      posts.forEach(post => {
+        const seed = Math.abs(hashStr(post.title));
+        const rng = seededRng(seed);
+        const isTrek = post.variant === 'trek';
+        const stoneCount = 4 + Math.floor(rng() * 4);
+
+        let svg = `<svg width="80" height="100" viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">`;
+
+        // Ground line
+        const groundColor = isTrek ? '#d97706' : '#22d3ee';
+        svg += `<line x1="15" y1="95" x2="65" y2="95" stroke="${groundColor}" stroke-width="1" opacity="0.3"/>`;
+
+        let y = 90;
+        for (let i = 0; i < stoneCount; i++) {
+          const w = 10 + rng() * 20 - i * 1.5;
+          const h = 5 + rng() * 8;
+          const x = 40 - w / 2 + (rng() - 0.5) * 6;
+          const opacity = 0.4 + rng() * 0.4;
+
+          if (isTrek) {
+            // Organic rounded stones
+            const rx = w / 2;
+            const ry = h / 2;
+            const fill = `rgba(217, 119, 6, ${opacity})`;
+            const stroke = `rgba(217, 119, 6, ${opacity + 0.2})`;
+            svg += `<ellipse cx="${x + w/2}" cy="${y - h/2}" rx="${rx}" ry="${ry}" fill="${fill}" stroke="${stroke}" stroke-width="0.5"/>`;
+          } else {
+            // Geometric angular stones
+            const skew = (rng() - 0.5) * 4;
+            const fill = `rgba(34, 211, 238, ${opacity * 0.7})`;
+            const stroke = `rgba(34, 211, 238, ${opacity})`;
+            svg += `<rect x="${x}" y="${y - h}" width="${w}" height="${h}" fill="${fill}" stroke="${stroke}" stroke-width="0.5" transform="skewX(${skew})"/>`;
+          }
+          y -= h + 1 + rng() * 2;
+        }
+
+        svg += `</svg>`;
+
+        const card = document.createElement('div');
+        card.className = 'cairn-card';
+        card.innerHTML = `
+          ${svg}
+          <div class="cairn-card-title">${post.title}</div>
+          <div class="cairn-card-tag">${post.tag}</div>
+        `;
+        grid.appendChild(card);
+      });
+    })();
+
+    // ============================================
+    // 4. TOPOGRAPHIC CONTOUR DIVIDERS
+    // ============================================
+    (function() {
+      const svg = document.getElementById('topo-svg');
+      if (!svg) return;
+
+      function noise(x, y) {
+        const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+        return n - Math.floor(n);
+      }
+
+      function smoothNoise(x, y) {
+        const ix = Math.floor(x), iy = Math.floor(y);
+        const fx = x - ix, fy = y - iy;
+        const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+        return (noise(ix, iy) * (1 - sx) + noise(ix + 1, iy) * sx) * (1 - sy) +
+               (noise(ix, iy + 1) * (1 - sx) + noise(ix + 1, iy + 1) * sx) * sy;
+      }
+
+      function fbm(x, y) {
+        let v = 0, a = 0.5;
+        for (let i = 0; i < 4; i++) {
+          v += a * smoothNoise(x, y);
+          x *= 2; y *= 2; a *= 0.5;
+        }
+        return v;
+      }
+
+      const seed = Math.random() * 100;
+      const levels = [0.3, 0.4, 0.5, 0.6, 0.7];
+      const elevations = ['3200m', '3600m', '4000m', '4400m', '4800m'];
+
+      levels.forEach((level, li) => {
+        let d = '';
+        for (let x = 0; x <= 800; x += 4) {
+          const val = fbm(x / 200 + seed, level * 5 + seed * 0.3);
+          const y = 10 + val * 100;
+          d += (x === 0 ? 'M' : 'L') + x + ',' + y;
+        }
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', `topo-line topo-line-${li + 1}`);
+        svg.appendChild(path);
+
+        // Elevation label
+        if (li % 2 === 0) {
+          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          const xPos = 50 + li * 180;
+          const yVal = fbm(xPos / 200 + seed, level * 5 + seed * 0.3);
+          text.setAttribute('x', String(xPos));
+          text.setAttribute('y', String(8 + yVal * 100));
+          text.setAttribute('class', 'topo-label');
+          text.textContent = elevations[li];
+          svg.appendChild(text);
+        }
+      });
+    })();
+
+    // ============================================
+    // 5. ELEVATION PROFILE SCROLL TRACKER
+    // ============================================
+    (function() {
+      const svg = document.getElementById('elevation-svg');
+      const slider = document.getElementById('elevation-slider');
+      const altDisplay = document.getElementById('elevation-alt');
+      if (!svg || !slider) return;
+
+      // Kedarkantha elevation data (normalized x, altitude)
+      const waypoints = [
+        { x: 0, alt: 2800, label: 'Sankri' },
+        { x: 0.15, alt: 3100, label: 'Juda Ka Talab' },
+        { x: 0.35, alt: 3400, label: 'Base Camp' },
+        { x: 0.55, alt: 3200, label: 'Valley' },
+        { x: 0.75, alt: 3600, label: 'Ridge' },
+        { x: 0.9, alt: 3800, label: 'Summit' },
+        { x: 1.0, alt: 3100, label: 'Descent' },
+      ];
+
+      const minAlt = 2600, maxAlt = 4000;
+      const pad = 10;
+      const w = 600, h = 80;
+
+      // Build path
+      let linePath = '';
+      let fillPath = '';
+      waypoints.forEach((wp, i) => {
+        const px = pad + wp.x * (w - 2 * pad);
+        const py = h - pad - ((wp.alt - minAlt) / (maxAlt - minAlt)) * (h - 2 * pad);
+        linePath += (i === 0 ? 'M' : 'L') + px + ',' + py;
+        fillPath += (i === 0 ? 'M' : 'L') + px + ',' + py;
+      });
+      fillPath += `L${w - pad},${h - pad} L${pad},${h - pad} Z`;
+
+      // Fill
+      const fill = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      fill.setAttribute('d', fillPath);
+      fill.setAttribute('class', 'elevation-fill');
+      svg.appendChild(fill);
+
+      // Line
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      line.setAttribute('d', linePath);
+      line.setAttribute('class', 'elevation-line');
+      svg.appendChild(line);
+
+      // Waypoint labels
+      waypoints.forEach(wp => {
+        const px = pad + wp.x * (w - 2 * pad);
+        const py = h - pad - ((wp.alt - minAlt) / (maxAlt - minAlt)) * (h - 2 * pad);
+
+        // Dot
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('cx', String(px));
+        dot.setAttribute('cy', String(py));
+        dot.setAttribute('r', '2');
+        dot.setAttribute('fill', '#d97706');
+        dot.setAttribute('opacity', '0.5');
+        svg.appendChild(dot);
+
+        // Label
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', String(px));
+        text.setAttribute('y', String(py - 6));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('class', 'elevation-waypoint');
+        text.textContent = wp.label;
+        svg.appendChild(text);
+      });
+
+      // Marker
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      marker.setAttribute('r', '5');
+      marker.setAttribute('class', 'elevation-marker');
+      svg.appendChild(marker);
+
+      function updateMarker(pct) {
+        const t = pct / 100;
+        // Interpolate altitude
+        let alt = waypoints[0].alt;
+        for (let i = 0; i < waypoints.length - 1; i++) {
+          if (t >= waypoints[i].x && t <= waypoints[i+1].x) {
+            const localT = (t - waypoints[i].x) / (waypoints[i+1].x - waypoints[i].x);
+            alt = waypoints[i].alt + localT * (waypoints[i+1].alt - waypoints[i].alt);
+            break;
+          }
+        }
+        if (t >= waypoints[waypoints.length-1].x) alt = waypoints[waypoints.length-1].alt;
+
+        const px = pad + t * (w - 2 * pad);
+        const py = h - pad - ((alt - minAlt) / (maxAlt - minAlt)) * (h - 2 * pad);
+        marker.setAttribute('cx', String(px));
+        marker.setAttribute('cy', String(py));
+        if (altDisplay) altDisplay.textContent = Math.round(alt).toLocaleString() + 'm';
+      }
+
+      updateMarker(0);
+      slider.addEventListener('input', () => updateMarker(parseInt(slider.value)));
+    })();
+
+    // ============================================
+    // 6. FLOW FIELD
+    // ============================================
+    (function() {
+      const canvas = document.getElementById('flow-canvas');
+      const toggle = document.getElementById('flow-toggle');
+      const label = document.getElementById('flow-label');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      let mode = 'tech';
+      const PARTICLE_COUNT = 300;
+      let particles = [];
+
+      function resize() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        initParticles(rect.width, rect.height);
+      }
+
+      function initParticles(w, h) {
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            vx: 0, vy: 0,
+            life: Math.random() * 100,
+          });
+        }
+      }
+
+      function noise2d(x, y) {
+        return Math.sin(x * 0.01 + y * 0.005) * Math.cos(y * 0.008 - x * 0.003);
+      }
+
+      function frame() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const w = rect.width, h = rect.height;
+
+        ctx.fillStyle = mode === 'tech' ? 'rgba(15, 23, 42, 0.08)' : 'rgba(250, 248, 245, 0.08)';
+        ctx.fillRect(0, 0, w, h);
+
+        const time = performance.now() / 1000;
+
+        particles.forEach(p => {
+          let angle;
+          if (mode === 'tech') {
+            // Grid-like: quantized angles
+            angle = Math.round(noise2d(p.x + time * 20, p.y) * 4) * (Math.PI / 4);
+          } else {
+            // Organic: smooth flowing
+            angle = noise2d(p.x * 0.5 + time * 10, p.y * 0.5) * Math.PI * 2;
+          }
+
+          p.vx = Math.cos(angle) * (mode === 'tech' ? 1.2 : 0.8);
+          p.vy = Math.sin(angle) * (mode === 'tech' ? 1.2 : 0.8);
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life++;
+
+          if (p.x < 0 || p.x > w || p.y < 0 || p.y > h || p.life > 200) {
+            p.x = Math.random() * w;
+            p.y = Math.random() * h;
+            p.life = 0;
+          }
+
+          const alpha = Math.min(p.life / 20, 1) * Math.min((200 - p.life) / 20, 1) * 0.6;
+          ctx.fillStyle = mode === 'tech'
+            ? `rgba(34, 211, 238, ${alpha})`
+            : `rgba(217, 119, 6, ${alpha})`;
+          ctx.fillRect(p.x, p.y, mode === 'tech' ? 2 : 1.5, mode === 'tech' ? 2 : 1.5);
+        });
+
+        requestAnimationFrame(frame);
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+      frame();
+
+      toggle?.addEventListener('click', () => {
+        mode = mode === 'tech' ? 'trek' : 'tech';
+        toggle.textContent = mode === 'tech' ? 'switch to trek' : 'switch to tech';
+        if (label) label.textContent = `mode: ${mode} / particles: ${PARTICLE_COUNT}`;
+        // Clear canvas on switch
+        const rect = canvas.parentElement.getBoundingClientRect();
+        ctx.clearRect(0, 0, rect.width, rect.height);
+      });
+    })();
+
+    // ============================================
+    // 7. ALTITUDE TERMINAL
+    // ============================================
+    (function() {
+      const body = document.getElementById('terminal-body');
+      const input = document.getElementById('terminal-input');
+      const timeEl = document.getElementById('term-time');
+      if (!body || !input) return;
+
+      if (timeEl) timeEl.textContent = new Date().toLocaleTimeString();
+
+      let cwd = '~/blog';
+      let altitude = '3800m';
+
+      const fs = {
+        '~/blog': ['devops/', 'treks/', 'programming/', 'postgres/', 'about.md', 'contact.md'],
+        '~/blog/devops': ['reducing-deploy-times.md', 'sidecar-containers.md', 'nginx-ingress-k8s.md', 'aws-amplify-terraform.md', 'routing-traefik-nginx.md', 'adding-auth-kibana.md'],
+        '~/blog/treks': ['kedarkantha-trek.md', 'chopta-chandrashila-trek.md', 'kuari-pass-trek.md'],
+        '~/blog/programming': ['django-kafka-integration.md', 'django-bulk-save.md', 'flashing-esp8266.md', 'pdf-to-tiff.md', 'java-streaming.md'],
+        '~/blog/postgres': ['uuid-vs-ulid.md', 'uuid-vs-serials.md', 'django-rds-pgbouncer.md'],
+      };
+
+      const posts = {
+        'kedarkantha-trek': 'A winter trek through snow-covered trails to 3,800m in Govind Wildlife Sanctuary. Summit day: -15°C, knee-deep snow, and a panoramic view of Swargarohini.',
+        'reducing-deploy-times': 'How we cut deployment time from 23 minutes to 3 minutes by parallelizing Docker builds, caching pip layers, and pre-pulling base images on k8s nodes.',
+        'sidecar-containers': 'Running log collectors, config reloaders, and TLS proxies as sidecar containers sharing the same pod network and volume mounts.',
+        'uuid-vs-ulid': 'ULID wins. Monotonic ordering means B-tree index inserts are sequential instead of random. 3.2x faster INSERT throughput on our Postgres benchmark.',
+        'chopta-chandrashila-trek': 'The Tungnath temple at 3,680m, followed by the Chandrashila summit at 4,000m. Clear views of Nanda Devi, Trisul, and Chaukhamba.',
+        'kuari-pass-trek': 'Lord Curzon\'s trail through oak and rhododendron forests. The pass at 3,876m offers a 180° panorama of the Nanda Devi sanctuary.',
+      };
+
+      const altitudes = {
+        '~/blog': '3800m',
+        '~/blog/devops': '4200m',
+        '~/blog/treks': '4800m',
+        '~/blog/programming': '3600m',
+        '~/blog/postgres': '3900m',
+      };
+
+      function addLine(html) {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        // Insert before input line
+        const inputLine = body.querySelector('.term-input-line');
+        body.insertBefore(div, inputLine);
+        body.scrollTop = body.scrollHeight;
+      }
+
+      function getPrompt() {
+        return `<span class="term-prompt">sreeraj</span><span class="term-path">@${altitude}</span><span style="color:#e2e8f0">:</span><span class="term-highlight">${cwd}</span><span style="color:#e2e8f0">$ </span>`;
+      }
+
+      function updatePrompt() {
+        const inputLine = body.querySelector('.term-input-line');
+        const promptSpans = inputLine.querySelectorAll('span:not(.term-input)');
+        // Rebuild prompt
+        const wrapper = document.createElement('div');
+        wrapper.className = 'term-input-line';
+        wrapper.innerHTML = getPrompt();
+        wrapper.appendChild(input);
+        inputLine.replaceWith(wrapper);
+        input.focus();
+      }
+
+      function processCommand(cmd) {
+        cmd = cmd.trim();
+        if (!cmd) return;
+
+        addLine(getPrompt() + `<span style="color:#e2e8f0">${cmd}</span>`);
+
+        const parts = cmd.split(/\s+/);
+        const command = parts[0];
+        const arg = parts.slice(1).join(' ');
+
+        switch (command) {
+          case 'help':
+            addLine(`<span class="term-output">Available commands:</span>`);
+            addLine(`<span class="term-highlight">  ls</span><span class="term-output">          — list posts in current directory</span>`);
+            addLine(`<span class="term-highlight">  cd &lt;dir&gt;</span><span class="term-output">    — navigate (devops, treks, programming, postgres, ..)</span>`);
+            addLine(`<span class="term-highlight">  cat &lt;post&gt;</span><span class="term-output">  — read a post summary</span>`);
+            addLine(`<span class="term-highlight">  altitude</span><span class="term-output">    — show current elevation</span>`);
+            addLine(`<span class="term-highlight">  kubectl</span><span class="term-output">     — try: kubectl get pods</span>`);
+            addLine(`<span class="term-highlight">  whoami</span><span class="term-output">      — who is sreeraj</span>`);
+            addLine(`<span class="term-highlight">  clear</span><span class="term-output">       — clear terminal</span>`);
+            break;
+
+          case 'ls':
+            const items = fs[cwd] || [];
+            items.forEach(item => {
+              const isDir = item.endsWith('/');
+              addLine(`<span style="color:${isDir ? '#51cf66' : '#94a3b8'}">${item}</span>`);
+            });
+            break;
+
+          case 'cd':
+            if (!arg || arg === '~' || arg === '..') {
+              cwd = '~/blog';
+            } else if (arg === '..') {
+              cwd = '~/blog';
+            } else {
+              const target = cwd + '/' + arg.replace(/\/$/, '');
+              if (fs[target]) {
+                cwd = target;
+              } else {
+                addLine(`<span class="term-error">cd: no such directory: ${arg}</span>`);
+                break;
+              }
+            }
+            altitude = altitudes[cwd] || '3800m';
+            updatePrompt();
+            break;
+
+          case 'cat':
+            const slug = arg.replace(/\.md$/, '');
+            if (posts[slug]) {
+              addLine(`<span class="term-output">${posts[slug]}</span>`);
+            } else {
+              addLine(`<span class="term-error">cat: ${arg}: No such file</span>`);
+            }
+            break;
+
+          case 'altitude':
+            addLine(`<span class="term-trek">Current altitude: ${altitude}</span>`);
+            addLine(`<span class="term-output">Oxygen saturation: ~${cwd.includes('trek') ? '82' : '95'}%</span>`);
+            break;
+
+          case 'kubectl':
+            if (arg.startsWith('get pod')) {
+              addLine(`<span class="term-output">NAME                        READY   STATUS    RESTARTS   AGE</span>`);
+              addLine(`<span class="term-output">api-server-7d4f8b6c9-x2k   1/1     Running   0          47h</span>`);
+              addLine(`<span class="term-output">worker-batch-2c91f-np8     1/1     Running   0          47h</span>`);
+              addLine(`<span class="term-output">redis-cache-0              1/1     Running   0          12d</span>`);
+              addLine(`<span class="term-highlight">pgbouncer-5f7a2-jk3        1/1     Running   0          12d</span>`);
+            } else if (arg.startsWith('get svc') || arg.startsWith('get service')) {
+              addLine(`<span class="term-output">NAME            TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)</span>`);
+              addLine(`<span class="term-output">api-gateway     LoadBalancer   10.100.24.87    52.66.x.x       443:31234/TCP</span>`);
+              addLine(`<span class="term-output">redis-cache     ClusterIP      10.100.31.12    &lt;none&gt;          6379/TCP</span>`);
+            } else {
+              addLine(`<span class="term-output">Try: kubectl get pods, kubectl get svc</span>`);
+            }
+            break;
+
+          case 'whoami':
+            addLine(`<span class="term-output">Sreeraj Rajan — DevOps engineer at Medley Learning</span>`);
+            addLine(`<span class="term-output">Himalayan trekker. Occasional open-source contributor.</span>`);
+            addLine(`<span class="term-trek">Summits: Kedarkantha (3,800m), Chandrashila (4,000m), Kuari Pass (3,876m)</span>`);
+            break;
+
+          case 'clear':
+            while (body.children.length > 1) {
+              body.removeChild(body.firstChild);
+            }
+            break;
+
+          case 'sudo':
+            addLine(`<span class="term-error">Permission denied. You are above the treeline — there is no root here.</span>`);
+            break;
+
+          case 'pwd':
+            addLine(`<span class="term-output">${cwd}</span>`);
+            break;
+
+          case 'uptime':
+            addLine(`<span class="term-output">Blog uptime: since July 2021</span>`);
+            addLine(`<span class="term-output">Your session: ${Math.round(performance.now() / 1000)}s</span>`);
+            break;
+
+          default:
+            addLine(`<span class="term-error">command not found: ${command}. Try 'help'</span>`);
+        }
+
+        updatePrompt();
+      }
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          processCommand(input.value);
+          input.value = '';
+        }
+      });
+
+      // Focus terminal on click
+      body.addEventListener('click', () => input.focus());
+    })();
+
+    // ============================================
+    // 10. SCROLL-DRIVEN WEATHER
+    // ============================================
+    (function() {
+      const content = document.getElementById('weather-content');
+      const fog = document.getElementById('weather-fog');
+      const snow = document.getElementById('weather-snow');
+      const altBadge = document.getElementById('weather-alt');
+      if (!content || !fog || !snow) return;
+
+      // Create snowflakes
+      for (let i = 0; i < 40; i++) {
+        const flake = document.createElement('span');
+        flake.className = 'snowflake';
+        flake.textContent = '•';
+        flake.style.left = Math.random() * 100 + '%';
+        flake.style.animationDuration = (3 + Math.random() * 4) + 's';
+        flake.style.animationDelay = Math.random() * 5 + 's';
+        flake.style.fontSize = (0.3 + Math.random() * 0.4) + 'rem';
+        snow.appendChild(flake);
+      }
+
+      content.addEventListener('scroll', () => {
+        const pct = content.scrollTop / (content.scrollHeight - content.clientHeight);
+
+        // Fog increases 30-70%
+        const fogOpacity = Math.max(0, Math.min(1, (pct - 0.3) * 2.5));
+        fog.style.opacity = String(fogOpacity);
+
+        // Snow appears after 60%
+        const snowOpacity = Math.max(0, Math.min(1, (pct - 0.6) * 2.5));
+        snow.style.opacity = String(snowOpacity);
+
+        // Altitude
+        const alt = Math.round(2800 + pct * 1000);
+        let condition = 'Clear';
+        if (pct > 0.6) condition = 'Snow';
+        else if (pct > 0.3) condition = 'Fog';
+        else if (pct > 0.15) condition = 'Clouds';
+        if (altBadge) altBadge.textContent = alt.toLocaleString() + 'm — ' + condition;
+      });
+    })();
+  </script>
+</BaseLayout>

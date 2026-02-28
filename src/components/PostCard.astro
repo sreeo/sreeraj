@@ -1,6 +1,7 @@
 ---
 import FormattedDate from './FormattedDate.astro';
 import TagList from './TagList.astro';
+import CairnIcon from './CairnIcon.astro';
 
 interface Props {
   title: string;
@@ -19,8 +20,8 @@ const isTrek = variant === 'trek';
 
 <article class:list={['post-card group', isTrek && 'trek-card']}>
   <a href={`/${slug}/`} class="block">
-    {featureImage && (
-      <div class:list={[!isTrek && 'mb-3', isTrek && 'overflow-hidden']}>
+    <div class:list={['post-card-visual flex items-end gap-4', !isTrek && 'mb-3', isTrek && 'overflow-hidden']}>
+      {featureImage ? (
         <img
           src={featureImage}
           alt={title}
@@ -31,8 +32,16 @@ const isTrek = variant === 'trek';
           ]}
           loading="lazy"
         />
-      </div>
-    )}
+      ) : (
+        <div class:list={[
+          'flex items-center justify-center w-full',
+          !isTrek && 'h-40 rounded-lg',
+          isTrek && 'h-52',
+        ]} style={`background: ${isTrek ? 'rgba(217,119,6,0.05)' : 'rgba(34,211,238,0.05)'};`}>
+          <CairnIcon title={title} variant={variant} />
+        </div>
+      )}
+    </div>
     <div class:list={[isTrek && 'post-card-body']}>
       <h3 class:list={['post-card-title text-lg mb-1 transition-colors', !isTrek && 'font-semibold']}>
         {title}

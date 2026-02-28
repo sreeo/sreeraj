@@ -14,6 +14,17 @@ const blog = defineCollection({
     tags: z.array(z.string()).default([]),
     author: z.string().default('Sreeraj'),
     readingTime: z.number().default(1),
+    // Trek-specific fields
+    trekStats: z.object({
+      elevation: z.string().optional(),
+      distance: z.string().optional(),
+      duration: z.string().optional(),
+      difficulty: z.string().optional(),
+      basecamp: z.string().optional(),
+      season: z.string().optional(),
+      startAlt: z.number().optional(),
+      peakAlt: z.number().optional(),
+    }).optional(),
   }),
 });
 
