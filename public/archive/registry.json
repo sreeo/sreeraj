@@ -1,6 +1,13 @@
 {
   "archives": [
     {
+      "month": "2026-03",
+      "trend": "Organic Anti-Grid",
+      "description": "A rebellion against rigid grid systems, embracing flowing layouts, organic shapes, and natural asymmetry. This trend reflects a desire for humanity in digital spaces, using irregular compositions that feel alive and breathing rather than mechanically perfect.",
+      "primaryColor": "#2dd4bf",
+      "deployedAt": "2026-03-21T13:43:14.277Z"
+    },
+    {
       "month": "2026-02",
       "trend": "Cutting-Edge Terminal",
       "description": "Dark terminal aesthetic with cyan accents, monospace git-log timeline, WebGL mountains, and dual tech/trek theming",
