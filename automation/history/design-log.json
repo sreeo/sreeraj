@@ -8,6 +8,15 @@
       "timestamp": "2026-03-21T11:35:46.512Z",
       "description": "Clean lines, organic curves, and bold graphic elements from the 1950s-60s design era. Think Eames, Saul Bass, and Herb Lubalin. Geometric yet warm, structured yet playful.",
       "primaryColor": "#ff6b35"
+    },
+    {
+      "month": "2026-03",
+      "trendId": "kinetic-typography",
+      "trendName": "Kinetic Typography",
+      "status": "success",
+      "timestamp": "2026-03-21T13:32:36.281Z",
+      "description": "Dynamic, animated typography where text moves, transforms, and responds to user interaction in real-time. Text becomes an active element of storytelling rather than passive content, using motion to guide attention, convey emotion, and create memorable moments.",
+      "primaryColor": "#6366f1"
     }
   ]
 }

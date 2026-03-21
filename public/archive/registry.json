@@ -1,6 +1,13 @@
 {
   "archives": [
     {
+      "month": "2026-03",
+      "trend": "Kinetic Typography",
+      "description": "Dynamic, animated typography where text moves, transforms, and responds to user interaction in real-time. Text becomes an active element of storytelling rather than passive content, using motion to guide attention, convey emotion, and create memorable moments.",
+      "primaryColor": "#6366f1",
+      "deployedAt": "2026-03-21T13:32:29.249Z"
+    },
+    {
       "month": "2026-02",
       "trend": "Cutting-Edge Terminal",
       "description": "Dark terminal aesthetic with cyan accents, monospace git-log timeline, WebGL mountains, and dual tech/trek theming",

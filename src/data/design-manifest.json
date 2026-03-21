@@ -1,0 +1,20 @@
+{
+  "month": "2026-03",
+  "trend": "Kinetic Typography",
+  "trendId": "kinetic-typography",
+  "description": "Dynamic, animated typography where text moves, transforms, and responds to user interaction in real-time. Text becomes an active element of storytelling rather than passive content, using motion to guide attention, convey emotion, and create memorable moments.",
+  "primaryColor": "#6366f1",
+  "accentColor": "#ffffff",
+  "fonts": [
+    "Inter",
+    "JetBrains Mono",
+    "Lora",
+    "Space Grotesk",
+    "Fira Code"
+  ],
+  "keyFeatures": [
+    "Text-first layouts where typography is the primary structural element",
+    "Variable fonts enable smooth transitions between weights, widths, and optical sizes within single typefaces",
+    "Scroll-triggered text reveals with staggered timing"
+  ]
+}
