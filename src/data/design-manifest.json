@@ -1,0 +1,20 @@
+{
+  "month": "2026-03",
+  "trend": "Kinetic Typography",
+  "trendId": "kinetic-typography",
+  "description": "Typography becomes the primary interactive element, with text that moves, responds, and transforms based on user behavior. Letters animate, words reveal progressively, and headlines react to scroll or cursor movement, turning static copy into dynamic storytelling.",
+  "primaryColor": "#00d4ff",
+  "accentColor": "#0a0a0a",
+  "fonts": [
+    "Inter",
+    "JetBrains Mono",
+    "Lora",
+    "Orbitron",
+    "Space Grotesk"
+  ],
+  "keyFeatures": [
+    "Typography-driven layout hierarchy where animated text blocks define sections",
+    "Variable fonts enable smooth weight/width transitions",
+    "Scroll-triggered text reveals and transformations"
+  ]
+}
