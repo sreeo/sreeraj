@@ -139,6 +139,40 @@ body — font-family, line-height, transitions
 .flow-field-canvas — sizing, positioning
 ```
 
+#### Background Visual Controls (CSS Custom Properties)
+These optional CSS custom properties control the background visual components. Set them to customize or disable backgrounds:
+
+```
+--flow-field-opacity — particle field opacity (default 0.12, set to 0 to hide)
+--flow-field-color — particle RGB values e.g. "34, 211, 238" (no # prefix, comma-separated RGB)
+--flow-field-bg — canvas clear RGB values e.g. "15, 23, 42"
+--flow-field-speed — particle speed multiplier (default 1 for tech, 0.6 for trek)
+--mountain-display — "block" or "none" to show/hide mountain skyline
+--mountain-height — mountain container height e.g. "180px" or "0px"
+```
+
+#### Background Effects (Optional, encouraged)
+You are encouraged to add CSS-based background effects that match the design style. These layer behind the content (z-index 0-1). Ideas:
+- CSS gradients on body or ::before pseudo-elements
+- Repeating patterns (dots, grids, lines) via background-image
+- Animated gradient backgrounds
+- Noise/grain texture overlays via SVG filters
+- Geometric shapes via clip-path or SVG backgrounds
+- Vignette effects via radial-gradient overlays
+
+Example: a grid background for a Swiss/Bauhaus style:
+```css
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 80px);
+  background-size: 80px 80px;
+}
+```
+
 ### Responsive Breakpoints Required
 - `@media (max-width: 640px)` — git log timeline adjustments
 - `@media (max-width: 768px)` — trek journal margin line hidden, trek images constrained

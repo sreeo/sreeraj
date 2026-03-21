@@ -16,6 +16,8 @@ const { height = '180px', seed = Astro.url.pathname } = Astro.props;
     position: relative;
     width: 100%;
     overflow: hidden;
+    display: var(--mountain-display, block);
+    height: var(--mountain-height, 180px);
   }
   .mountain-canvas {
     width: 100%;

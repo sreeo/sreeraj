@@ -53,5 +53,21 @@ What makes a design FAIL:
 9. Available fonts (loaded via Google Fonts): Inter (sans), JetBrains Mono (mono), Lora (serif)
 10. You may suggest up to 2 additional Google Fonts — include them as a comment at the top: `/* FONTS: FontName1, FontName2 */`
 
+## Background & Atmosphere
+The site has a particle animation (FlowField) and a WebGL mountain skyline that are controlled via CSS custom properties. You should set these to match your design:
+
+- Set `--flow-field-color` to match the accent (RGB format: "R, G, B")
+- Set `--flow-field-bg` to match the background (RGB format)
+- Set `--flow-field-opacity` to control intensity (0 to hide, 0.05-0.2 for subtle)
+- Set `--mountain-display: none` if mountains don't fit the style, or adjust `--mountain-height`
+
+Additionally, you SHOULD add CSS-based background effects that reinforce the design style:
+- Grid/dot patterns for structured styles (Swiss, Bauhaus, Bento)
+- Subtle gradient overlays for atmospheric styles (Glassmorphism, Aurora)
+- Grain/noise textures for analog styles (Newspaper, Dark Academia, Paper)
+- Geometric shapes for bold styles (Art Deco, Mid-Century)
+
+Use `body::before` or `body::after` with `position: fixed; inset: 0; z-index: 0; pointer-events: none;` for background layers.
+
 ## Output Format
 Return ONLY the complete CSS file content. No markdown code fences. No explanations. Just raw CSS.

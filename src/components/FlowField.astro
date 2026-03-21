@@ -16,7 +16,7 @@ const { theme = 'tech' } = Astro.props;
     height: 100%;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.12;
+    opacity: var(--flow-field-opacity, 0.12);
   }
 </style>
 
@@ -28,6 +28,15 @@ const { theme = 'tech' } = Astro.props;
       const mode = canvas.dataset.theme || 'tech';
       const PARTICLE_COUNT = 200;
       let particles: { x: number; y: number; vx: number; vy: number; life: number }[] = [];
+
+      // Read colors from CSS custom properties
+      const styles = getComputedStyle(document.documentElement);
+      const particleColor = styles.getPropertyValue('--flow-field-color').trim() ||
+        (mode === 'tech' ? '34, 211, 238' : '217, 119, 6');
+      const bgColor = styles.getPropertyValue('--flow-field-bg').trim() ||
+        (mode === 'tech' ? '15, 23, 42' : '250, 248, 245');
+      const speed = parseFloat(styles.getPropertyValue('--flow-field-speed').trim()) ||
+        (mode === 'tech' ? 1 : 0.6);
 
       function resize() {
         canvas!.width = window.innerWidth * window.devicePixelRatio;
@@ -54,7 +63,7 @@ const { theme = 'tech' } = Astro.props;
 
       function frame() {
         const w = window.innerWidth, h = window.innerHeight;
-        ctx!.fillStyle = mode === 'tech' ? 'rgba(15, 23, 42, 0.06)' : 'rgba(250, 248, 245, 0.06)';
+        ctx!.fillStyle = `rgba(${bgColor}, 0.06)`;
         ctx!.fillRect(0, 0, w, h);
 
         const time = performance.now() / 1000;
@@ -67,8 +76,8 @@ const { theme = 'tech' } = Astro.props;
             angle = noise2d(p.x * 0.5 + time * 10, p.y * 0.5) * Math.PI * 2;
           }
 
-          p.vx = Math.cos(angle) * (mode === 'tech' ? 1 : 0.6);
-          p.vy = Math.sin(angle) * (mode === 'tech' ? 1 : 0.6);
+          p.vx = Math.cos(angle) * speed;
+          p.vy = Math.sin(angle) * speed;
           p.x += p.vx;
           p.y += p.vy;
           p.life++;
@@ -80,9 +89,7 @@ const { theme = 'tech' } = Astro.props;
           }
 
           const alpha = Math.min(p.life / 20, 1) * Math.min((200 - p.life) / 20, 1) * 0.5;
-          ctx!.fillStyle = mode === 'tech'
-            ? `rgba(34, 211, 238, ${alpha})`
-            : `rgba(217, 119, 6, ${alpha})`;
+          ctx!.fillStyle = `rgba(${particleColor}, ${alpha})`;
           ctx!.fillRect(p.x, p.y, 1.5, 1.5);
         });
 
