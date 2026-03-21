@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync, spawn, ChildProcess } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { CONFIG } from './config.js';
@@ -15,7 +15,6 @@ interface StepResult {
 }
 
 // Critical selectors — must be present for the site to function
-// Uses substring matching (case-insensitive) to handle variations in how the model writes CSS
 const CRITICAL_SELECTORS = [
   '@theme',
   'tailwindcss',
@@ -37,7 +36,7 @@ const CRITICAL_SELECTORS = [
   '@keyframes',
 ];
 
-// Important but non-blocking selectors — warn but don't fail
+// Important but non-blocking selectors
 const RECOMMENDED_SELECTORS = [
   'post-header-title',
   'post-header-meta',
@@ -56,6 +55,44 @@ const RECOMMENDED_SELECTORS = [
   'post-nav-link',
   'post-nav-border',
 ];
+
+// --- Server management helpers ---
+
+function startServer(port: number): ChildProcess {
+  const server = spawn('npx', ['serve', 'dist', '-l', String(port), '--no-clipboard'], {
+    cwd: CONFIG.projectRoot,
+    stdio: 'pipe',
+    detached: false,
+  });
+  // Prevent unhandled error from crashing the process
+  server.on('error', () => {});
+  return server;
+}
+
+function killServer(server: ChildProcess | null): void {
+  if (!server || server.killed) return;
+  try {
+    server.kill('SIGKILL');
+  } catch {
+    // already dead
+  }
+}
+
+async function waitForServer(port: number, timeoutMs = 10_000): Promise<boolean> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const res = await fetch(`http://localhost:${port}/`);
+      if (res.ok) return true;
+    } catch {
+      // not ready yet
+    }
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+  return false;
+}
+
+// --- Main validation ---
 
 export async function validateDesign(css: string): Promise<ValidationResult> {
   const steps: StepResult[] = [];
@@ -104,7 +141,6 @@ export async function validateDesign(css: string): Promise<ValidationResult> {
   console.log('Step 5: Accessibility check...');
   const a11yResult = await checkAccessibility();
   steps.push(a11yResult);
-  // a11y is a warning, not a blocker
   if (!a11yResult.passed) {
     console.log('  Warning: accessibility issues found (non-blocking)');
   }
@@ -115,15 +151,14 @@ export async function validateDesign(css: string): Promise<ValidationResult> {
   steps.push(fontResult);
 
   const criticalPassed = steps
-    .filter((_, i) => i < 5) // First 5 steps are critical (contract, contrast, build, render, visual)
+    .filter((_, i) => i < 5) // First 5 steps are critical
     .every(s => s.passed);
 
   return { passed: criticalPassed, steps };
 }
 
-/**
- * Parse a hex color (#rgb, #rrggbb) to [r, g, b] (0-255)
- */
+// --- Contrast checks ---
+
 function hexToRgb(hex: string): [number, number, number] | null {
   hex = hex.replace('#', '');
   if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
@@ -135,9 +170,6 @@ function hexToRgb(hex: string): [number, number, number] | null {
   ];
 }
 
-/**
- * Calculate relative luminance per WCAG 2.0
- */
 function luminance(r: number, g: number, b: number): number {
   const [rs, gs, bs] = [r, g, b].map(c => {
     c = c / 255;
@@ -146,14 +178,10 @@ function luminance(r: number, g: number, b: number): number {
   return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 }
 
-/**
- * Calculate contrast ratio between two colors
- */
 function contrastRatio(hex1: string, hex2: string): number | null {
   const rgb1 = hexToRgb(hex1);
   const rgb2 = hexToRgb(hex2);
   if (!rgb1 || !rgb2) return null;
-
   const l1 = luminance(...rgb1);
   const l2 = luminance(...rgb2);
   const lighter = Math.max(l1, l2);
@@ -163,113 +191,67 @@ function contrastRatio(hex1: string, hex2: string): number | null {
 
 function checkContrast(css: string): StepResult {
   const issues: string[] = [];
-
-  // Extract color values from @theme block
   const extractColor = (varName: string): string | null => {
     const match = css.match(new RegExp(`${varName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:\\s*(#[0-9a-fA-F]{3,8})`));
     return match ? match[1] : null;
   };
 
-  // Tech theme checks
-  const techBg = extractColor('--color-tech-bg');
-  const techText = extractColor('--color-tech-text');
-  const techMuted = extractColor('--color-tech-text-muted');
-
-  // Trek theme checks
-  const trekBg = extractColor('--color-trek-bg');
-  const trekText = extractColor('--color-trek-text');
-  const trekMuted = extractColor('--color-trek-text-muted');
-
   const pairs = [
-    { name: 'tech text/bg', fg: techText, bg: techBg, minRatio: 4.5 },
-    { name: 'tech muted/bg', fg: techMuted, bg: techBg, minRatio: 3.0 },
-    { name: 'trek text/bg', fg: trekText, bg: trekBg, minRatio: 4.5 },
-    { name: 'trek muted/bg', fg: trekMuted, bg: trekBg, minRatio: 3.0 },
+    { name: 'tech text/bg', fg: extractColor('--color-tech-text'), bg: extractColor('--color-tech-bg'), minRatio: 4.5 },
+    { name: 'tech muted/bg', fg: extractColor('--color-tech-text-muted'), bg: extractColor('--color-tech-bg'), minRatio: 3.0 },
+    { name: 'trek text/bg', fg: extractColor('--color-trek-text'), bg: extractColor('--color-trek-bg'), minRatio: 4.5 },
+    { name: 'trek muted/bg', fg: extractColor('--color-trek-text-muted'), bg: extractColor('--color-trek-bg'), minRatio: 3.0 },
   ];
 
   for (const pair of pairs) {
-    if (!pair.fg || !pair.bg) {
-      issues.push(`${pair.name}: could not extract colors`);
-      continue;
-    }
-
+    if (!pair.fg || !pair.bg) { issues.push(`${pair.name}: could not extract colors`); continue; }
     const ratio = contrastRatio(pair.fg, pair.bg);
-    if (ratio === null) {
-      issues.push(`${pair.name}: invalid color format`);
-      continue;
-    }
-
+    if (ratio === null) { issues.push(`${pair.name}: invalid color format`); continue; }
     if (ratio < pair.minRatio) {
       issues.push(`${pair.name}: contrast ratio ${ratio.toFixed(1)}:1 (need ${pair.minRatio}:1) — ${pair.fg} on ${pair.bg}`);
     }
   }
 
   if (issues.length > 0) {
-    return {
-      name: 'Contrast',
-      passed: false,
-      message: `Readability issues:\n  ${issues.join('\n  ')}`,
-    };
+    return { name: 'Contrast', passed: false, message: `Readability issues:\n  ${issues.join('\n  ')}` };
   }
-
-  return {
-    name: 'Contrast',
-    passed: true,
-    message: 'All text/background color pairs meet minimum contrast ratios',
-  };
+  return { name: 'Contrast', passed: true, message: 'All text/background color pairs meet minimum contrast ratios' };
 }
+
+// --- CSS contract ---
 
 function checkCssContract(css: string): StepResult {
   const missingCritical: string[] = [];
   const missingRecommended: string[] = [];
 
   for (const selector of CRITICAL_SELECTORS) {
-    if (!css.includes(selector)) {
-      missingCritical.push(selector);
-    }
+    if (!css.includes(selector)) missingCritical.push(selector);
   }
-
   for (const selector of RECOMMENDED_SELECTORS) {
-    if (!css.includes(selector)) {
-      missingRecommended.push(selector);
-    }
+    if (!css.includes(selector)) missingRecommended.push(selector);
   }
 
-  // Check both themes have sufficient coverage
   const techCount = (css.match(/\[data-theme="tech"\]/g) || []).length;
   const trekCount = (css.match(/\[data-theme="trek"\]/g) || []).length;
+  if (techCount < 8) missingCritical.push(`tech theme has only ${techCount} selectors (need 8+)`);
+  if (trekCount < 8) missingCritical.push(`trek theme has only ${trekCount} selectors (need 8+)`);
 
-  if (techCount < 8) {
-    missingCritical.push(`tech theme has only ${techCount} selectors (need 8+)`);
-  }
-  if (trekCount < 8) {
-    missingCritical.push(`trek theme has only ${trekCount} selectors (need 8+)`);
-  }
-
-  // Check @keyframes count
   const keyframesCount = (css.match(/@keyframes/g) || []).length;
-  if (keyframesCount < 2) {
-    missingCritical.push(`only ${keyframesCount} @keyframes (need 2+)`);
-  }
+  if (keyframesCount < 2) missingCritical.push(`only ${keyframesCount} @keyframes (need 2+)`);
 
   if (missingCritical.length > 0) {
-    return {
-      name: 'CSS Contract',
-      passed: false,
-      message: `Missing critical: ${missingCritical.join(', ')}`,
-    };
+    return { name: 'CSS Contract', passed: false, message: `Missing critical: ${missingCritical.join(', ')}` };
   }
 
-  const warnings = missingRecommended.length > 0
-    ? ` Warnings: missing ${missingRecommended.join(', ')}`
-    : '';
-
+  const warnings = missingRecommended.length > 0 ? ` Warnings: missing ${missingRecommended.join(', ')}` : '';
   return {
     name: 'CSS Contract',
     passed: true,
     message: `All critical selectors present. Tech: ${techCount}, Trek: ${trekCount}, Animations: ${keyframesCount}.${warnings}`,
   };
 }
+
+// --- Build check ---
 
 async function checkBuild(): Promise<StepResult> {
   try {
@@ -283,44 +265,32 @@ async function checkBuild(): Promise<StepResult> {
     if (!fs.existsSync(indexPath)) {
       return { name: 'Build', passed: false, message: `Build ran but dist/index.html not found.\nOutput: ${result.slice(-500)}` };
     }
-
     return { name: 'Build', passed: true, message: 'Build succeeded, dist/index.html exists' };
   } catch (error) {
     const output = (error as { stdout?: string; stderr?: string });
     const combined = (output.stdout || '') + '\n' + (output.stderr || '');
-    // Get the last 500 chars which usually contain the actual error
-    const tail = combined.slice(-500);
-    return { name: 'Build', passed: false, message: `Build failed:\n${tail}` };
+    return { name: 'Build', passed: false, message: `Build failed:\n${combined.slice(-500)}` };
   }
 }
 
+// --- Page render check (Playwright) ---
+
 async function checkPageRenders(): Promise<StepResult> {
+  let server: ChildProcess | null = null;
   try {
     const { chromium } = await import('playwright');
 
-    // Start a local server
-    const { spawn } = await import('child_process');
-    const server = spawn('npx', ['serve', 'dist', '-l', '4173', '--no-clipboard'], {
-      cwd: CONFIG.projectRoot,
-      stdio: 'pipe',
-    });
-
-    // Wait for server to be ready (poll until it responds)
-    const maxWait = 15_000;
-    const start = Date.now();
-    while (Date.now() - start < maxWait) {
-      try {
-        await fetch('http://localhost:4173/');
-        break;
-      } catch {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
+    server = startServer(4173);
+    const ready = await waitForServer(4173);
+    if (!ready) {
+      killServer(server);
+      return { name: 'Page Render', passed: false, message: 'Server failed to start on port 4173' };
     }
 
     const browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
     const errors: string[] = [];
-    const screenshotDir = path.join(CONFIG.testOutputDir);
+    const screenshotDir = CONFIG.testOutputDir;
     fs.mkdirSync(screenshotDir, { recursive: true });
 
     for (const pagePath of CONFIG.pagesToCheck) {
@@ -341,13 +311,9 @@ async function checkPageRenders(): Promise<StepResult> {
           continue;
         }
 
-        // Check for <main> element
         const hasMain = await page.$('main');
-        if (!hasMain) {
-          errors.push(`${pagePath}: missing <main> element`);
-        }
+        if (!hasMain) errors.push(`${pagePath}: missing <main> element`);
 
-        // Save screenshot
         const screenshotName = pagePath === '/' ? 'index' : pagePath.replace(/\//g, '_');
         await page.screenshot({
           path: path.join(screenshotDir, `${screenshotName}.png`),
@@ -365,25 +331,19 @@ async function checkPageRenders(): Promise<StepResult> {
     }
 
     await browser.close();
-    server.kill();
+    killServer(server);
 
     if (errors.length > 0) {
       return { name: 'Page Render', passed: false, message: errors.join('\n') };
     }
-
-    return {
-      name: 'Page Render',
-      passed: true,
-      message: `All ${CONFIG.pagesToCheck.length} pages rendered successfully`,
-    };
+    return { name: 'Page Render', passed: true, message: `All ${CONFIG.pagesToCheck.length} pages rendered successfully` };
   } catch (error) {
-    return {
-      name: 'Page Render',
-      passed: false,
-      message: `Playwright error: ${error instanceof Error ? error.message : String(error)}`,
-    };
+    killServer(server);
+    return { name: 'Page Render', passed: false, message: `Playwright error: ${error instanceof Error ? error.message : String(error)}` };
   }
 }
+
+// --- Visual sanity ---
 
 async function checkVisualSanity(): Promise<StepResult> {
   const screenshotDir = CONFIG.testOutputDir;
@@ -398,9 +358,7 @@ async function checkVisualSanity(): Promise<StepResult> {
 
   const issues: string[] = [];
   for (const file of screenshots) {
-    const filePath = path.join(screenshotDir, file);
-    const stats = fs.statSync(filePath);
-    // A blank page screenshot is typically very small (< 5KB)
+    const stats = fs.statSync(path.join(screenshotDir, file));
     if (stats.size < 5000) {
       issues.push(`${file}: suspiciously small (${stats.size} bytes) — may be blank`);
     }
@@ -409,37 +367,27 @@ async function checkVisualSanity(): Promise<StepResult> {
   if (issues.length > 0) {
     return { name: 'Visual Sanity', passed: false, message: issues.join('\n') };
   }
-
-  return {
-    name: 'Visual Sanity',
-    passed: true,
-    message: `${screenshots.length} screenshots look valid`,
-  };
+  return { name: 'Visual Sanity', passed: true, message: `${screenshots.length} screenshots look valid` };
 }
 
+// --- Accessibility ---
+
 async function checkAccessibility(): Promise<StepResult> {
+  let server: ChildProcess | null = null;
   try {
     const { chromium } = await import('playwright');
     const AxeBuilder = (await import('@axe-core/playwright')).default;
 
-    const { spawn } = await import('child_process');
-    const server = spawn('npx', ['serve', 'dist', '-l', '4174', '--no-clipboard'], {
-      cwd: CONFIG.projectRoot,
-      stdio: 'pipe',
-    });
-    const maxWait = 15_000;
-    const start = Date.now();
-    while (Date.now() - start < maxWait) {
-      try {
-        await fetch('http://localhost:4174/');
-        break;
-      } catch {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
+    server = startServer(4174);
+    const ready = await waitForServer(4174);
+    if (!ready) {
+      killServer(server);
+      return { name: 'Accessibility', passed: true, message: 'Skipped: server failed to start' };
     }
 
     const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage();
+    const context = await browser.newContext();
+    const page = await context.newPage();
     await page.goto('http://localhost:4174/', { waitUntil: 'networkidle', timeout: 15_000 });
 
     const results = await new AxeBuilder({ page })
@@ -447,7 +395,7 @@ async function checkAccessibility(): Promise<StepResult> {
       .analyze();
 
     await browser.close();
-    server.kill();
+    killServer(server);
 
     const criticalViolations = results.violations.filter(
       v => v.impact === 'critical' || v.impact === 'serious'
@@ -466,7 +414,7 @@ async function checkAccessibility(): Promise<StepResult> {
       message: `Passed. ${results.violations.length} minor issues, ${results.passes.length} rules passed`,
     };
   } catch (error) {
-    // Accessibility check failure is non-blocking
+    killServer(server);
     return {
       name: 'Accessibility',
       passed: true,
@@ -474,6 +422,8 @@ async function checkAccessibility(): Promise<StepResult> {
     };
   }
 }
+
+// --- Font check ---
 
 async function checkFonts(css: string): Promise<StepResult> {
   const fontMatch = css.match(/\/\*\s*FONTS:\s*(.+?)\s*\*\//);
@@ -488,9 +438,7 @@ async function checkFonts(css: string): Promise<StepResult> {
     const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}`;
     try {
       const response = await fetch(url);
-      if (!response.ok) {
-        issues.push(`${font}: Google Fonts returned ${response.status}`);
-      }
+      if (!response.ok) issues.push(`${font}: Google Fonts returned ${response.status}`);
     } catch {
       issues.push(`${font}: failed to reach Google Fonts`);
     }
@@ -499,35 +447,21 @@ async function checkFonts(css: string): Promise<StepResult> {
   if (issues.length > 0) {
     return { name: 'Font Check', passed: false, message: issues.join(', ') };
   }
-
   return { name: 'Font Check', passed: true, message: `Fonts verified: ${fonts.join(', ')}` };
 }
 
-/**
- * Validate that an archived design is fully viewable —
- * CSS loads correctly and the page isn't unstyled.
- * Called by the orchestrator AFTER archiving is complete and the site is rebuilt.
- */
+// --- Archive verification (called by orchestrator after archiving) ---
+
 export async function validateArchive(monthKey: string): Promise<StepResult> {
+  let server: ChildProcess | null = null;
   try {
     const { chromium } = await import('playwright');
-    const { spawn } = await import('child_process');
 
-    // Serve the full dist/ which includes public/archive/{monthKey}/
-    const server = spawn('npx', ['serve', 'dist', '-l', '4175', '--no-clipboard'], {
-      cwd: CONFIG.projectRoot,
-      stdio: 'pipe',
-    });
-
-    const maxWait = 15_000;
-    const start = Date.now();
-    while (Date.now() - start < maxWait) {
-      try {
-        await fetch('http://localhost:4175/');
-        break;
-      } catch {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
+    server = startServer(4175);
+    const ready = await waitForServer(4175);
+    if (!ready) {
+      killServer(server);
+      return { name: 'Archive Verification', passed: false, message: 'Server failed to start' };
     }
 
     const browser = await chromium.launch({ headless: true });
@@ -539,54 +473,38 @@ export async function validateArchive(monthKey: string): Promise<StepResult> {
 
     if (!response || response.status() !== 200) {
       await browser.close();
-      server.kill();
-      return {
-        name: 'Archive Verification',
-        passed: false,
-        message: `Archive page returned HTTP ${response?.status() || 'no response'}`,
-      };
+      killServer(server);
+      return { name: 'Archive Verification', passed: false, message: `Archive returned HTTP ${response?.status() || 'no response'}` };
     }
 
-    // Check that CSS loaded — verify the page has styled elements (not unstyled default)
-    // An unstyled page will have a white/default background on body
     const hasStyledNav = await page.$('.nav-bar');
-    const bodyBg = await page.evaluate(() => {
-      return window.getComputedStyle(document.body).backgroundColor;
-    });
+    const bodyBg = await page.evaluate(() => window.getComputedStyle(document.body).backgroundColor);
+    const stylesheetCount = await page.evaluate(() => document.querySelectorAll('link[rel="stylesheet"]').length);
 
-    // Check that stylesheets loaded (at least one link[rel=stylesheet] with loaded state)
-    const stylesheetCount = await page.evaluate(() => {
-      return document.querySelectorAll('link[rel="stylesheet"]').length;
-    });
-
-    // Take a screenshot of the archive for comparison
     const screenshotDir = CONFIG.testOutputDir;
     fs.mkdirSync(screenshotDir, { recursive: true });
-    await page.screenshot({
-      path: path.join(screenshotDir, `archive-${monthKey}.png`),
-      fullPage: false,
-    });
+    await page.screenshot({ path: path.join(screenshotDir, `archive-${monthKey}.png`), fullPage: false });
 
     await browser.close();
-    server.kill();
+    killServer(server);
 
-    // White background (rgb(255, 255, 255)) on a tech theme likely means CSS didn't load
     const isUnstyled = bodyBg === 'rgb(255, 255, 255)' || bodyBg === 'rgba(0, 0, 0, 0)';
 
     if (!hasStyledNav || isUnstyled) {
       return {
         name: 'Archive Verification',
         passed: false,
-        message: `Archive appears unstyled. Nav found: ${!!hasStyledNav}, Body BG: ${bodyBg}, Stylesheets: ${stylesheetCount}`,
+        message: `Archive appears unstyled. Nav: ${!!hasStyledNav}, BG: ${bodyBg}, Stylesheets: ${stylesheetCount}`,
       };
     }
 
     return {
       name: 'Archive Verification',
       passed: true,
-      message: `Archive ${monthKey} loads correctly. Body BG: ${bodyBg}, Stylesheets: ${stylesheetCount}`,
+      message: `Archive ${monthKey} loads correctly. BG: ${bodyBg}, Stylesheets: ${stylesheetCount}`,
     };
   } catch (error) {
+    killServer(server);
     return {
       name: 'Archive Verification',
       passed: false,
