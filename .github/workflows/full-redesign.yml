@@ -50,10 +50,10 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          claude --print \
+          claude -p "$(cat /tmp/rebuild-prompt.md)" \
+            --print \
             --dangerously-skip-permissions \
-            --max-turns 30 \
-            --prompt "$(cat /tmp/rebuild-prompt.md)"
+            --max-turns 30
 
       - name: Build final site
         run: npm run build
