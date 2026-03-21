@@ -146,7 +146,7 @@ async function main() {
 
       console.log(`\nRedesign complete: ${trend.name}`);
       console.log(`Primary color: ${result.manifest.primaryColor}`);
-      return;
+      process.exit(0);
 
     } catch (error) {
       console.error(`\nError during attempt ${attempt}:`, error instanceof Error ? error.message : error);
