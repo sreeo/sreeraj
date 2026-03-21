@@ -1,0 +1,20 @@
+{
+  "month": "2026-03",
+  "trend": "ikea",
+  "trendId": "ikea",
+  "description": "Design style: ikea. Interpret this freely as a web design aesthetic and create a complete, cohesive design system around it.",
+  "primaryColor": "#0058a3",
+  "accentColor": "#fefefe",
+  "fonts": [
+    "Inter",
+    "JetBrains Mono",
+    "Lora",
+    "Noto Sans",
+    "Source Sans Pro"
+  ],
+  "keyFeatures": [
+    "Use your expertise to define the ideal layout structure for a \"ikea\" design style",
+    "Use your expertise to define the ideal typography system for a \"ikea\" design style",
+    "Use your expertise to define the ideal interactions and animations for a \"ikea\" design style"
+  ]
+}
