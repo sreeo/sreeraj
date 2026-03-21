@@ -44,8 +44,18 @@ async function main() {
       if (found) {
         trend = found;
       } else {
-        console.error(`Unknown trend: ${FORCE_TREND}. Available: ${TRENDS.map(t => t.id).join(', ')}`);
-        process.exit(1);
+        // Not in registry — treat as a freeform prompt for Claude
+        console.log(`"${FORCE_TREND}" not in registry, using as freeform trend prompt...`);
+        trend = {
+          id: FORCE_TREND.toLowerCase().replace(/\s+/g, '-'),
+          name: FORCE_TREND,
+          description: `Design style: ${FORCE_TREND}. Interpret this freely as a web design aesthetic and create a complete, cohesive design system around it.`,
+          structure: `Use your expertise to define the ideal layout structure for a "${FORCE_TREND}" design style.`,
+          typography: `Use your expertise to define the ideal typography system for a "${FORCE_TREND}" design style.`,
+          spacing: `Use your expertise to define the ideal spacing and rhythm for a "${FORCE_TREND}" design style.`,
+          interactions: `Use your expertise to define the ideal interactions and animations for a "${FORCE_TREND}" design style.`,
+          references: `Research and apply best practices for "${FORCE_TREND}" style web design.`,
+        };
       }
     } else if (attempt === 1) {
       // First attempt: use web search + Claude to discover a trend
