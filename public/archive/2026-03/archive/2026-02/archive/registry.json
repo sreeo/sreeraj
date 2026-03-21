@@ -1,13 +1,6 @@
 {
   "archives": [
     {
-      "month": "2026-03",
-      "trend": "ikea",
-      "description": "Design style: ikea. Interpret this freely as a web design aesthetic and create a complete, cohesive design system around it.",
-      "primaryColor": "#0058a3",
-      "deployedAt": "2026-03-21T14:29:15.801Z"
-    },
-    {
       "month": "2026-02",
       "trend": "Cutting-Edge Terminal",
       "description": "Dark terminal aesthetic with cyan accents, monospace git-log timeline, WebGL mountains, and dual tech/trek theming",

@@ -8,6 +8,15 @@
       "timestamp": "2026-03-21T11:35:46.512Z",
       "description": "Clean lines, organic curves, and bold graphic elements from the 1950s-60s design era. Think Eames, Saul Bass, and Herb Lubalin. Geometric yet warm, structured yet playful.",
       "primaryColor": "#ff6b35"
+    },
+    {
+      "month": "2026-03",
+      "trendId": "ikea",
+      "trendName": "ikea",
+      "status": "success",
+      "timestamp": "2026-03-21T14:29:23.033Z",
+      "description": "Design style: ikea. Interpret this freely as a web design aesthetic and create a complete, cohesive design system around it.",
+      "primaryColor": "#0058a3"
     }
   ]
 }
