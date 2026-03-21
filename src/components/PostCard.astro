@@ -1,63 +1,59 @@
 ---
 import FormattedDate from './FormattedDate.astro';
 import TagList from './TagList.astro';
-import CairnIcon from './CairnIcon.astro';
 
 interface Props {
   title: string;
   slug: string;
-  description: string;
+  description?: string;
   pubDate: Date;
   featureImage?: string;
   tags?: string[];
   readingTime?: number;
-  variant?: 'tech' | 'trek';
+  variant?: 'default' | 'trek';
 }
 
-const { title, slug, description, pubDate, featureImage, tags = [], readingTime, variant = 'tech' } = Astro.props;
+const {
+  title,
+  slug,
+  description = '',
+  pubDate,
+  featureImage = '',
+  tags = [],
+  readingTime = 1,
+  variant = 'default',
+} = Astro.props;
+
 const isTrek = variant === 'trek';
 ---
 
-<article class:list={['post-card group', isTrek && 'trek-card']}>
-  <a href={`/${slug}/`} class="block">
-    <div class:list={['post-card-visual flex items-end gap-4', !isTrek && 'mb-3', isTrek && 'overflow-hidden']}>
-      {featureImage ? (
-        <img
-          src={featureImage}
-          alt={title}
-          class:list={[
-            'post-card-image w-full object-cover transition-transform duration-300 group-hover:scale-105',
-            !isTrek && 'h-40 rounded-lg',
-            isTrek && 'h-52',
-          ]}
-          loading="lazy"
-        />
-      ) : (
-        <div class:list={[
-          'flex items-center justify-center w-full',
-          !isTrek && 'h-40 rounded-lg',
-          isTrek && 'h-52',
-        ]} style={`background: ${isTrek ? 'rgba(217,119,6,0.05)' : 'rgba(34,211,238,0.05)'};`}>
-          <CairnIcon title={title} variant={variant} />
-        </div>
-      )}
-    </div>
-    <div class:list={[isTrek && 'post-card-body']}>
-      <h3 class:list={['post-card-title text-lg mb-1 transition-colors', !isTrek && 'font-semibold']}>
-        {title}
-      </h3>
-      <div class="post-card-meta flex items-center gap-2 mb-2">
-        <FormattedDate date={pubDate} />
-        {readingTime && <span>· {readingTime} min read</span>}
-      </div>
-      {description && (
-        <p class="post-card-description text-sm line-clamp-2">{description}</p>
-      )}
-    </div>
-  </a>
-  {tags.length > 0 && (
-    <div class:list={['mt-2', isTrek && 'px-5 pb-4']}>
-      <TagList tags={tags} />
-    </div>
+<a href={`/${slug}/`} class={`post-card ${isTrek ? 'post-card-trek' : ''}`}>
+  {featureImage && (
+    <img
+      src={featureImage}
+      alt={title}
+      class="post-card-image"
+      loading="lazy"
+      decoding="async"
+    />
   )}
-</article>
+
+  <div class="post-card-body">
+    {tags.length > 0 && (
+      <TagList tags={tags.slice(0, 3)} isTrek={isTrek} />
+    )}
+
+    <div class="post-card-title">{title}</div>
+
+    {description && (
+      <div class="post-card-desc">{description}</div>
+    )}
+
+    <div class="post-card-meta">
+      <span class="post-card-date">
+        <FormattedDate date={pubDate} />
+      </span>
+      <span class="post-card-reading-time">{readingTime} min read</span>
+    </div>
+  </div>
+</a>
