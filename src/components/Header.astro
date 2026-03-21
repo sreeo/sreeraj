@@ -1,186 +1,61 @@
 ---
-interface Props {
-  theme?: 'tech' | 'trek';
-}
-
-const { theme = 'tech' } = Astro.props;
+const pathname = Astro.url.pathname;
 
 const navItems = [
-  { label: 'Home', href: '/', icon: null },
-  { label: 'About', href: '/about/', icon: null },
-  { label: 'DevOps', href: '/devops/', icon: 'led' },
-  { label: 'Treks', href: '/treks/', icon: 'flags' },
-  { label: 'Programming', href: '/programming/', icon: 'brackets' },
-  { label: 'Postgres', href: '/postgres/', icon: 'elephant' },
-  { label: 'Archive', href: '/archive/', icon: null },
+  { label: 'About', href: '/about/' },
+  { label: 'DevOps', href: '/devops/' },
+  { label: 'Programming', href: '/programming/' },
+  { label: 'PostgreSQL', href: '/postgres/' },
+  { label: 'Treks', href: '/treks/' },
+  { label: 'Archive', href: '/archive/' },
 ];
 
-const currentPath = Astro.url.pathname;
+function isActive(href: string) {
+  if (href === '/') return pathname === '/';
+  return pathname.startsWith(href);
+}
 ---
 
-<header class="nav-bar sticky top-0 z-50">
-  <nav class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-    <a href="/" class="nav-brand text-xl">
-      sreeraj.dev
-    </a>
+<header class="nav">
+  <div class="container">
+    <nav class="nav-inner">
+      <a href="/" class="nav-logo">sreeraj.dev</a>
 
-    <button
-      id="menu-toggle"
-      class="md:hidden p-2 nav-link"
-      aria-label="Toggle menu"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
+      <ul class="nav-links">
+        {navItems.map((item) => (
+          <li>
+            <a href={item.href} class={isActive(item.href) ? 'active' : ''}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
 
-    <ul class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <button class="nav-mobile-btn" id="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="4" width="14" height="1.5" rx="0.75" fill="currentColor"/>
+          <rect x="2" y="8.25" width="14" height="1.5" rx="0.75" fill="currentColor"/>
+          <rect x="2" y="12.5" width="14" height="1.5" rx="0.75" fill="currentColor"/>
+        </svg>
+      </button>
+    </nav>
+
+    <div class="nav-mobile-menu" id="mobile-menu">
+      <a href="/">Home</a>
       {navItems.map((item) => (
-        <li>
-          <a
-            href={item.href}
-            class:list={[
-              'nav-link transition-colors inline-flex items-center gap-1.5',
-              currentPath === item.href && 'active',
-            ]}
-          >
-            {item.icon === 'led' && (
-              <span class="signal-led" aria-hidden="true"></span>
-            )}
-            {item.icon === 'flags' && (
-              <span class="signal-flags" aria-hidden="true">
-                <span class="sf sf-1"></span>
-                <span class="sf sf-2"></span>
-                <span class="sf sf-3"></span>
-                <span class="sf sf-4"></span>
-                <span class="sf sf-5"></span>
-              </span>
-            )}
-            {item.icon === 'brackets' && (
-              <span class="signal-brackets" aria-hidden="true">{`{}`}</span>
-            )}
-            {item.icon === 'elephant' && (
-              <span class="signal-elephant" aria-hidden="true">🐘</span>
-            )}
-            {item.label}
-          </a>
-        </li>
+        <a href={item.href}>{item.label}</a>
       ))}
-    </ul>
-  </nav>
-
-  <ul id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-1">
-    {navItems.map((item) => (
-      <li>
-        <a
-          href={item.href}
-          class:list={[
-            'block py-2 text-sm font-medium nav-link transition-colors inline-flex items-center gap-1.5',
-            currentPath === item.href && 'active',
-          ]}
-        >
-          {item.icon === 'led' && (
-            <span class="signal-led" aria-hidden="true"></span>
-          )}
-          {item.icon === 'flags' && (
-            <span class="signal-flags" aria-hidden="true">
-              <span class="sf sf-1"></span>
-              <span class="sf sf-2"></span>
-              <span class="sf sf-3"></span>
-              <span class="sf sf-4"></span>
-              <span class="sf sf-5"></span>
-            </span>
-          )}
-          {item.icon === 'brackets' && (
-            <span class="signal-brackets" aria-hidden="true">{`{}`}</span>
-          )}
-          {item.icon === 'elephant' && (
-            <span class="signal-elephant" aria-hidden="true">🐘</span>
-          )}
-          {item.label}
-        </a>
-      </li>
-    ))}
-  </ul>
+    </div>
+  </div>
 </header>
 
-<style>
-  /* Signal LED - DevOps */
-  .signal-led {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #22d3ee;
-    animation: led-blink 2s ease infinite;
-  }
-  @keyframes led-blink {
-    0%, 100% { opacity: 1; box-shadow: 0 0 4px #22d3ee; }
-    50% { opacity: 0.3; box-shadow: none; }
-  }
-
-  /* Prayer Flags - Treks */
-  .signal-flags {
-    display: inline-flex;
-    gap: 1px;
-    align-items: flex-start;
-  }
-  .sf {
-    display: inline-block;
-    width: 3px;
-    height: 8px;
-    transform-origin: top center;
-    animation: flag-wave 1.5s ease-in-out infinite;
-  }
-  .sf-1 { background: #3b82f6; animation-delay: 0s; }
-  .sf-2 { background: #ffffff; animation-delay: 0.15s; }
-  .sf-3 { background: #ef4444; animation-delay: 0.3s; }
-  .sf-4 { background: #22c55e; animation-delay: 0.45s; }
-  .sf-5 { background: #eab308; animation-delay: 0.6s; }
-  @keyframes flag-wave {
-    0%, 100% { transform: skewX(0deg); }
-    25% { transform: skewX(8deg); }
-    75% { transform: skewX(-5deg); }
-  }
-
-  /* Brackets - Programming */
-  .signal-brackets {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    color: #cc5de8;
-    animation: bracket-pulse 2s ease infinite;
-  }
-  @keyframes bracket-pulse {
-    0%, 100% { opacity: 1; letter-spacing: 0px; }
-    50% { opacity: 0.6; letter-spacing: 2px; }
-  }
-
-  /* Elephant - Postgres */
-  .signal-elephant {
-    font-size: 11px;
-    line-height: 1;
-    display: inline-block;
-    animation: elephant-sway 3s ease-in-out infinite;
-  }
-  @keyframes elephant-sway {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(5deg); }
-    75% { transform: rotate(-5deg); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .signal-led, .sf, .signal-brackets, .signal-elephant {
-      animation: none;
-    }
-    .signal-led { opacity: 1; box-shadow: 0 0 4px #22d3ee; }
-  }
-</style>
-
 <script>
-  const toggle = document.getElementById('menu-toggle');
+  const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
-  toggle?.addEventListener('click', () => {
-    menu?.classList.toggle('hidden');
+
+  btn?.addEventListener('click', () => {
+    const isOpen = menu?.classList.contains('open');
+    menu?.classList.toggle('open', !isOpen);
+    btn.setAttribute('aria-expanded', String(!isOpen));
   });
 </script>
