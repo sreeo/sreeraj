@@ -13,14 +13,25 @@ on:
         options:
           - 'false'
           - 'true'
+      preview:
+        description: 'Deploy to preview URL instead of production'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
       trend:
-        description: 'Force specific trend (e.g., cyberpunk, neo-brutalism)'
+        description: 'Force specific trend (e.g., editorial-magazine, swiss-international)'
         required: false
         default: ''
         type: string
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+  pull-requests: write
 
 jobs:
   redesign:
@@ -60,16 +71,71 @@ jobs:
           fi
           npx tsx redesign-orchestrator.ts $ARGS
 
-      - name: Upload test output
+      - name: Upload test output (screenshots)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: redesign-output
+          name: redesign-screenshots
           path: automation/test-output/
           retention-days: 30
 
-      - name: Commit and push
+      - name: Build final site
         if: inputs.dry_run != 'true'
+        run: npm run build
+
+      - name: Upload built site
+        if: inputs.dry_run != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: redesign-site-preview
+          path: dist/
+          retention-days: 7
+
+      # --- Preview mode: push to a branch and create a PR ---
+      - name: Deploy preview
+        if: inputs.preview == 'true' && inputs.dry_run != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          TREND_NAME="unknown"
+          if [ -f automation/history/current-trend.txt ]; then
+            TREND_NAME=$(cat automation/history/current-trend.txt)
+          fi
+
+          BRANCH="preview/redesign-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "Preview: Monthly redesign — ${TREND_NAME}"
+          git push -u origin "$BRANCH"
+
+          # Create a PR so you can review the diff
+          gh pr create \
+            --title "Preview: Monthly redesign — ${TREND_NAME}" \
+            --body "$(cat <<PREOF
+          ## Monthly Redesign Preview
+
+          **Design:** ${TREND_NAME}
+          **Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          This is a preview of the automated monthly redesign. Review the changes below and check the deploy preview.
+
+          ### How to review
+          1. Check the deploy preview URL above
+          2. Review the CSS diff in the Files tab
+          3. Check the screenshots in the [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          If it looks good, merge this PR to deploy to production.
+          PREOF
+          )" \
+            --head "$BRANCH" \
+            --base main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- Production mode: commit and push to main ---
+      - name: Commit and push to production
+        if: inputs.preview != 'true' && inputs.dry_run != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
