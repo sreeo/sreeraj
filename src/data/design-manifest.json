@@ -1,0 +1,6 @@
+{
+  "trend": "Bento Editorial Grid",
+  "description": "Clean bento-grid homepage with modular cards of varying sizes, combined with editorial minimalism on article pages. Warm off-white background, deep blue tech accent, forest green trek accent. Inter for UI, Lora serif for long-form reading, JetBrains Mono for code.",
+  "primaryColor": "#2563EB",
+  "fonts": ["Inter", "Lora", "JetBrains Mono"]
+}

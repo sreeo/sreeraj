@@ -2,8 +2,6 @@
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import MountainSkyline from '../components/MountainSkyline.astro';
-import FlowField from '../components/FlowField.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -11,22 +9,24 @@ interface Props {
   description?: string;
   image?: string;
   theme?: 'tech' | 'trek';
-  showMountain?: boolean;
 }
 
-const { title, description, image, theme = 'tech', showMountain = true } = Astro.props;
+const {
+  title,
+  description,
+  image,
+  theme = 'tech',
+} = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" data-theme={theme}>
+<html lang="en" class={`theme-${theme}`}>
   <head>
     <BaseHead title={title} description={description} image={image} />
   </head>
-  <body class="min-h-screen flex flex-col">
-    <FlowField theme={theme} />
+  <body style="background-color: var(--color-bg); color: var(--color-text);">
     <Header theme={theme} />
-    {showMountain && <MountainSkyline />}
-    <main class="flex-1 max-w-4xl mx-auto px-4 py-8 w-full relative z-10">
+    <main class="flex-1">
       <slot />
     </main>
     <Footer />

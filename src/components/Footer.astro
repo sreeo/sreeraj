@@ -2,13 +2,33 @@
 const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer mt-16">
-  <div class="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-    <p>&copy; {year} Sreeraj Rajan</p>
-    <nav class="flex items-center gap-6">
-      <a href="/contact/" class="transition-colors">Contact</a>
-      <a href="/rss.xml" class="transition-colors">RSS</a>
-      <a href="/tags/" class="transition-colors">Tags</a>
-    </nav>
+<footer class="mt-auto border-t border-[var(--color-border)] bg-[var(--color-surface)]"
+  style="--color-border: #E5E7EB; --color-surface: #FFFFFF;"
+>
+  <div class="container py-8">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <p class="text-sm font-semibold text-[var(--color-text)]" style="--color-text: #111827;">sreeraj.dev</p>
+        <p class="text-xs text-[var(--color-text-muted)] mt-0.5" style="--color-text-muted: #6B7280;">
+          DevOps · Programming · Treks
+        </p>
+      </div>
+
+      <nav class="flex flex-wrap gap-4" aria-label="Footer navigation">
+        <a href="/devops/" class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors" style="--color-text-muted: #6B7280; --color-text: #111827;">DevOps</a>
+        <a href="/programming/" class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors" style="--color-text-muted: #6B7280; --color-text: #111827;">Programming</a>
+        <a href="/postgres/" class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors" style="--color-text-muted: #6B7280; --color-text: #111827;">Postgres</a>
+        <a href="/treks/" class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors" style="--color-text-muted: #6B7280; --color-text: #111827;">Treks</a>
+        <a href="/archive/" class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors" style="--color-text-muted: #6B7280; --color-text: #111827;">Archive</a>
+        <a href="/about/" class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors" style="--color-text-muted: #6B7280; --color-text: #111827;">About</a>
+        <a href="/rss.xml" class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors" style="--color-text-muted: #6B7280; --color-text: #111827;">RSS</a>
+      </nav>
+    </div>
+
+    <div class="mt-6 pt-6 border-t border-[var(--color-border)]" style="--color-border: #E5E7EB;">
+      <p class="text-xs text-[var(--color-text-subtle)]" style="--color-text-subtle: #9CA3AF;">
+        &copy; {year} Sreeraj Rajan. Built with <a href="https://astro.build" class="hover:underline">Astro</a>.
+      </p>
+    </div>
   </div>
 </footer>

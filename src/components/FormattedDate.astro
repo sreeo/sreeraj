@@ -1,15 +1,26 @@
 ---
 interface Props {
   date: Date;
+  format?: 'short' | 'long' | 'year';
 }
 
-const { date } = Astro.props;
----
+const { date, format = 'long' } = Astro.props;
 
-<time datetime={date.toISOString()}>
-  {date.toLocaleDateString('en-US', {
+const formatted = (() => {
+  if (format === 'year') return date.getFullYear().toString();
+  if (format === 'short') {
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+  return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  })}
-</time>
+  });
+})();
+---
+
+<time datetime={date.toISOString()}>{formatted}</time>
