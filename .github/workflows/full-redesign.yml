@@ -67,13 +67,16 @@ jobs:
           npx tsx -e "
             import { validateDesign } from './validate-design.js';
             import fs from 'fs';
-            const css = fs.readFileSync('../src/styles/global.css', 'utf-8');
-            const result = await validateDesign(css);
-            for (const step of result.steps) {
-              const icon = step.passed ? 'PASS' : 'FAIL';
-              console.log('[' + icon + '] ' + step.name + ': ' + step.message);
+            async function main() {
+              const css = fs.readFileSync('../src/styles/global.css', 'utf-8');
+              const result = await validateDesign(css);
+              for (const step of result.steps) {
+                const icon = step.passed ? 'PASS' : 'FAIL';
+                console.log('[' + icon + '] ' + step.name + ': ' + step.message);
+              }
+              process.exit(0);
             }
-            process.exit(0);
+            main();
           "
 
       - name: Upload screenshots
