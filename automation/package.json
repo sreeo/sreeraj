@@ -1,0 +1,19 @@
+{
+  "name": "sreeraj-dev-redesign-automation",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Automated monthly website redesign system for sreeraj.dev",
+  "scripts": {
+    "redesign": "tsx redesign-orchestrator.ts",
+    "redesign:dry": "tsx redesign-orchestrator.ts --dry-run",
+    "generate": "tsx design-generator.ts",
+    "validate": "tsx validate-design.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@axe-core/playwright": "^4.10.0",
+    "playwright": "^1.49.0",
+    "serve": "^14.2.4",
+    "tsx": "^4.19.0"
+  }
+}

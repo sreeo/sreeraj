@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+import registryData from '../../../public/archive/registry.json';
+
+const archives = registryData.archives || [];
+---
+
+<BaseLayout title="Design Archive — sreeraj.dev" theme="tech">
+  <h1 class="page-title text-3xl mb-2">Design Archive</h1>
+  <p class="page-description mb-12">
+    This site gets a new design every month. Browse previous versions below.
+  </p>
+
+  {archives.length === 0 ? (
+    <p class="text-center" style="color: var(--color-tech-text-muted);">
+      No archives yet. The first archived design will appear here next month.
+    </p>
+  ) : (
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {archives.map((entry: { month: string; trend: string; description: string; primaryColor: string; deployedAt: string }) => {
+        const [year, month] = entry.month.split('-');
+        const monthName = new Date(Number(year), Number(month) - 1).toLocaleString('en', { month: 'long' });
+
+        return (
+          <a
+            href={`/archive/${entry.month}/`}
+            class="archive-card post-card block"
+          >
+            <div
+              class="archive-card-swatch"
+              style={`background-color: ${entry.primaryColor};`}
+            />
+            <div class="post-card-body p-5">
+              <div class="post-card-meta mb-1">
+                {monthName} {year}
+              </div>
+              <h2 class="post-card-title text-lg mb-2">
+                {entry.trend}
+              </h2>
+              <p class="post-card-description text-sm">
+                {entry.description}
+              </p>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  )}
+</BaseLayout>
+
+<style>
+  .archive-card-swatch {
+    height: 8px;
+    width: 100%;
+  }
+</style>
