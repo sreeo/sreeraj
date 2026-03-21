@@ -1,0 +1,20 @@
+{
+  "month": "2026-03",
+  "trend": "Art Deco",
+  "trendId": "art-deco",
+  "description": "The roaring 20s design language. Geometric symmetry, gold accents on dark backgrounds, ornamental borders, luxury typography. Gatsby-era opulence meets modern web.",
+  "primaryColor": "#d4af37",
+  "accentColor": "#1a1a1a",
+  "fonts": [
+    "Inter",
+    "JetBrains Mono",
+    "Lora",
+    "Playfair Display",
+    "Cinzel"
+  ],
+  "keyFeatures": [
+    "Symmetrical, centered layouts",
+    "Geometric serif or display fonts for headings",
+    "Elegant reveals — elements that fan open or step in geometrically"
+  ]
+}

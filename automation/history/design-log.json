@@ -8,6 +8,15 @@
       "timestamp": "2026-03-21T11:35:46.512Z",
       "description": "Clean lines, organic curves, and bold graphic elements from the 1950s-60s design era. Think Eames, Saul Bass, and Herb Lubalin. Geometric yet warm, structured yet playful.",
       "primaryColor": "#ff6b35"
+    },
+    {
+      "month": "2026-03",
+      "trendId": "art-deco",
+      "trendName": "Art Deco",
+      "status": "success",
+      "timestamp": "2026-03-21T13:08:05.649Z",
+      "description": "The roaring 20s design language. Geometric symmetry, gold accents on dark backgrounds, ornamental borders, luxury typography. Gatsby-era opulence meets modern web.",
+      "primaryColor": "#d4af37"
     }
   ]
 }
