@@ -6,6 +6,13 @@
       "description": "Dark terminal aesthetic with cyan accents, monospace git-log timeline, WebGL mountains, and dual tech/trek theming",
       "primaryColor": "#22d3ee",
       "deployedAt": "2026-02-28T00:00:00Z"
+    },
+    {
+      "month": "2026-03",
+      "trend": "Bento Editorial Grid",
+      "description": "Clean bento-grid homepage with modular cards, editorial minimalism on article pages. Warm off-white background, deep blue tech accent, forest green trek accent, Inter + Lora typography.",
+      "primaryColor": "#2563EB",
+      "deployedAt": "2026-03-21T00:00:00Z"
     }
   ]
 }

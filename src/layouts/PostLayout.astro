@@ -2,9 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import TagList from '../components/TagList.astro';
-import WeatherAtmosphere from '../components/WeatherAtmosphere.astro';
-import TrekStatsBar from '../components/TrekStatsBar.astro';
-import ElevationProgress from '../components/ElevationProgress.astro';
+import { getThemeForTags } from '../utils/theme';
 
 interface TrekStats {
   elevation?: string;
@@ -26,107 +24,197 @@ interface Props {
   tags?: string[];
   author?: string;
   readingTime?: number;
-  theme?: 'tech' | 'trek';
-  prevPost?: { slug: string; title: string } | null;
-  nextPost?: { slug: string; title: string } | null;
   trekStats?: TrekStats;
+  prevPost?: { title: string; slug: string } | null;
+  nextPost?: { title: string; slug: string } | null;
 }
 
 const {
   title,
-  description,
+  description = '',
   pubDate,
   updatedDate,
-  featureImage,
+  featureImage = '',
   tags = [],
-  author,
-  readingTime,
-  theme = 'tech',
+  author = 'Sreeraj',
+  readingTime = 1,
+  trekStats,
   prevPost,
   nextPost,
-  trekStats,
 } = Astro.props;
 
+const theme = getThemeForTags(tags);
+const accentColor = theme === 'trek' ? 'var(--color-trek)' : 'var(--color-tech)';
 const isTrek = theme === 'trek';
+
+// Elevation percentage for progress bar
+let elevPercent = 0;
+if (trekStats?.startAlt && trekStats?.peakAlt) {
+  const range = trekStats.peakAlt - trekStats.startAlt;
+  elevPercent = Math.min(100, Math.round((range / trekStats.peakAlt) * 100));
+}
 ---
 
 <BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage} theme={theme}>
-  {isTrek && <WeatherAtmosphere />}
-  {isTrek && trekStats && (
-    <ElevationProgress
-      startAlt={trekStats.startAlt || 1800}
-      peakAlt={trekStats.peakAlt || 4000}
-    />
-  )}
+  <!-- Reading progress bar -->
+  <div id="reading-progress"></div>
 
-  <article class:list={["max-w-[720px] mx-auto relative z-10", isTrek && "trek-journal"]}>
-    {featureImage && (
-      <div class:list={[isTrek ? "trek-hero-wrap" : ""]}>
-        <img
-          src={featureImage}
-          alt={title}
-          class:list={["post-hero-image w-full", isTrek ? "trek-hero" : "mb-6"]}
-        />
-        {isTrek && (
-          <div class="trek-hero-overlay">
-            <span class="trek-hero-tag">Field Journal</span>
-          </div>
-        )}
+  <article class="py-8 sm:py-12">
+    <div class="container">
+      <!-- Back link -->
+      <div class="mb-6 sm:mb-8">
+        <a
+          href="javascript:history.back()"
+          class="inline-flex items-center gap-1.5 text-sm font-medium hover:opacity-80 transition-opacity"
+          style={`color: ${accentColor}`}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15,18 9,12 15,6"/>
+          </svg>
+          Back
+        </a>
       </div>
-    )}
 
-    <header class="mb-8">
-      <h1 class="post-header-title text-3xl sm:text-4xl mb-3">{title}</h1>
-      <div class="post-header-meta flex flex-wrap items-center gap-3">
-        {author && <span>{author}</span>}
-        <span>&middot;</span>
-        <FormattedDate date={pubDate} />
-        {readingTime && (
-          <>
-            <span>&middot;</span>
-            <span>{readingTime} min read</span>
-          </>
-        )}
-      </div>
-      {updatedDate && updatedDate.getTime() !== pubDate.getTime() && (
-        <p class="post-header-meta mt-1 opacity-60">
-          Updated <FormattedDate date={updatedDate} />
-        </p>
-      )}
-      {tags.length > 0 && (
-        <div class="mt-3">
+      <!-- Header -->
+      <header class="mb-8 sm:mb-10 max-w-3xl">
+        <div class="mb-3">
           <TagList tags={tags} />
         </div>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-[var(--color-text)] mb-4" style="--color-text: #111827; font-family: var(--font-sans);">
+          {title}
+        </h1>
+
+        {description && (
+          <p class="text-lg text-[var(--color-text-muted)] leading-relaxed" style="--color-text-muted: #6B7280;">
+            {description}
+          </p>
+        )}
+
+        <div class="flex flex-wrap items-center gap-3 mt-4 text-sm text-[var(--color-text-subtle)]" style="--color-text-subtle: #9CA3AF; font-family: var(--font-sans);">
+          <span>By <strong class="text-[var(--color-text-muted)]" style="--color-text-muted: #6B7280; font-weight: 600;">{author}</strong></span>
+          <span>·</span>
+          <FormattedDate date={pubDate} />
+          {updatedDate && (
+            <>
+              <span>·</span>
+              <span>Updated <FormattedDate date={updatedDate} format="short" /></span>
+            </>
+          )}
+          <span>·</span>
+          <span>{readingTime} min read</span>
+        </div>
+      </header>
+
+      <!-- Feature image -->
+      {featureImage && (
+        <div class="mb-8 sm:mb-10 rounded-xl overflow-hidden max-w-3xl bg-[var(--color-border-subtle)]" style="--color-border-subtle: #F3F4F6;">
+          <img
+            src={featureImage}
+            alt={title}
+            class="w-full object-cover max-h-[480px]"
+            loading="eager"
+          />
+        </div>
       )}
+
+      <!-- Trek Stats -->
       {isTrek && trekStats && (
-        <TrekStatsBar
-          elevation={trekStats.elevation}
-          distance={trekStats.distance}
-          duration={trekStats.duration}
-          difficulty={trekStats.difficulty}
-          basecamp={trekStats.basecamp}
-          season={trekStats.season}
-        />
+        <div class="max-w-3xl mb-2">
+          <div class="trek-stats">
+            {trekStats.elevation && (
+              <div class="trek-stat-item">
+                <div class="trek-stat-label">Max Elevation</div>
+                <div class="trek-stat-value">{trekStats.elevation}</div>
+              </div>
+            )}
+            {trekStats.distance && (
+              <div class="trek-stat-item">
+                <div class="trek-stat-label">Distance</div>
+                <div class="trek-stat-value">{trekStats.distance}</div>
+              </div>
+            )}
+            {trekStats.duration && (
+              <div class="trek-stat-item">
+                <div class="trek-stat-label">Duration</div>
+                <div class="trek-stat-value">{trekStats.duration}</div>
+              </div>
+            )}
+            {trekStats.difficulty && (
+              <div class="trek-stat-item">
+                <div class="trek-stat-label">Difficulty</div>
+                <div class="trek-stat-value">{trekStats.difficulty}</div>
+              </div>
+            )}
+            {trekStats.basecamp && (
+              <div class="trek-stat-item">
+                <div class="trek-stat-label">Base Camp</div>
+                <div class="trek-stat-value">{trekStats.basecamp}</div>
+              </div>
+            )}
+            {trekStats.season && (
+              <div class="trek-stat-item">
+                <div class="trek-stat-label">Season</div>
+                <div class="trek-stat-value">{trekStats.season}</div>
+              </div>
+            )}
+          </div>
+
+          {trekStats.startAlt && trekStats.peakAlt && (
+            <div class="elev-bar">
+              <span class="font-semibold whitespace-nowrap">{trekStats.startAlt}m</span>
+              <div class="elev-track">
+                <div class="elev-fill" style={`width: ${elevPercent}%`}></div>
+              </div>
+              <span class="font-semibold whitespace-nowrap">{trekStats.peakAlt}m</span>
+            </div>
+          )}
+        </div>
       )}
-    </header>
 
-    <div class:list={["prose", isTrek && "trek-prose"]}>
-      <slot />
+      <!-- Article body -->
+      <div class="prose max-w-3xl">
+        <slot />
+      </div>
+
+      <!-- Prev / Next -->
+      {(prevPost || nextPost) && (
+        <div class="max-w-3xl">
+          <div class="post-nav">
+            {prevPost ? (
+              <a href={`/${prevPost.slug}/`} class="post-nav-item">
+                <div class="text-xs font-semibold text-[var(--color-text-subtle)] mb-1 uppercase tracking-wide" style="--color-text-subtle: #9CA3AF;">← Previous</div>
+                <div class="text-sm font-medium text-[var(--color-text)] line-clamp-2" style="--color-text: #111827;">{prevPost.title}</div>
+              </a>
+            ) : (
+              <div></div>
+            )}
+            {nextPost ? (
+              <a href={`/${nextPost.slug}/`} class="post-nav-item text-right">
+                <div class="text-xs font-semibold text-[var(--color-text-subtle)] mb-1 uppercase tracking-wide" style="--color-text-subtle: #9CA3AF;">Next →</div>
+                <div class="text-sm font-medium text-[var(--color-text)] line-clamp-2" style="--color-text: #111827;">{nextPost.title}</div>
+              </a>
+            ) : (
+              <div></div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
-
-    {(prevPost || nextPost) && (
-      <nav class="mt-12 pt-8 post-nav-border border-t flex justify-between gap-4">
-        {prevPost ? (
-          <a href={`/${prevPost.slug}/`} class="post-nav-link">
-            &larr; {prevPost.title}
-          </a>
-        ) : <span />}
-        {nextPost ? (
-          <a href={`/${nextPost.slug}/`} class="post-nav-link text-right">
-            {nextPost.title} &rarr;
-          </a>
-        ) : <span />}
-      </nav>
-    )}
   </article>
 </BaseLayout>
+
+<script>
+  // Reading progress bar
+  const progressBar = document.getElementById('reading-progress');
+  if (progressBar) {
+    const updateProgress = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      progressBar.style.width = `${Math.min(100, progress)}%`;
+    };
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+  }
+</script>

@@ -3,19 +3,33 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pages = await getCollection('pages');
-const aboutPage = pages.find((p) => p.data.slug === 'about');
-const { Content } = aboutPage ? await render(aboutPage) : { Content: null };
+const about = pages.find(p => p.data.slug === 'about');
+const rendered = about ? await render(about) : null;
+const Content = rendered?.Content;
 ---
 
-<BaseLayout title="About — sreeraj.dev" theme="tech">
-  <article class="max-w-[720px] mx-auto">
-    <h1 class="page-title text-3xl mb-8">About</h1>
-    {Content ? (
-      <div class="prose">
-        <Content />
+<BaseLayout title="About — sreeraj.dev" description="About Sreeraj — DevOps engineer, hiker, and programmer.">
+  <div class="py-10 sm:py-14">
+    <div class="container">
+      <div class="max-w-3xl anim-in">
+        <span class="accent-line mb-5"></span>
+        <p class="section-heading mb-2">About</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-[var(--color-text)] mb-8" style="--color-text: #111827; font-family: var(--font-sans);">
+          {about?.data.title || 'About Me'}
+        </h1>
+
+        {about?.data.featureImage && (
+          <div class="mb-8 rounded-xl overflow-hidden max-w-sm">
+            <img src={about.data.featureImage} alt="Profile" class="w-full object-cover" />
+          </div>
+        )}
+
+        {Content && (
+          <div class="prose">
+            <Content />
+          </div>
+        )}
       </div>
-    ) : (
-      <p class="page-description">About page content not found.</p>
-    )}
-  </article>
+    </div>
+  </div>
 </BaseLayout>

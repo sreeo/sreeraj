@@ -5,182 +5,98 @@ interface Props {
 
 const { theme = 'tech' } = Astro.props;
 
-const navItems = [
-  { label: 'Home', href: '/', icon: null },
-  { label: 'About', href: '/about/', icon: null },
-  { label: 'DevOps', href: '/devops/', icon: 'led' },
-  { label: 'Treks', href: '/treks/', icon: 'flags' },
-  { label: 'Programming', href: '/programming/', icon: 'brackets' },
-  { label: 'Postgres', href: '/postgres/', icon: 'elephant' },
-  { label: 'Archive', href: '/archive/', icon: null },
+const path = Astro.url.pathname;
+
+const navLinks = [
+  { href: '/devops/', label: 'DevOps' },
+  { href: '/programming/', label: 'Programming' },
+  { href: '/postgres/', label: 'Postgres' },
+  { href: '/treks/', label: 'Treks' },
+  { href: '/archive/', label: 'Archive' },
+  { href: '/about/', label: 'About' },
 ];
 
-const currentPath = Astro.url.pathname;
+function isActive(href: string) {
+  if (href === '/') return path === '/';
+  return path.startsWith(href);
+}
 ---
 
-<header class="nav-bar sticky top-0 z-50">
-  <nav class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-    <a href="/" class="nav-brand text-xl">
-      sreeraj.dev
-    </a>
+<header
+  class="sticky top-0 z-50 bg-[var(--color-surface)]/95 backdrop-blur-sm border-b border-[var(--color-border)]"
+  style="--color-surface: #FFFFFF; --color-border: #E5E7EB;"
+>
+  <div class="container">
+    <div class="flex items-center justify-between h-14">
+      <!-- Logo -->
+      <a
+        href="/"
+        class="flex items-center gap-2 font-bold text-[var(--color-text)] hover:opacity-80 transition-opacity"
+        style="font-family: var(--font-sans);"
+      >
+        <span
+          class="w-7 h-7 rounded-md flex items-center justify-center text-white text-xs font-bold"
+          style={`background: ${theme === 'trek' ? 'var(--color-trek)' : 'var(--color-tech)'}`}
+        >S</span>
+        <span class="text-sm font-semibold tracking-tight">sreeraj.dev</span>
+      </a>
 
-    <button
-      id="menu-toggle"
-      class="md:hidden p-2 nav-link"
-      aria-label="Toggle menu"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
-
-    <ul class="hidden md:flex items-center gap-6 text-sm font-medium">
-      {navItems.map((item) => (
-        <li>
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex items-center gap-0.5" aria-label="Main navigation">
+        {navLinks.map(link => (
           <a
-            href={item.href}
-            class:list={[
-              'nav-link transition-colors inline-flex items-center gap-1.5',
-              currentPath === item.href && 'active',
-            ]}
+            href={link.href}
+            class={`nav-link ${isActive(link.href) ? 'active' : ''}`}
           >
-            {item.icon === 'led' && (
-              <span class="signal-led" aria-hidden="true"></span>
-            )}
-            {item.icon === 'flags' && (
-              <span class="signal-flags" aria-hidden="true">
-                <span class="sf sf-1"></span>
-                <span class="sf sf-2"></span>
-                <span class="sf sf-3"></span>
-                <span class="sf sf-4"></span>
-                <span class="sf sf-5"></span>
-              </span>
-            )}
-            {item.icon === 'brackets' && (
-              <span class="signal-brackets" aria-hidden="true">{`{}`}</span>
-            )}
-            {item.icon === 'elephant' && (
-              <span class="signal-elephant" aria-hidden="true">🐘</span>
-            )}
-            {item.label}
+            {link.label}
           </a>
-        </li>
-      ))}
-    </ul>
-  </nav>
+        ))}
+      </nav>
 
-  <ul id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-1">
-    {navItems.map((item) => (
-      <li>
-        <a
-          href={item.href}
-          class:list={[
-            'block py-2 text-sm font-medium nav-link transition-colors inline-flex items-center gap-1.5',
-            currentPath === item.href && 'active',
-          ]}
-        >
-          {item.icon === 'led' && (
-            <span class="signal-led" aria-hidden="true"></span>
-          )}
-          {item.icon === 'flags' && (
-            <span class="signal-flags" aria-hidden="true">
-              <span class="sf sf-1"></span>
-              <span class="sf sf-2"></span>
-              <span class="sf sf-3"></span>
-              <span class="sf sf-4"></span>
-              <span class="sf sf-5"></span>
-            </span>
-          )}
-          {item.icon === 'brackets' && (
-            <span class="signal-brackets" aria-hidden="true">{`{}`}</span>
-          )}
-          {item.icon === 'elephant' && (
-            <span class="signal-elephant" aria-hidden="true">🐘</span>
-          )}
-          {item.label}
-        </a>
-      </li>
+      <!-- Mobile hamburger -->
+      <button
+        id="mobile-menu-btn"
+        class="md:hidden p-2 rounded-md text-[var(--color-text-muted)] hover:bg-[var(--color-border-subtle)] transition-colors"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+      >
+        <svg id="icon-menu" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <svg id="icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile nav -->
+  <div id="mobile-nav" class="mobile-nav md:hidden">
+    {navLinks.map(link => (
+      <a
+        href={link.href}
+        class={`nav-link block px-3 py-2 ${isActive(link.href) ? 'active' : ''}`}
+      >
+        {link.label}
+      </a>
     ))}
-  </ul>
+  </div>
 </header>
 
-<style>
-  /* Signal LED - DevOps */
-  .signal-led {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #22d3ee;
-    animation: led-blink 2s ease infinite;
-  }
-  @keyframes led-blink {
-    0%, 100% { opacity: 1; box-shadow: 0 0 4px #22d3ee; }
-    50% { opacity: 0.3; box-shadow: none; }
-  }
-
-  /* Prayer Flags - Treks */
-  .signal-flags {
-    display: inline-flex;
-    gap: 1px;
-    align-items: flex-start;
-  }
-  .sf {
-    display: inline-block;
-    width: 3px;
-    height: 8px;
-    transform-origin: top center;
-    animation: flag-wave 1.5s ease-in-out infinite;
-  }
-  .sf-1 { background: #3b82f6; animation-delay: 0s; }
-  .sf-2 { background: #ffffff; animation-delay: 0.15s; }
-  .sf-3 { background: #ef4444; animation-delay: 0.3s; }
-  .sf-4 { background: #22c55e; animation-delay: 0.45s; }
-  .sf-5 { background: #eab308; animation-delay: 0.6s; }
-  @keyframes flag-wave {
-    0%, 100% { transform: skewX(0deg); }
-    25% { transform: skewX(8deg); }
-    75% { transform: skewX(-5deg); }
-  }
-
-  /* Brackets - Programming */
-  .signal-brackets {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    color: #cc5de8;
-    animation: bracket-pulse 2s ease infinite;
-  }
-  @keyframes bracket-pulse {
-    0%, 100% { opacity: 1; letter-spacing: 0px; }
-    50% { opacity: 0.6; letter-spacing: 2px; }
-  }
-
-  /* Elephant - Postgres */
-  .signal-elephant {
-    font-size: 11px;
-    line-height: 1;
-    display: inline-block;
-    animation: elephant-sway 3s ease-in-out infinite;
-  }
-  @keyframes elephant-sway {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(5deg); }
-    75% { transform: rotate(-5deg); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .signal-led, .sf, .signal-brackets, .signal-elephant {
-      animation: none;
-    }
-    .signal-led { opacity: 1; box-shadow: 0 0 4px #22d3ee; }
-  }
-</style>
-
 <script>
-  const toggle = document.getElementById('menu-toggle');
-  const menu = document.getElementById('mobile-menu');
-  toggle?.addEventListener('click', () => {
-    menu?.classList.toggle('hidden');
+  const btn = document.getElementById('mobile-menu-btn');
+  const nav = document.getElementById('mobile-nav');
+  const iconMenu = document.getElementById('icon-menu');
+  const iconClose = document.getElementById('icon-close');
+
+  btn?.addEventListener('click', () => {
+    const isOpen = nav?.classList.contains('open');
+    nav?.classList.toggle('open', !isOpen);
+    if (iconMenu) iconMenu.style.display = isOpen ? 'block' : 'none';
+    if (iconClose) iconClose.style.display = isOpen ? 'none' : 'block';
+    btn?.setAttribute('aria-expanded', String(!isOpen));
   });
 </script>

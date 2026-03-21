@@ -1,63 +1,83 @@
 ---
 import FormattedDate from './FormattedDate.astro';
 import TagList from './TagList.astro';
-import CairnIcon from './CairnIcon.astro';
+import { getThemeForTags } from '../utils/theme';
 
 interface Props {
   title: string;
   slug: string;
-  description: string;
+  description?: string;
   pubDate: Date;
-  featureImage?: string;
   tags?: string[];
+  featureImage?: string;
   readingTime?: number;
-  variant?: 'tech' | 'trek';
+  featured?: boolean;
+  size?: 'default' | 'large' | 'compact';
 }
 
-const { title, slug, description, pubDate, featureImage, tags = [], readingTime, variant = 'tech' } = Astro.props;
-const isTrek = variant === 'trek';
+const {
+  title,
+  slug,
+  description = '',
+  pubDate,
+  tags = [],
+  featureImage = '',
+  readingTime = 1,
+  featured = false,
+  size = 'default',
+} = Astro.props;
+
+const theme = getThemeForTags(tags);
+const accentColor = theme === 'trek' ? 'var(--color-trek)' : 'var(--color-tech)';
+const hasImage = featureImage && featureImage.length > 0;
+const isLarge = size === 'large';
 ---
 
-<article class:list={['post-card group', isTrek && 'trek-card']}>
-  <a href={`/${slug}/`} class="block">
-    <div class:list={['post-card-visual flex items-end gap-4', !isTrek && 'mb-3', isTrek && 'overflow-hidden']}>
-      {featureImage ? (
-        <img
-          src={featureImage}
-          alt={title}
-          class:list={[
-            'post-card-image w-full object-cover transition-transform duration-300 group-hover:scale-105',
-            !isTrek && 'h-40 rounded-lg',
-            isTrek && 'h-52',
-          ]}
-          loading="lazy"
-        />
-      ) : (
-        <div class:list={[
-          'flex items-center justify-center w-full',
-          !isTrek && 'h-40 rounded-lg',
-          isTrek && 'h-52',
-        ]} style={`background: ${isTrek ? 'rgba(217,119,6,0.05)' : 'rgba(34,211,238,0.05)'};`}>
-          <CairnIcon title={title} variant={variant} />
-        </div>
-      )}
-    </div>
-    <div class:list={[isTrek && 'post-card-body']}>
-      <h3 class:list={['post-card-title text-lg mb-1 transition-colors', !isTrek && 'font-semibold']}>
-        {title}
-      </h3>
-      <div class="post-card-meta flex items-center gap-2 mb-2">
-        <FormattedDate date={pubDate} />
-        {readingTime && <span>· {readingTime} min read</span>}
-      </div>
-      {description && (
-        <p class="post-card-description text-sm line-clamp-2">{description}</p>
-      )}
-    </div>
-  </a>
-  {tags.length > 0 && (
-    <div class:list={['mt-2', isTrek && 'px-5 pb-4']}>
-      <TagList tags={tags} />
+<a href={`/${slug}/`} class={`card block group ${isLarge ? 'h-full' : ''}`} style={`--accent: ${accentColor}`}>
+  {hasImage && (
+    <div class={`overflow-hidden bg-[var(--color-border-subtle)] ${isLarge ? 'h-52 sm:h-64' : 'h-44'}`}>
+      <img
+        src={featureImage}
+        alt={title}
+        loading="lazy"
+        decoding="async"
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
     </div>
   )}
-</article>
+
+  {!hasImage && (
+    <div
+      class={`overflow-hidden flex items-center justify-center ${isLarge ? 'h-52 sm:h-64' : 'h-44'}`}
+      style={`background: ${theme === 'trek' ? 'var(--color-trek-light)' : 'var(--color-tech-light)'}`}
+    >
+      <span style={`font-size: ${isLarge ? '3rem' : '2rem'}; opacity: 0.35`}>
+        {theme === 'trek' ? '⛰' : '</>'}
+      </span>
+    </div>
+  )}
+
+  <div class="p-4 sm:p-5">
+    <div class="mb-2.5">
+      <TagList tags={tags} />
+    </div>
+
+    <h3
+      class={`font-bold leading-snug text-[var(--color-text)] group-hover:text-[var(--accent)] transition-colors duration-150 ${isLarge ? 'text-xl sm:text-2xl mb-2' : 'text-base sm:text-lg mb-1.5'}`}
+    >
+      {title}
+    </h3>
+
+    {description && (
+      <p class={`text-[var(--color-text-muted)] leading-relaxed line-clamp-2 ${isLarge ? 'text-sm sm:text-base mb-3' : 'text-sm mb-2.5'}`}>
+        {description}
+      </p>
+    )}
+
+    <div class="flex items-center gap-2 text-xs text-[var(--color-text-subtle)] font-medium">
+      <FormattedDate date={pubDate} format="short" />
+      <span>·</span>
+      <span>{readingTime} min read</span>
+    </div>
+  </div>
+</a>

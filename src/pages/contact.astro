@@ -3,19 +3,31 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pages = await getCollection('pages');
-const contactPage = pages.find((p) => p.data.slug === 'contact');
-const { Content } = contactPage ? await render(contactPage) : { Content: null };
+const contact = pages.find(p => p.data.slug === 'contact');
+const rendered = contact ? await render(contact) : null;
+const Content = rendered?.Content;
 ---
 
-<BaseLayout title="Contact — sreeraj.dev" theme="tech">
-  <article class="max-w-[720px] mx-auto">
-    <h1 class="page-title text-3xl mb-8">Contact</h1>
-    {Content ? (
-      <div class="prose">
-        <Content />
+<BaseLayout title="Contact — sreeraj.dev" description="Get in touch with Sreeraj.">
+  <div class="py-10 sm:py-14">
+    <div class="container">
+      <div class="max-w-2xl anim-in">
+        <span class="accent-line mb-5"></span>
+        <p class="section-heading mb-2">Contact</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-[var(--color-text)] mb-8" style="--color-text: #111827; font-family: var(--font-sans);">
+          {contact?.data.title || 'Get in Touch'}
+        </h1>
+
+        {Content ? (
+          <div class="prose">
+            <Content />
+          </div>
+        ) : (
+          <div class="prose">
+            <p>Feel free to reach out at <strong>contact [at] sreeraj [dot] dev</strong>.</p>
+          </div>
+        )}
       </div>
-    ) : (
-      <p class="page-description">Contact page content not found.</p>
-    )}
-  </article>
+    </div>
+  </div>
 </BaseLayout>

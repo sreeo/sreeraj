@@ -3,12 +3,14 @@ import { getCollection } from 'astro:content';
 import TagLayout from '../layouts/TagLayout.astro';
 
 const posts = (await getCollection('blog'))
-  .filter((p) => p.data.tags.includes('devops'))
+  .filter(p => p.data.tags.includes('devops'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <TagLayout
   title="DevOps"
-  description="Posts about DevOps, infrastructure, Kubernetes, CI/CD, and cloud."
+  description="Infrastructure, Kubernetes, CI/CD, and cloud engineering."
   posts={posts}
+  theme="tech"
+  categoryLabel="Category"
 />
