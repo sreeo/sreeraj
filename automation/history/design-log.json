@@ -8,6 +8,15 @@
       "timestamp": "2026-03-21T11:35:46.512Z",
       "description": "Clean lines, organic curves, and bold graphic elements from the 1950s-60s design era. Think Eames, Saul Bass, and Herb Lubalin. Geometric yet warm, structured yet playful.",
       "primaryColor": "#ff6b35"
+    },
+    {
+      "month": "2026-03",
+      "trendId": "organic-anti-grid",
+      "trendName": "Organic Anti-Grid",
+      "status": "success",
+      "timestamp": "2026-03-21T13:43:21.308Z",
+      "description": "A rebellion against rigid grid systems, embracing flowing layouts, organic shapes, and natural asymmetry. This trend reflects a desire for humanity in digital spaces, using irregular compositions that feel alive and breathing rather than mechanically perfect.",
+      "primaryColor": "#2dd4bf"
     }
   ]
 }
