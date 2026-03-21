@@ -2,8 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import { CONFIG } from './config.js';
-import { selectTrend, getLastTrend, DesignLog, DesignLogEntry } from './trend-registry.js';
+import { selectTrend, getLastTrend, DesignLog, DesignLogEntry, TRENDS } from './trend-registry.js';
 import { generateDesign } from './design-generator.js';
+import { discoverTrend } from './trend-discovery.js';
 import { validateDesign, validateArchive } from './validate-design.js';
 import { archiveCurrentDesign } from './archive-manager.js';
 
@@ -38,15 +39,26 @@ async function main() {
     // Select trend
     let trend;
     if (FORCE_TREND && attempt === 1) {
-      const { TRENDS } = await import('./trend-registry.js');
-      trend = TRENDS.find(t => t.id === FORCE_TREND);
-      if (!trend) {
-        console.error(`Unknown trend: ${FORCE_TREND}`);
+      // Check hardcoded trends first
+      const found = TRENDS.find(t => t.id === FORCE_TREND);
+      if (found) {
+        trend = found;
+      } else {
+        console.error(`Unknown trend: ${FORCE_TREND}. Available: ${TRENDS.map(t => t.id).join(', ')}`);
         process.exit(1);
       }
+    } else if (attempt === 1) {
+      // First attempt: use web search + Claude to discover a trend
+      try {
+        trend = await discoverTrend(designLog, previousTrend);
+      } catch (error) {
+        console.log(`Trend discovery failed: ${error instanceof Error ? error.message : error}`);
+        console.log('Falling back to classic trend registry...');
+        trend = selectTrend(designLog);
+      }
     } else {
+      // Retries: fall back to classic registry
       trend = selectTrend(designLog);
-      // Avoid retrying the same trend
       while (triedTrends.has(trend.id)) {
         trend = selectTrend(designLog);
       }
