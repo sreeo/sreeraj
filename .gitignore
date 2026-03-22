@@ -12,6 +12,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# automation output
+automation/test-output/
+automation/history/current-trend.txt
+
 
 # environment variables
 .env

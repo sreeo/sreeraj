@@ -271,8 +271,10 @@ export async function GET(context) {
 3. Generate `src/styles/global.css` first — this is the design foundation
 4. Generate layouts, then components, then pages
 5. Run `npm run build` and fix any errors
-6. Keep iterating until `npm run build` succeeds with 0 errors
-7. Write `src/data/design-manifest.json`:
+6. Run `cd automation && npm ci && npx tsx run-validation.ts ../src/styles/global.css`
+7. If validation fails, inspect the reported failing steps, fix the site, and rerun both build and validation
+8. Keep iterating until both `npm run build` and the validation command succeed with 0 errors
+9. Write `src/data/design-manifest.json`:
 ```json
 {
   "trend": "Design style name",
@@ -285,6 +287,7 @@ export async function GET(context) {
 ## Success Criteria
 
 - `npm run build` completes with 0 errors
+- `cd automation && npx tsx run-validation.ts ../src/styles/global.css` completes with 0 errors
 - All 19 blog posts accessible at their slugs
 - The homepage has a distinctive layout (not just a generic card grid)
 - Blog posts are comfortable to read (proper max-width, line-height, spacing)

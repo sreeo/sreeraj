@@ -9,7 +9,7 @@ async function main() {
     const icon = step.passed ? 'PASS' : 'FAIL';
     console.log(`[${icon}] ${step.name}: ${step.message}`);
   }
-  process.exit(0);
+  process.exit(result.passed ? 0 : 1);
 }
 
 main();

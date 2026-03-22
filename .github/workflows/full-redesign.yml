@@ -77,18 +77,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Check if there are changes
-          if git diff --quiet && git diff --cached --quiet; then
-            echo "No changes generated"
-            exit 1
-          fi
-
           TREND="${{ inputs.trend }}"
           [ -z "$TREND" ] && TREND="auto-discovered"
 
           BRANCH="rebuild/$(date +%Y%m%d-%H%M%S)"
           git checkout -b "$BRANCH"
           git add -A
+          if git diff --cached --quiet; then
+            echo "No changes generated"
+            exit 0
+          fi
           git commit -m "Full site rebuild: ${TREND}"
           git push -u origin "$BRANCH"
 

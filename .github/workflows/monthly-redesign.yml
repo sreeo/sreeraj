@@ -106,6 +106,10 @@ jobs:
           BRANCH="preview/redesign-$(date +%Y%m%d-%H%M%S)"
           git checkout -b "$BRANCH"
           git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
           git commit -m "Preview: Monthly redesign — ${TREND_NAME}"
           git push -u origin "$BRANCH"
 
@@ -140,18 +144,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Check if there are changes to commit
-          if git diff --quiet && git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-
           TREND_NAME="unknown"
           if [ -f automation/history/current-trend.txt ]; then
             TREND_NAME=$(cat automation/history/current-trend.txt)
           fi
 
           git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
           git commit -m "Monthly redesign: ${TREND_NAME}
 
           Automated design refresh with ${TREND_NAME} aesthetic.
