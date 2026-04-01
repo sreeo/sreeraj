@@ -2,6 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import TagList from '../components/TagList.astro';
+import { getThemeForTags } from '../utils/theme';
 
 interface TrekStats {
   elevation?: string;
@@ -42,114 +43,115 @@ const {
   trekStats,
 } = Astro.props;
 
-const isTrek = tags.some((t) => ['treks', 'trek'].includes(t));
+const theme = getThemeForTags(tags);
+const isTrek = theme === 'trek';
 ---
 
-<BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage || undefined}>
-  <div class="container">
-    <article>
-      <div class="post-header">
-        <div class="post-header-tags">
-          <TagList tags={tags} isTrek={isTrek} linkable={true} />
+<BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage || undefined} theme={theme}>
+  <article style="max-width: 700px; margin: 0 auto; padding: 6rem 2rem 8rem;">
+    <!-- Header -->
+    <header style="margin-bottom: 3rem;">
+      <h1 class="post-header-title">{title}</h1>
+
+      <div class="post-header-meta">
+        <span>{author}</span>
+        <span style="opacity: 0.4;">·</span>
+        <FormattedDate date={pubDate} />
+        {updatedDate && updatedDate > pubDate && (
+          <>
+            <span style="opacity: 0.4;">·</span>
+            <span>Updated <FormattedDate date={updatedDate} /></span>
+          </>
+        )}
+        <span style="opacity: 0.4;">·</span>
+        <span>{readingTime} min read</span>
+      </div>
+
+      {tags.length > 0 && (
+        <div style="margin-top: 1.5rem;">
+          <TagList tags={tags} linkable={true} />
         </div>
+      )}
+    </header>
 
-        <h1 class="post-title">{title}</h1>
+    <!-- Feature Image -->
+    {featureImage && (
+      <div class={isTrek ? 'trek-hero-wrap' : ''} style="margin-bottom: 3rem;">
+        <img
+          src={featureImage}
+          alt={title}
+          loading="eager"
+          decoding="async"
+          style={isTrek ? '' : `width: 100%; border-radius: 4px; border: 1px solid var(--color-${theme}-border);`}
+        />
+      </div>
+    )}
 
-        <div class="post-meta">
-          <span>{author}</span>
-          <span class="post-meta-dot"></span>
-          <FormattedDate date={pubDate} />
-          {updatedDate && updatedDate > pubDate && (
-            <>
-              <span class="post-meta-dot"></span>
-              <span>Updated <FormattedDate date={updatedDate} /></span>
-            </>
-          )}
-          <span class="post-meta-dot"></span>
-          <span>{readingTime} min read</span>
-        </div>
-
-        {description && (
-          <p class="post-description">{description}</p>
+    <!-- Trek Stats -->
+    {trekStats && (
+      <div class="trek-journal" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; padding: 1.5rem; border: 1px solid var(--color-trek-border); border-radius: 4px; margin-bottom: 3rem;">
+        {trekStats.elevation && (
+          <div>
+            <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;">Elevation</div>
+            <div style="font-weight: 700; font-size: 1.125rem;">{trekStats.elevation}</div>
+          </div>
+        )}
+        {trekStats.distance && (
+          <div>
+            <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;">Distance</div>
+            <div style="font-weight: 700; font-size: 1.125rem;">{trekStats.distance}</div>
+          </div>
+        )}
+        {trekStats.duration && (
+          <div>
+            <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;">Duration</div>
+            <div style="font-weight: 700; font-size: 1.125rem;">{trekStats.duration}</div>
+          </div>
+        )}
+        {trekStats.difficulty && (
+          <div>
+            <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;">Difficulty</div>
+            <div style="font-weight: 700; font-size: 1.125rem;">{trekStats.difficulty}</div>
+          </div>
+        )}
+        {trekStats.basecamp && (
+          <div>
+            <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;">Basecamp</div>
+            <div style="font-weight: 700; font-size: 1.125rem;">{trekStats.basecamp}</div>
+          </div>
+        )}
+        {trekStats.season && (
+          <div>
+            <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em;">Season</div>
+            <div style="font-weight: 700; font-size: 1.125rem;">{trekStats.season}</div>
+          </div>
         )}
       </div>
+    )}
 
-      {featureImage && (
-        <div class="post-feature-image">
-          <img src={featureImage} alt={title} loading="eager" decoding="async" />
-        </div>
-      )}
+    <!-- Content -->
+    <div class={isTrek ? 'prose trek-prose' : 'prose'}>
+      <slot />
+    </div>
 
-      {trekStats && (
-        <div style="max-width: 720px; margin: 0 auto;">
-          <div class="trek-stats">
-            {trekStats.elevation && (
-              <div class="trek-stat">
-                <span class="trek-stat-label">Elevation</span>
-                <span class="trek-stat-value">{trekStats.elevation}</span>
-              </div>
-            )}
-            {trekStats.distance && (
-              <div class="trek-stat">
-                <span class="trek-stat-label">Distance</span>
-                <span class="trek-stat-value">{trekStats.distance}</span>
-              </div>
-            )}
-            {trekStats.duration && (
-              <div class="trek-stat">
-                <span class="trek-stat-label">Duration</span>
-                <span class="trek-stat-value">{trekStats.duration}</span>
-              </div>
-            )}
-            {trekStats.difficulty && (
-              <div class="trek-stat">
-                <span class="trek-stat-label">Difficulty</span>
-                <span class="trek-stat-value">{trekStats.difficulty}</span>
-              </div>
-            )}
-            {trekStats.basecamp && (
-              <div class="trek-stat">
-                <span class="trek-stat-label">Basecamp</span>
-                <span class="trek-stat-value">{trekStats.basecamp}</span>
-              </div>
-            )}
-            {trekStats.season && (
-              <div class="trek-stat">
-                <span class="trek-stat-label">Season</span>
-                <span class="trek-stat-value">{trekStats.season}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      <div class="prose">
-        <slot />
-      </div>
-
-      {(prevPost || nextPost) && (
-        <nav class="post-nav">
+    <!-- Prev/Next Navigation -->
+    {(prevPost || nextPost) && (
+      <div class="post-nav-border">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
           {prevPost ? (
-            <a href={`/${prevPost.slug}/`} class="post-nav-item">
-              <span class="post-nav-direction">← Previous</span>
-              <span class="post-nav-title">{prevPost.title}</span>
+            <a href={`/${prevPost.slug}/`} class="post-nav-link">
+              <span class="post-nav-label">&larr; Previous</span>
+              <div class="post-nav-title">{prevPost.title}</div>
             </a>
-          ) : (
-            <div></div>
-          )}
-
+          ) : <div />}
           {nextPost ? (
-            <a href={`/${nextPost.slug}/`} class="post-nav-item">
-              <span class="post-nav-direction">Next →</span>
-              <span class="post-nav-title">{nextPost.title}</span>
+            <a href={`/${nextPost.slug}/`} class="post-nav-link" style="text-align: right;">
+              <span class="post-nav-label">Next &rarr;</span>
+              <div class="post-nav-title">{nextPost.title}</div>
             </a>
-          ) : (
-            <div></div>
-          )}
-        </nav>
-      )}
-    </article>
-
-    <div style="padding-bottom: 96px;"></div>
-  </div>
+          ) : <div />}
+        </div>
+      </div>
+    )}
+  </article>
 </BaseLayout>

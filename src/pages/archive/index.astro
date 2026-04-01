@@ -6,31 +6,29 @@ const archives = registryData.archives ?? [];
 ---
 
 <BaseLayout title="Archive — sreeraj.dev" description="Monthly design archives — each month a new design trend.">
-  <div class="container">
-    <div class="tag-page-header">
-      <h1 class="tag-page-title">Archive</h1>
-      <p class="tag-page-subtitle">A new design trend ships every month. This is the history.</p>
-    </div>
+  <section style="max-width: 900px; margin: 0 auto; padding: 6rem 2rem 8rem;">
+    <header style="margin-bottom: 3rem;">
+      <h1 class="section-title">Archive</h1>
+      <p class="page-description" style="margin-top: 0.5rem;">A new design ships every month. This is the history.</p>
+    </header>
 
     {archives.length > 0 ? (
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding-bottom: 96px;">
+      <div style="display: grid; gap: 1rem;">
         {archives.map((archive) => (
-          <a href={`/archive/${archive.month}/`} class="archive-card">
-            <div class="archive-card-month">{archive.month}</div>
-            <div style="display: flex; align-items: center; gap: 10px;">
+          <a href={`/archive/${archive.month}/`} class="post-card" style="padding: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
               <div
                 style={`width: 10px; height: 10px; border-radius: 50%; background: ${archive.primaryColor}; flex-shrink: 0;`}
               ></div>
-              <div class="archive-card-trend">{archive.trend}</div>
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; opacity: 0.5;">{archive.month}</span>
             </div>
-            <div class="archive-card-desc">{archive.description}</div>
+            <div class="post-card-title">{archive.trend}</div>
+            <p class="post-card-description" style="margin-top: 0.5rem;">{archive.description}</p>
           </a>
         ))}
       </div>
     ) : (
-      <div class="empty-state" style="padding-bottom: 96px;">
-        <p class="empty-state-text">No archives yet.</p>
-      </div>
+      <p style="opacity: 0.5;">No archives yet.</p>
     )}
-  </div>
+  </section>
 </BaseLayout>

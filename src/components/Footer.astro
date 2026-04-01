@@ -2,28 +2,15 @@
 const year = new Date().getFullYear();
 ---
 
-<footer class="footer">
-  <div class="container">
-    <div class="footer-inner">
-      <div>
-        <div class="footer-brand">sreeraj.dev</div>
-        <div class="footer-tagline">DevOps · Programming · PostgreSQL · Treks</div>
-      </div>
-
-      <div class="footer-links">
-        <a href="/about/" class="footer-link">About</a>
-        <a href="/devops/" class="footer-link">DevOps</a>
-        <a href="/programming/" class="footer-link">Programming</a>
-        <a href="/postgres/" class="footer-link">PostgreSQL</a>
-        <a href="/treks/" class="footer-link">Treks</a>
-        <a href="/tags/" class="footer-link">Tags</a>
-        <a href="/archive/" class="footer-link">Archive</a>
-        <a href="/rss.xml" class="footer-link">RSS</a>
-      </div>
-    </div>
-
-    <div class="footer-copy">
-      © {year} sreeraj.dev — built with Astro
-    </div>
+<footer class="site-footer">
+  <div style="margin-bottom: 1rem;">
+    <a href="/about/">about</a>
+    <span style="margin: 0 0.5rem; opacity: 0.3;">/</span>
+    <a href="/tags/">tags</a>
+    <span style="margin: 0 0.5rem; opacity: 0.3;">/</span>
+    <a href="/archive/">archive</a>
+    <span style="margin: 0 0.5rem; opacity: 0.3;">/</span>
+    <a href="/rss.xml">rss</a>
   </div>
+  <div>&copy; {year} sreeraj.dev</div>
 </footer>

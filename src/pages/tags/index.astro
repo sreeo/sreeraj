@@ -15,24 +15,19 @@ const tags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 ---
 
 <BaseLayout title="Tags — sreeraj.dev" description="Browse posts by tag.">
-  <div class="container">
-    <div class="tag-page-header">
-      <h1 class="tag-page-title">Tags</h1>
-      <p class="tag-page-subtitle">Browse all {tags.length} tags across {posts.length} posts.</p>
-    </div>
+  <section style="max-width: 900px; margin: 0 auto; padding: 6rem 2rem 8rem;">
+    <header style="margin-bottom: 3rem;">
+      <h1 class="section-title">Tags</h1>
+      <p style="margin-top: 0.5rem; opacity: 0.5; font-size: 0.875rem;">{tags.length} tags across {posts.length} posts</p>
+    </header>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 12px; padding-bottom: 96px;">
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
       {tags.map(([tag, count]) => (
-        <a
-          href={`/tags/${tag}/`}
-          style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); font-size: 0.875rem; color: var(--color-text-2); transition: all 200ms ease-out; text-decoration: none;"
-          onmouseover="this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-accent)'; this.style.background='var(--color-accent-subtle)';"
-          onmouseout="this.style.borderColor='var(--color-border)'; this.style.color='var(--color-text-2)'; this.style.background='var(--color-surface)';"
-        >
-          <span style="font-weight: 600;">{tag}</span>
-          <span style="font-size: 0.6875rem; color: var(--color-text-3); font-family: var(--font-mono);">{count}</span>
+        <a href={`/tags/${tag}/`} class="tag-pill" style="font-size: 0.875rem; padding: 6px 14px;">
+          {tag}
+          <span style="opacity: 0.5; margin-left: 6px; font-size: 0.75rem;">{count}</span>
         </a>
       ))}
     </div>
-  </div>
+  </section>
 </BaseLayout>

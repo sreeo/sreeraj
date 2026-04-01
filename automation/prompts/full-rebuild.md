@@ -54,6 +54,39 @@ You are not building a template. You are building a site that could win an Awwwa
 - Borders that are too heavy (>1px for most elements)
 - Drop shadows that are too dark or too large
 
+### Generative & Interactive Elements (Experimental)
+
+Push boundaries. Add ONE or TWO subtle generative/interactive JavaScript elements that elevate the design beyond static CSS. Ideas:
+
+- **Generative SVG hero** — procedurally generated patterns, mesh gradients, or geometric art in the hero section using inline `<script>` in an Astro component
+- **Scroll-driven animations** — reveal animations, parallax layers, or progress indicators using the Intersection Observer API or CSS scroll-timeline
+- **Custom cursor** — a cursor that morphs, leaves trails, or reacts to content type (code blocks vs prose vs images)
+- **Time-aware design** — subtle color shifts based on time of day (warm tones at golden hour, cool at night)
+- **Generative page transitions** — unique transition effects between pages using View Transitions API (`astro:page-load` event)
+- **Interactive card physics** — cards that tilt on hover using 3D transforms based on mouse position
+- **Ambient canvas background** — a subtle particle system, noise field, or animated gradient that responds to scroll position
+- **ASCII/generative footer art** — procedurally generated text art or patterns in the footer
+
+Rules for generative elements:
+- Must be in a separate `.astro` component with a `<script>` tag (client-side JS)
+- Must be subtle — enhance, never distract from content readability
+- Must respect `prefers-reduced-motion` (disable or simplify behind media query)
+- Must not block page load (use `requestIdleCallback`, `IntersectionObserver`, or deferred loading)
+- Maximum 80 lines of JS per element
+- No external JS libraries — vanilla JS and Web APIs only
+- Should feel like a signature detail that makes the site memorable
+
+### Design Evolution Context
+
+This site is redesigned monthly. Each month should feel distinctly different while maintaining the same content quality. Here is the history of recent designs:
+
+{{DESIGN_HISTORY}}
+
+Your design should:
+- Feel **distinctly different** from the most recent design — different layout structure, different color temperature, different typographic voice
+- You may carry forward ONE element from a previous design if it was exceptional (a particularly good interaction, an elegant component pattern)
+- Consider how this design contributes to the site's evolving identity — it's a portfolio of design sensibility over time
+
 ## Reference Sites for Quality Bar
 
 Study these for structural quality (not to copy, but to match the caliber):
@@ -63,6 +96,18 @@ Study these for structural quality (not to copy, but to match the caliber):
 - **apple.com** — whitespace mastery, product storytelling
 - **pentagram.com** — bold editorial design
 - **rauno.me** — personal site with exceptional craft
+
+## Vision Quality Gate
+
+After you finish, your design will be evaluated by a Vision AI quality gate that scores:
+- **Typography** (type scale, weight usage, letter-spacing, line-height)
+- **Spacing** (consistent scale, generous section padding, breathing room)
+- **Color harmony** (restrained palette, purposeful accent usage)
+- **Visual hierarchy** (eye flow, featured content prominence, content choreography)
+- **Polish** (hover states, consistent borders/shadows/radii, intentional details)
+- **Cohesion** (unified design system, consistent language across pages)
+
+Designs scoring below **6/10** overall will be rejected and you'll be asked to fix the issues. Aim for **8+/10**. The difference between 6 and 8 is craft — the obsessive attention to spacing ratios, the perfect type scale, the hover states that feel satisfying.
 
 ---
 
@@ -293,4 +338,6 @@ export async function GET(context) {
 - Blog posts are comfortable to read (proper max-width, line-height, spacing)
 - Every interactive element has a hover state
 - The design is cohesive — every element feels like it belongs to the same system
+- At least ONE generative/interactive element that adds a signature touch
+- The design would score 8+/10 on the Vision quality gate
 - A designer would look at this and say "this was made with care"

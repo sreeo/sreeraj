@@ -102,6 +102,14 @@ async function main() {
         console.log(`  [${icon}] ${step.name}: ${step.message}`);
       }
 
+      if (validation.visionScore) {
+        console.log(`\n  Vision score: ${validation.visionScore.overall}/10`);
+        console.log(`  Recommendation: ${validation.visionScore.recommendation}`);
+        if (validation.visionScore.issues.length > 0) {
+          console.log(`  Issues: ${validation.visionScore.issues.join(', ')}`);
+        }
+      }
+
       if (!validation.passed) {
         console.log(`\nValidation FAILED. Reverting CSS...`);
         fs.writeFileSync(CONFIG.globalCssPath, originalCss);

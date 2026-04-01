@@ -3,16 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="404 — Page Not Found — sreeraj.dev">
-  <div class="container">
-    <div class="not-found">
-      <div class="not-found-code">404</div>
-      <h1 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: var(--color-text);">
-        Page not found
-      </h1>
-      <p style="font-size: 0.9375rem; color: var(--color-text-2);">
-        The page you're looking for doesn't exist.
-      </p>
-      <a href="/" class="btn btn-ghost">← Back home</a>
+  <section style="max-width: 700px; margin: 0 auto; padding: 10rem 2rem; text-align: center;">
+    <div style="font-family: var(--font-mono); font-size: 4rem; font-weight: 800; letter-spacing: -0.04em; opacity: 0.15; margin-bottom: 1rem;">
+      404
     </div>
-  </div>
+    <h1 class="page-title" style="font-size: 1.953rem; margin-bottom: 1rem;">Page not found</h1>
+    <p style="opacity: 0.5; margin-bottom: 2rem;">The page you're looking for doesn't exist.</p>
+    <a href="/" class="tag-pill" style="font-size: 0.875rem; padding: 8px 20px;">&larr; Back home</a>
+  </section>
 </BaseLayout>

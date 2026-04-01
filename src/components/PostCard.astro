@@ -1,6 +1,5 @@
 ---
 import FormattedDate from './FormattedDate.astro';
-import TagList from './TagList.astro';
 
 interface Props {
   title: string;
@@ -10,7 +9,6 @@ interface Props {
   featureImage?: string;
   tags?: string[];
   readingTime?: number;
-  variant?: 'default' | 'trek';
 }
 
 const {
@@ -21,13 +19,10 @@ const {
   featureImage = '',
   tags = [],
   readingTime = 1,
-  variant = 'default',
 } = Astro.props;
-
-const isTrek = variant === 'trek';
 ---
 
-<a href={`/${slug}/`} class={`post-card ${isTrek ? 'post-card-trek' : ''}`}>
+<a href={`/${slug}/`} class="post-card">
   {featureImage && (
     <img
       src={featureImage}
@@ -38,22 +33,21 @@ const isTrek = variant === 'trek';
     />
   )}
 
-  <div class="post-card-body">
+  <h3 class="post-card-title">{title}</h3>
+
+  {description && (
+    <p class="post-card-description">{description}</p>
+  )}
+
+  <div class="post-card-meta">
+    <FormattedDate date={pubDate} />
+    <span style="opacity: 0.4;">·</span>
+    <span>{readingTime} min read</span>
     {tags.length > 0 && (
-      <TagList tags={tags.slice(0, 3)} isTrek={isTrek} />
+      <>
+        <span style="opacity: 0.4;">·</span>
+        <span>{tags[0]}</span>
+      </>
     )}
-
-    <div class="post-card-title">{title}</div>
-
-    {description && (
-      <div class="post-card-desc">{description}</div>
-    )}
-
-    <div class="post-card-meta">
-      <span class="post-card-date">
-        <FormattedDate date={pubDate} />
-      </span>
-      <span class="post-card-reading-time">{readingTime} min read</span>
-    </div>
   </div>
 </a>

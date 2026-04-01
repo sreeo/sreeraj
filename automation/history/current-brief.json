@@ -1,0 +1,74 @@
+{
+  "generatedAt": "2026-03-22T07:51:15.929Z",
+  "seedTrend": {
+    "id": "kinetic-editorial",
+    "name": "Kinetic Editorial"
+  },
+  "selectedConceptId": "contextual-typography",
+  "brief": {
+    "conceptId": "contextual-typography",
+    "conceptName": "Contextual Typography Engine",
+    "visualThesis": "Typography becomes an intelligent layer that adapts not just visually but contextually—technical posts get monospace kinetic elements that highlight code concepts, while travel writing uses serif motion that evokes the rhythm of walking and discovery.",
+    "fitForSite": "Addresses the challenge of serving two distinct audiences (developers and adventure enthusiasts) by making typography itself convey the content's nature, helping readers immediately understand whether they're diving into a technical deep-dive or joining a mountain journey.",
+    "layoutSystem": "Standard editorial grid (12-column) but with dynamic type zones that expand/contract based on content complexity. Technical posts get wider code blocks, travel posts get narrower, more intimate text columns with room for kinetic pull quotes.",
+    "homepageArchitecture": "Traditional blog structure enhanced with typography previews—post cards show animated typography samples that demonstrate the reading experience. Recent posts grid with each card featuring live kinetic typography that matches the post's content type and tone.",
+    "typographySystem": "Dual-axis variable font system: JetBrains Mono Variable for technical content (animates between weights/widths when highlighting code concepts), Newsreader Variable for narratives (morphs between roman/italic for emphasis). Headlines 64-96px with content-aware kinetic behaviors.",
+    "spacingSystem": "Adaptive rhythm: technical content uses precise 8px grid with tight 1.5 line height, narrative content flows to 12px grid with generous 1.9 line height. Spacing animations smooth between these modes when content type changes.",
+    "colorStrategy": "Syntax-highlighting inspired palette for technical posts (subtle blues, greens for code elements), warm earth tones for travel content (ochre, forest green). Typography motion uses these contextual colors to reinforce content type.",
+    "motionPrinciples": "Content-aware animations: technical posts feature cursor-responsive code highlighting and variable font width changes that emphasize key terms. Travel posts use gentle baseline shifts and italic morphing that mimics natural speech rhythm and emotional beats.",
+    "componentDirectives": [
+      "Typography system must detect content type and adapt font choice automatically",
+      "Code snippets get interactive highlighting with kinetic emphasis on hover",
+      "Travel writing uses variable font slant to create natural speech rhythms",
+      "Pull quotes morph between technical precision and narrative flow",
+      "Reading progress indicators adapt to content type (code completion vs journey progress)",
+      "Comment and share interactions use contextual typography styling",
+      "Search results preview typography treatment of actual content"
+    ],
+    "mustAvoid": [
+      "One-size-fits-all typography that ignores content context",
+      "Overuse of animation that distracts from reading flow",
+      "Mixing technical and narrative typography within single posts",
+      "Complex font loading that delays contextual adaptations"
+    ],
+    "successCriteria": [
+      "Users can identify content type from typography before reading headlines",
+      "Technical posts feel more scannable with kinetic code emphasis",
+      "Travel posts create stronger emotional connection through typographic rhythm",
+      "Page loading with contextual typography remains under 1.5s",
+      "Cross-content navigation feels cohesive despite typography differences",
+      "Accessibility remains high across all contextual typography variations"
+    ],
+    "confidence": 8,
+    "reviewSummary": "Contextual Typography Engine wins by solving the core challenge of serving dual audiences through intelligent typography adaptation rather than layout gimmicks. The concept provides clear structural innovation—typography that contextually morphs between technical and narrative modes—while maintaining excellent readability and offering specific implementation guidance. Unlike the other concepts which risk becoming decorative distractions, this approach enhances content comprehension through purposeful kinetic typography that readers will actually benefit from during long-form technical reading."
+  },
+  "scorecard": [
+    {
+      "conceptId": "narrative-stream",
+      "structuralNovelty": 9,
+      "fitnessForBlog": 5,
+      "implementationClarity": 6,
+      "visualAmbition": 8,
+      "total": 28,
+      "verdict": "Highly novel but sacrifices reading experience for continuous scroll gimmick that will frustrate blog readers."
+    },
+    {
+      "conceptId": "contextual-typography",
+      "structuralNovelty": 8,
+      "fitnessForBlog": 9,
+      "implementationClarity": 8,
+      "visualAmbition": 8,
+      "total": 33,
+      "verdict": "Perfect balance of innovation and practicality with typography that actually enhances content comprehension."
+    },
+    {
+      "conceptId": "kinetic-wayfinding",
+      "structuralNovelty": 6,
+      "fitnessForBlog": 8,
+      "implementationClarity": 8,
+      "visualAmbition": 6,
+      "total": 28,
+      "verdict": "Solid navigation concept but lacks the structural ambition needed for memorable redesign impact."
+    }
+  ]
+}

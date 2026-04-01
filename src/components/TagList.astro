@@ -1,19 +1,18 @@
 ---
 interface Props {
   tags: string[];
-  isTrek?: boolean;
   linkable?: boolean;
 }
 
-const { tags, isTrek = false, linkable = false } = Astro.props;
+const { tags, linkable = false } = Astro.props;
 ---
 
-<div class="post-card-tags">
+<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
   {tags.map((tag) =>
     linkable ? (
-      <a href={`/tags/${tag}/`} class={`tag ${isTrek ? 'tag-trek' : ''}`}>{tag}</a>
+      <a href={`/tags/${tag}/`} class="tag-pill">{tag}</a>
     ) : (
-      <span class={`tag ${isTrek ? 'tag-trek' : ''}`}>{tag}</span>
+      <span class="tag-pill">{tag}</span>
     )
   )}
 </div>

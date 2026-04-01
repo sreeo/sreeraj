@@ -1,6 +1,6 @@
 {
-  "trend": "Neo-Editorial Dark",
-  "description": "Electric violet accent on deep dark background, Bricolage Grotesque display font, clean editorial hierarchy with asymmetric homepage hero and micro-delight interactions inspired by Linear.app and Vercel",
-  "primaryColor": "#7c6af7",
-  "fonts": ["Bricolage Grotesque", "Inter", "JetBrains Mono"]
+  "trend": "Neo-Brutalist Editorial",
+  "description": "Raw editorial design with exposed grid structures, Space Grotesk + JetBrains Mono typography, violet accent on deep dark, git-log timeline layout, and generative geometric canvas background",
+  "primaryColor": "#a78bfa",
+  "fonts": ["Space Grotesk", "Inter", "JetBrains Mono", "Lora"]
 }

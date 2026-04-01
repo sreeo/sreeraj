@@ -1,7 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
-import { getThemeForTags } from '../utils/theme';
 
 interface Post {
   data: {
@@ -19,43 +18,36 @@ interface Props {
   title: string;
   description?: string;
   posts: Post[];
-  icon?: string;
+  theme?: 'tech' | 'trek';
 }
 
-const { title, description = '', posts, icon = '' } = Astro.props;
+const { title, description = '', posts, theme = 'tech' } = Astro.props;
 ---
 
-<BaseLayout title={`${title} — sreeraj.dev`} description={description}>
-  <div class="container">
-    <div class="tag-page-header">
-      {icon && <div style="font-size: 2rem; margin-bottom: 12px;">{icon}</div>}
-      <h1 class="tag-page-title">{title}</h1>
-      {description && <p class="tag-page-subtitle">{description}</p>}
-    </div>
+<BaseLayout title={`${title} — sreeraj.dev`} description={description} theme={theme}>
+  <section style="max-width: 900px; margin: 0 auto; padding: 6rem 2rem 8rem;">
+    <header style="margin-bottom: 4rem;">
+      <h1 class="section-title">{title}</h1>
+      {description && <p class="page-description" style="margin-top: 1rem;">{description}</p>}
+      <p style="margin-top: 0.5rem; opacity: 0.5; font-size: 0.875rem;">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>
+    </header>
 
     {posts.length > 0 ? (
-      <div class="post-grid" style="padding-bottom: 96px;">
-        {posts.map((post) => {
-          const tags = post.data.tags ?? [];
-          const variant = getThemeForTags(tags) === 'trek' ? 'trek' : 'default';
-          return (
-            <PostCard
-              title={post.data.title}
-              slug={post.data.slug}
-              description={post.data.description}
-              pubDate={post.data.pubDate}
-              featureImage={post.data.featureImage}
-              tags={tags}
-              readingTime={post.data.readingTime}
-              variant={variant}
-            />
-          );
-        })}
+      <div style="display: grid; gap: 1.5rem;">
+        {posts.map((post) => (
+          <PostCard
+            title={post.data.title}
+            slug={post.data.slug}
+            description={post.data.description}
+            pubDate={post.data.pubDate}
+            featureImage={post.data.featureImage}
+            tags={post.data.tags}
+            readingTime={post.data.readingTime}
+          />
+        ))}
       </div>
     ) : (
-      <div class="empty-state" style="padding-bottom: 96px;">
-        <p class="empty-state-text">No posts yet.</p>
-      </div>
+      <p style="opacity: 0.5;">No posts found.</p>
     )}
-  </div>
+  </section>
 </BaseLayout>

@@ -8,19 +8,15 @@ const { Content } = about ? await render(about) : { Content: null };
 ---
 
 <BaseLayout title="About — sreeraj.dev" description="About Sreeraj — software engineer, DevOps practitioner, and Himalayan trekker.">
-  <div class="container">
-    <div class="post-header" style="padding-bottom: 48px; border-bottom: 1px solid var(--color-border); margin-bottom: 48px;">
-      <h1 class="post-title">About</h1>
-    </div>
+  <article style="max-width: 700px; margin: 0 auto; padding: 6rem 2rem 8rem;">
+    <h1 class="page-title" style="margin-bottom: 3rem;">About</h1>
 
     {Content ? (
-      <div class="prose" style="padding-bottom: 96px;">
+      <div class="prose">
         <Content />
       </div>
     ) : (
-      <div class="empty-state">
-        <p class="empty-state-text">Page not found.</p>
-      </div>
+      <p style="opacity: 0.5;">Page not found.</p>
     )}
-  </div>
+  </article>
 </BaseLayout>

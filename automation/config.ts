@@ -30,6 +30,16 @@ export const CONFIG = {
   ],
   maxRetries: 2,
 
+  // Vision quality gate
+  visionModel: 'claude-sonnet-4-20250514' as const,
+  visionThreshold: 6.0,
+  visionMaxScreenshots: 4,
+  visionEnabled: true,
+
+  // Vision feedback loop
+  maxVisionPasses: 3,
+  visionFeedbackEnabled: true,
+
   // Archive
   maxArchiveMonths: 24,
 } as const;

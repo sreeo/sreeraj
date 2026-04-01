@@ -2,10 +2,12 @@ import { execSync, spawn, ChildProcess } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { CONFIG } from './config.js';
+import type { VisionScore } from './vision-quality-gate.js';
 
 export interface ValidationResult {
   passed: boolean;
   steps: StepResult[];
+  visionScore?: VisionScore;
 }
 
 interface StepResult {
@@ -150,11 +152,27 @@ export async function validateDesign(css: string): Promise<ValidationResult> {
   const fontResult = await checkFonts(css);
   steps.push(fontResult);
 
+  // Step 7: Vision Quality Gate
+  let visionScore: VisionScore | undefined;
+  if (CONFIG.visionEnabled) {
+    console.log('Step 7: Vision quality check...');
+    const visionResult = await checkVisionQuality();
+    steps.push(visionResult);
+    if (visionResult.visionScore) {
+      visionScore = visionResult.visionScore;
+    }
+  }
+
+  // Steps 0-4 (contract, contrast, build, render, visual) are critical
+  // Step 5 (a11y) and Step 6 (fonts) are non-blocking
+  // Step 7 (vision) is critical when enabled
   const criticalPassed = steps
-    .filter((_, i) => i < 5) // First 5 steps are critical
+    .filter((_, i) => i < 5)
     .every(s => s.passed);
 
-  return { passed: criticalPassed, steps };
+  const visionPassed = !CONFIG.visionEnabled || steps.find(s => s.name === 'Vision Quality')?.passed !== false;
+
+  return { passed: criticalPassed && visionPassed, steps, visionScore };
 }
 
 // --- Contrast checks ---
@@ -448,6 +466,59 @@ async function checkFonts(css: string): Promise<StepResult> {
     return { name: 'Font Check', passed: false, message: issues.join(', ') };
   }
   return { name: 'Font Check', passed: true, message: `Fonts verified: ${fonts.join(', ')}` };
+}
+
+// --- Vision quality gate ---
+
+interface VisionStepResult extends StepResult {
+  visionScore?: VisionScore;
+}
+
+async function checkVisionQuality(): Promise<VisionStepResult> {
+  try {
+    const { evaluateVisualQuality } = await import('./vision-quality-gate.js');
+    const result = await evaluateVisualQuality(CONFIG.testOutputDir);
+    const s = result.score;
+
+    const details = [
+      `Overall: ${s.overall}/10`,
+      `Typography: ${s.typography}`,
+      `Spacing: ${s.spacing}`,
+      `Color: ${s.colorHarmony}`,
+      `Hierarchy: ${s.visualHierarchy}`,
+      `Polish: ${s.polish}`,
+      `Cohesion: ${s.cohesion}`,
+      `Recommendation: ${s.recommendation}`,
+    ].join(', ');
+
+    if (s.issues.length > 0) {
+      console.log(`  Issues: ${s.issues.join('; ')}`);
+    }
+
+    return {
+      name: 'Vision Quality',
+      passed: result.passed,
+      message: result.passed
+        ? `Passed (${details})`
+        : `Below threshold (${details})`,
+      visionScore: s,
+    };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    // Vision gate failure is non-fatal if API is unavailable
+    if (msg.includes('ANTHROPIC_API_KEY') || msg.includes('401') || msg.includes('fetch')) {
+      return {
+        name: 'Vision Quality',
+        passed: true,
+        message: `Skipped: ${msg}`,
+      };
+    }
+    return {
+      name: 'Vision Quality',
+      passed: false,
+      message: `Vision evaluation error: ${msg}`,
+    };
+  }
 }
 
 // --- Archive verification (called by orchestrator after archiving) ---
