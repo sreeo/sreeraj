@@ -1,6 +1,8 @@
-name: Full Site Rebuild
+name: Monthly Full Redesign
 
 on:
+  schedule:
+    - cron: '0 3 1 * *'  # 1st of every month at 03:00 UTC
   workflow_dispatch:
     inputs:
       trend:
@@ -8,15 +10,25 @@ on:
         required: false
         default: ''
         type: string
+      dry_run:
+        description: 'Dry run (validate only, no PR)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 permissions:
   contents: write
   pull-requests: write
+  pages: write
+  id-token: write
 
 jobs:
   rebuild:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -34,17 +46,56 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Install Playwright
-        run: npx playwright install --with-deps chromium
+      - name: Install automation dependencies
+        run: cd automation && npm ci
 
-      - name: Build prompt
+      - name: Install Playwright
+        run: cd automation && npx playwright install --with-deps chromium
+
+      - name: Discover trend
+        id: trend
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           TREND="${{ inputs.trend }}"
           if [ -z "$TREND" ]; then
-            TREND="Search the web for the most cutting-edge web design trends right now and pick one that would make a stunning personal tech blog"
+            # Use trend discovery for scheduled runs
+            TREND=$(cd automation && npx tsx -e "
+              import { discoverTrend } from './trend-discovery.js';
+              import fs from 'fs';
+              const logPath = 'history/design-log.json';
+              const log = fs.existsSync(logPath) ? JSON.parse(fs.readFileSync(logPath, 'utf-8')) : { designs: [] };
+              const lastTrend = log.designs.length > 0 ? log.designs[log.designs.length - 1].trendName : null;
+              const trend = await discoverTrend(log, lastTrend);
+              console.log(trend.name + ' — ' + trend.description);
+            " 2>/dev/null || echo "Search the web for the most cutting-edge web design trends right now and pick one that would make a stunning personal tech blog")
           fi
-          sed "s|{{TREND}}|${TREND}|g" automation/prompts/full-rebuild.md > /tmp/rebuild-prompt.md
+          echo "TREND=${TREND}" >> $GITHUB_ENV
           echo "Trend: ${TREND}"
+
+      - name: Build prompt with design history
+        run: |
+          # Start with the template
+          cp automation/prompts/full-rebuild.md /tmp/rebuild-prompt.md
+
+          # Inject trend
+          sed -i "s|{{TREND}}|${TREND}|g" /tmp/rebuild-prompt.md
+
+          # Inject design history for cross-month evolution
+          if [ -f automation/history/design-log.json ]; then
+            HISTORY=$(cat automation/history/design-log.json | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for d in data.get('designs', [])[-6:]:
+              print(f\"- {d['month']}: {d['trendName']} ({d['status']})\")
+          " 2>/dev/null || echo "No previous designs yet.")
+          else
+            HISTORY="No previous designs yet."
+          fi
+          sed -i "s|{{DESIGN_HISTORY}}|${HISTORY}|g" /tmp/rebuild-prompt.md
+
+          echo "=== Prompt built ==="
+          head -5 /tmp/rebuild-prompt.md
 
       - name: Run Claude Code rebuild
         env:
@@ -58,27 +109,112 @@ jobs:
       - name: Build final site
         run: npm run build
 
-      - name: Install automation deps
-        run: cd automation && npm ci
-
       - name: Validate with Playwright
         run: cd automation && npx tsx run-validation.ts ../src/styles/global.css
+
+      - name: Vision feedback loop
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          MAX_PASSES=3
+          PASS=1
+
+          while [ $PASS -le $MAX_PASSES ]; do
+            echo "=== Vision evaluation pass $PASS/$MAX_PASSES ==="
+
+            # Run vision gate
+            RESULT=$(cd automation && npx tsx vision-quality-gate.ts test-output/ --json 2>/dev/null) || {
+              echo "Vision gate failed to run, accepting current design"
+              break
+            }
+
+            SCORE=$(echo "$RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin)['score']['overall'])" 2>/dev/null || echo "0")
+            PASSED=$(echo "$RESULT" | python3 -c "import json,sys; print(json.load(sys.stdin)['passed'])" 2>/dev/null || echo "True")
+            ISSUES=$(echo "$RESULT" | python3 -c "import json,sys; print('. '.join(json.load(sys.stdin)['score']['issues']))" 2>/dev/null || echo "")
+
+            echo "Score: $SCORE/10 | Passed: $PASSED"
+
+            if [ "$PASSED" = "True" ] || [ "$PASSED" = "true" ]; then
+              echo "Vision gate passed with score $SCORE"
+              # Save score for PR body
+              echo "$SCORE" > /tmp/vision-score.txt
+              echo "$RESULT" > /tmp/vision-result.json
+              break
+            fi
+
+            if [ $PASS -eq $MAX_PASSES ]; then
+              echo "Final vision score: $SCORE (accepting best attempt after $MAX_PASSES passes)"
+              echo "$SCORE" > /tmp/vision-score.txt
+              echo "$RESULT" > /tmp/vision-result.json
+              break
+            fi
+
+            # Feed issues back to Claude Code for fixes
+            echo "Issues to fix: $ISSUES"
+            claude -p "Your design scored $SCORE/10 on visual quality evaluation. Here are the specific issues found:
+
+          $ISSUES
+
+          Please fix these visual quality issues. Focus on:
+          1. The specific problems listed above
+          2. Making the design feel more polished and intentional
+          3. Ensuring visual hierarchy is clear and typography is well-crafted
+
+          After fixing, run: npm run build && cd automation && npx tsx run-validation.ts ../src/styles/global.css" \
+              --print \
+              --dangerously-skip-permissions \
+              --max-turns 20
+
+            # Rebuild and re-validate
+            npm run build
+            cd automation && npx tsx run-validation.ts ../src/styles/global.css
+            cd ..
+
+            PASS=$((PASS + 1))
+          done
 
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rebuild-screenshots
+          name: redesign-screenshots
           path: automation/test-output/
           retention-days: 30
 
+      - name: Update design log
+        if: inputs.dry_run != 'true'
+        run: |
+          cd automation && npx tsx -e "
+            import fs from 'fs';
+            const logPath = 'history/design-log.json';
+            const log = fs.existsSync(logPath) ? JSON.parse(fs.readFileSync(logPath, 'utf-8')) : { designs: [] };
+            const now = new Date();
+            const month = now.toISOString().slice(0, 7);
+            log.designs.push({
+              month,
+              trendId: 'full-rebuild',
+              trendName: process.env.TREND || 'Full Rebuild',
+              status: 'success',
+              timestamp: now.toISOString(),
+              description: process.env.TREND || 'Full site rebuild',
+              visionScore: (() => {
+                try {
+                  const r = JSON.parse(fs.readFileSync('/tmp/vision-result.json', 'utf-8'));
+                  return r.score?.overall;
+                } catch { return undefined; }
+              })(),
+            });
+            fs.writeFileSync(logPath, JSON.stringify(log, null, 2));
+          "
+
       - name: Create PR
+        if: inputs.dry_run != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          TREND="${{ inputs.trend }}"
-          [ -z "$TREND" ] && TREND="auto-discovered"
+          TREND_SHORT=$(echo "$TREND" | head -c 60)
+          VISION_SCORE=$(cat /tmp/vision-score.txt 2>/dev/null || echo "N/A")
 
           BRANCH="rebuild/$(date +%Y%m%d-%H%M%S)"
           git checkout -b "$BRANCH"
@@ -87,21 +223,25 @@ jobs:
             echo "No changes generated"
             exit 0
           fi
-          git commit -m "Full site rebuild: ${TREND}"
+          git commit -m "Monthly redesign: ${TREND_SHORT}"
           git push -u origin "$BRANCH"
 
           gh pr create \
-            --title "Full rebuild: ${TREND}" \
+            --title "Monthly redesign: ${TREND_SHORT}" \
             --body "$(cat <<PREOF
-          ## Full Site Rebuild
+          ## Monthly Full Redesign
 
           **Design style:** ${TREND}
           **Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          **Vision quality score:** ${VISION_SCORE}/10
 
-          Review the Cloudflare preview URL in the checks below.
-          Screenshots available in [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+          ### Review checklist
+          - [ ] Check the deploy preview URL in the checks below
+          - [ ] Review screenshots in [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - [ ] Verify the design matches the stated style
+          - [ ] Check mobile responsiveness
 
-          If it looks good, merge this PR to deploy to production.
+          If it looks good, merge to deploy.
           PREOF
           )" \
             --head "$BRANCH" \

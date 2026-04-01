@@ -1,9 +1,7 @@
-name: Monthly Redesign
+name: CSS-Only Redesign (Manual)
 
 on:
-  schedule:
-    - cron: '0 3 1 * *'  # 1st of every month at 03:00 UTC
-  workflow_dispatch:        # Manual trigger for testing
+  workflow_dispatch:        # Manual trigger only — monthly cron now uses full-redesign.yml
     inputs:
       dry_run:
         description: 'Dry run (generate + validate only, no commit)'
@@ -55,7 +53,7 @@ jobs:
         run: cd automation && npm ci
 
       - name: Install Playwright
-        run: npx playwright install --with-deps chromium
+        run: cd automation && npx playwright install --with-deps chromium
 
       - name: Run redesign
         env:
