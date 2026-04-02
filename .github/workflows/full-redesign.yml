@@ -68,7 +68,15 @@ jobs:
               const lastTrend = log.designs.length > 0 ? log.designs[log.designs.length - 1].trendName : null;
               const trend = await discoverTrend(log, lastTrend);
               console.log(trend.name + ' — ' + trend.description);
-            " 2>/dev/null || echo "Search the web for the most cutting-edge web design trends right now and pick one that would make a stunning personal tech blog")
+            " 2>&1) || TREND=""
+            if [ -z "$TREND" ] || echo "$TREND" | grep -qi "error"; then
+              echo "::warning::Trend discovery failed, using fallback from registry"
+              TREND=$(cd automation && npx tsx -e "
+                import { selectTrend } from './trend-registry.js';
+                const trend = selectTrend({ designs: [] });
+                console.log(trend.name + ' — ' + trend.description);
+              ")
+            fi
           fi
           echo "TREND=${TREND}" >> $GITHUB_ENV
           echo "Trend: ${TREND}"
@@ -104,7 +112,10 @@ jobs:
           claude -p "$(cat /tmp/rebuild-prompt.md)" \
             --print \
             --dangerously-skip-permissions \
-            --max-turns 50
+            --max-turns 50 || {
+            echo "::warning::Claude Code exited with code $? (may have hit max turns)"
+            echo "Continuing with whatever changes were made..."
+          }
 
       - name: Build final site
         run: npm run build
