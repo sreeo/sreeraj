@@ -2,128 +2,147 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
-import FormattedDate from '../components/FormattedDate.astro';
-import GridField from '../components/GridField.astro';
+import TopoDivider from '../components/TopoDivider.astro';
+import { getThemeForTags } from '../utils/theme';
 
-const allPosts = (await getCollection('blog'))
+const posts = (await getCollection('blog'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-const featuredPosts = allPosts.filter((p) => p.data.featured);
-const featuredPost = featuredPosts[0] ?? allPosts[0];
-const recentPosts = allPosts.filter((p) => p.data.slug !== featuredPost?.data.slug).slice(0, 8);
-const remainingPosts = allPosts.filter((p) => p.data.slug !== featuredPost?.data.slug).slice(8);
+const featuredPosts = posts.filter((p) => p.data.featured);
 
-function hashSlug(slug: string) {
+// Build git log data
+function shortHash(slug: string): string {
   let h = 0;
   for (let i = 0; i < slug.length; i++) h = ((h << 5) - h + slug.charCodeAt(i)) | 0;
   return Math.abs(h).toString(16).slice(0, 7);
 }
+
+function getBranch(tags: string[]): { name: string; color: string } {
+  if (tags.some(t => ['treks', 'trek'].includes(t))) return { name: 'treks', color: 'gl-branch-trek' };
+  if (tags.some(t => ['postgres'].includes(t))) return { name: 'postgres', color: 'gl-branch-postgres' };
+  if (tags.some(t => ['devops', 'kubernetes', 'k8s', 'aws'].includes(t))) return { name: 'devops', color: 'gl-branch-devops' };
+  return { name: 'programming', color: 'gl-branch-programming' };
+}
+
+// Group posts into branches and build graph
+type GitEntry = {
+  hash: string;
+  slug: string;
+  title: string;
+  date: string;
+  tags: string[];
+  branch: { name: string; color: string };
+  graph: string;
+};
+
+let lastBranch = '';
+const gitEntries: GitEntry[] = posts.map((post, i) => {
+  const branch = getBranch(post.data.tags);
+  const isMainBranch = branch.name === 'devops' || branch.name === 'programming';
+  const isBranchSwitch = branch.name !== lastBranch;
+
+  let graph = '*   ';
+  if (!isMainBranch) {
+    graph = '| * ';
+  }
+
+  // Show merge/branch points
+  let prefix = '';
+  if (isBranchSwitch && i > 0) {
+    if (!isMainBranch && (lastBranch === 'devops' || lastBranch === 'programming' || lastBranch === '')) {
+      prefix = '| |\n';
+    } else if (isMainBranch && lastBranch !== '' && lastBranch !== 'devops' && lastBranch !== 'programming') {
+      prefix = '|/\n';
+    }
+  }
+
+  lastBranch = branch.name;
+
+  return {
+    hash: shortHash(post.data.slug),
+    slug: post.data.slug,
+    title: post.data.title,
+    date: post.data.pubDate.toISOString().split('T')[0],
+    tags: post.data.tags.slice(0, 3),
+    branch,
+    graph: prefix + graph,
+  };
+});
 ---
 
-<BaseLayout title="sreeraj.dev — DevOps, Programming, and Treks" description="Engineering blog on DevOps, databases, programming, and mountain treks.">
+<BaseLayout title="sreeraj.dev — DevOps, Programming, and Treks" theme="tech">
+  <div class="mb-8">
+    <p class="font-mono text-xs mb-2" style="color: var(--color-accent); opacity: 0.6;">
+      ~/sreeraj.dev
+    </p>
+    <h1 class="text-3xl font-bold mb-1" style="color: var(--color-tech-text);">
+      sreeraj.dev
+    </h1>
+    <p style="color: var(--color-tech-text-muted); font-size: 0.9375rem;">
+      DevOps engineer, Himalayan trekker, occasional open-source contributor.
+    </p>
+  </div>
 
-  <!-- Hero -->
-  <section style="position: relative; padding: 8rem 2rem 6rem; overflow: hidden;">
-    <GridField />
-    <div style="position: relative; z-index: 1; max-width: 900px; margin: 0 auto;">
-      <div style="font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.5; margin-bottom: 1.5rem;">
-        ~/sreeraj.dev
-      </div>
-      <h1 style="font-family: var(--font-display); font-weight: 800; font-size: clamp(2.5rem, 6vw, 3.815rem); letter-spacing: -0.04em; line-height: 1.05; margin: 0 0 1.5rem;">
-        DevOps, databases,<br />and mountain treks<span class="cursor-blink">_</span>
-      </h1>
-      <p style="font-size: 1.125rem; line-height: 1.7; opacity: 0.65; max-width: 540px;">
-        Infrastructure deep-dives, Postgres internals, Django patterns, and narratives from Himalayan trails.
-      </p>
+  <!-- Git Log Timeline -->
+  <section class="mb-12">
+    <h2 class="section-title text-lg mb-4 font-mono" style="color: var(--color-tech-text-muted); font-size: 0.8125rem;">
+      $ git log --oneline --graph --all
+    </h2>
+    <div class="git-log-timeline">
+      {gitEntries.map((entry) => (
+        <div class="gl-entry">
+          <pre class="gl-graph-col">{entry.graph.split('\n').map(line => <span class="gl-graph">{line}</span>)}</pre>
+          <a href={`/${entry.slug}/`} class="gl-content">
+            <span class="gl-hash">{entry.hash}</span>
+            <span class:list={['gl-tag', entry.branch.color]}>
+              ({entry.tags.join(', ')})
+            </span>
+            <span class="gl-msg">{entry.title}</span>
+            <span class="gl-date">{entry.date}</span>
+          </a>
+        </div>
+      ))}
     </div>
   </section>
 
-  <div style="max-width: 900px; margin: 0 auto; padding: 0 2rem 8rem;">
+  <TopoDivider seed={42} />
 
-    <!-- Featured Post -->
-    {featuredPost && (
-      <section style="margin-bottom: 6rem;">
-        <h2 class="section-title" style="margin-bottom: 2rem;">Featured</h2>
-        <a href={`/${featuredPost.data.slug}/`} class="post-card" style="padding: 0; overflow: hidden;">
-          {featuredPost.data.featureImage && (
-            <img
-              src={featuredPost.data.featureImage}
-              alt={featuredPost.data.title}
-              style="width: 100%; height: 280px; object-fit: cover;"
-              loading="eager"
-              decoding="async"
-            />
-          )}
-          <div style="padding: 2rem;">
-            <h3 class="post-card-title" style="font-size: 1.563rem; letter-spacing: -0.03em;">{featuredPost.data.title}</h3>
-            {featuredPost.data.description && (
-              <p class="post-card-description">{featuredPost.data.description}</p>
-            )}
-            <div class="post-card-meta" style="margin-top: 1rem;">
-              <FormattedDate date={featuredPost.data.pubDate} />
-              <span style="opacity: 0.4;">·</span>
-              <span>{featuredPost.data.readingTime ?? 1} min read</span>
-            </div>
-          </div>
-        </a>
-      </section>
-    )}
-
-    <!-- Git Log Timeline -->
-    <section style="margin-bottom: 6rem;">
-      <h2 class="section-title" style="margin-bottom: 2rem;">Latest</h2>
-      <div class="git-log-timeline">
-        {recentPosts.map((post) => (
-          <a href={`/${post.data.slug}/`} class="gl-entry">
-            <span class="gl-hash">{hashSlug(post.data.slug)}</span>
-            <span class="gl-msg">{post.data.title}</span>
-            <span class="gl-date"><FormattedDate date={post.data.pubDate} /></span>
-          </a>
+  <!-- Card Grid (secondary view) -->
+  {featuredPosts.length > 0 && (
+    <section class="mb-12">
+      <h2 class="section-title text-2xl mb-6">Featured</h2>
+      <div class="grid gap-6 sm:grid-cols-2">
+        {featuredPosts.map((post) => (
+          <PostCard
+            title={post.data.title}
+            slug={post.data.slug}
+            description={post.data.description}
+            pubDate={post.data.pubDate}
+            featureImage={post.data.featureImage}
+            tags={post.data.tags}
+            readingTime={post.data.readingTime}
+            variant={getThemeForTags(post.data.tags)}
+          />
         ))}
       </div>
     </section>
+  )}
 
-    <!-- Browse Categories -->
-    <section style="margin-bottom: 6rem;">
-      <h2 class="section-title" style="margin-bottom: 2rem;">Browse</h2>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
-        <a href="/devops/" class="post-card" style="padding: 1.5rem;">
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.05em;">Category</div>
-          <div class="post-card-title" style="margin-top: 0.5rem;">DevOps</div>
-        </a>
-        <a href="/programming/" class="post-card" style="padding: 1.5rem;">
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.05em;">Category</div>
-          <div class="post-card-title" style="margin-top: 0.5rem;">Programming</div>
-        </a>
-        <a href="/postgres/" class="post-card" style="padding: 1.5rem;">
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.05em;">Category</div>
-          <div class="post-card-title" style="margin-top: 0.5rem;">PostgreSQL</div>
-        </a>
-        <a href="/treks/" class="post-card" style="padding: 1.5rem;">
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.05em;">Category</div>
-          <div class="post-card-title" style="margin-top: 0.5rem;">Treks</div>
-        </a>
-      </div>
-    </section>
-
-    <!-- Remaining Posts Grid -->
-    {remainingPosts.length > 0 && (
-      <section>
-        <h2 class="section-title" style="margin-bottom: 2rem;">Archive</h2>
-        <div style="display: grid; gap: 1.5rem;">
-          {remainingPosts.map((post) => (
-            <PostCard
-              title={post.data.title}
-              slug={post.data.slug}
-              description={post.data.description}
-              pubDate={post.data.pubDate}
-              featureImage={post.data.featureImage}
-              tags={post.data.tags}
-              readingTime={post.data.readingTime}
-            />
-          ))}
-        </div>
-      </section>
-    )}
-  </div>
+  <section>
+    <h2 class="section-title text-2xl mb-6">All Posts</h2>
+    <div class="grid gap-6 sm:grid-cols-2">
+      {posts.map((post) => (
+        <PostCard
+          title={post.data.title}
+          slug={post.data.slug}
+          description={post.data.description}
+          pubDate={post.data.pubDate}
+          featureImage={post.data.featureImage}
+          tags={post.data.tags}
+          readingTime={post.data.readingTime}
+          variant={getThemeForTags(post.data.tags)}
+        />
+      ))}
+    </div>
+  </section>
 </BaseLayout>

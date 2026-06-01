@@ -2,15 +2,13 @@
 const year = new Date().getFullYear();
 ---
 
-<footer class="site-footer">
-  <div style="margin-bottom: 1rem;">
-    <a href="/about/">about</a>
-    <span style="margin: 0 0.5rem; opacity: 0.3;">/</span>
-    <a href="/tags/">tags</a>
-    <span style="margin: 0 0.5rem; opacity: 0.3;">/</span>
-    <a href="/archive/">archive</a>
-    <span style="margin: 0 0.5rem; opacity: 0.3;">/</span>
-    <a href="/rss.xml">rss</a>
+<footer class="site-footer mt-16">
+  <div class="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+    <p>&copy; {year} Sreeraj Rajan</p>
+    <nav class="flex items-center gap-6">
+      <a href="/contact/" class="transition-colors">Contact</a>
+      <a href="/rss.xml" class="transition-colors">RSS</a>
+      <a href="/tags/" class="transition-colors">Tags</a>
+    </nav>
   </div>
-  <div>&copy; {year} sreeraj.dev</div>
 </footer>
