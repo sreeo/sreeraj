@@ -45,8 +45,9 @@ jobs:
       - name: Install site dependencies
         run: npm ci
 
-      - name: Install Claude Code (Agent SDK runtime)
-        run: npm install -g @anthropic-ai/claude-code
+      # NOTE: do NOT install @anthropic-ai/claude-code globally — the Agent SDK
+      # bundles its own runtime, and a conflicting global install breaks auth
+      # (headless 401 "Invalid API key").
 
       - name: Install automation dependencies
         run: cd automation && npm install
@@ -61,9 +62,33 @@ jobs:
 
       - name: Install Webwright (best effort, non-blocking)
         continue-on-error: true
+        timeout-minutes: 6
         run: |
-          pip install webwright || echo "::warning::webwright install failed — stage will run on geometry only"
+          # Microsoft Research Webwright — installs from git source. (The PyPI
+          # name "webwright" is an unrelated project; do NOT use it.)
+          pip install "git+https://github.com/microsoft/webwright.git" \
+            || echo "::warning::webwright install failed — stage will run on geometry only"
           python -m playwright install chromium || true
+
+      - name: Validate ANTHROPIC_API_KEY
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # Strip any stray CR/LF a pasted secret may carry.
+          KEY="$(printf '%s' "$ANTHROPIC_API_KEY" | tr -d '\r\n')"
+          echo "key length: ${#KEY}"
+          CODE=$(curl -s -o /tmp/key_check.json -w "%{http_code}" https://api.anthropic.com/v1/messages \
+            -H "x-api-key: ${KEY}" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d '{"model":"claude-sonnet-4-6","max_tokens":4,"messages":[{"role":"user","content":"ping"}]}')
+          echo "Anthropic /v1/messages HTTP status: ${CODE}"
+          if [ "$CODE" = "401" ] || [ "$CODE" = "403" ]; then
+            echo "::error::ANTHROPIC_API_KEY is rejected by the API (HTTP ${CODE}). The secret is invalid/expired."
+            cat /tmp/key_check.json
+            exit 1
+          fi
+          echo "Key authenticates (HTTP ${CODE})."
 
       - name: Run Layout QA & Fix stage
         id: qa
@@ -71,6 +96,8 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           cd automation
+          # Normalize the key for the SDK runtime too.
+          export ANTHROPIC_API_KEY="$(printf '%s' "$ANTHROPIC_API_KEY" | tr -d '\r\n')"
           set +e
           npx tsx layout-qa-stage.ts
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
