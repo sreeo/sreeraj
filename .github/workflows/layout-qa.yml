@@ -1,0 +1,135 @@
+name: Layout QA (standalone)
+
+# Runs the deterministic + agentic Layout QA & Fix stage against the CURRENT
+# committed CSS — no creative redesign. Used to verify the stage end-to-end and
+# as a manual touch-up tool. It never deploys; it only opens a PR when explicitly
+# dispatched with dry_run=false.
+
+on:
+  # Auto-run on this feature branch so we can verify the stage in real CI without
+  # needing the workflow on the default branch. Remove this branch entry before
+  # merging to main (keep workflow_dispatch for manual use).
+  push:
+    branches:
+      - 'feat/layout-qa-stage'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (verify only, never open a PR)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  layout-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install site dependencies
+        run: npm ci
+
+      - name: Install Claude Code (Agent SDK runtime)
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Install automation dependencies
+        run: cd automation && npm install
+
+      - name: Install Playwright (Node)
+        run: cd automation && npx playwright install --with-deps chromium
+
+      - name: Setup Python (for Webwright)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Webwright (best effort, non-blocking)
+        continue-on-error: true
+        run: |
+          pip install webwright || echo "::warning::webwright install failed — stage will run on geometry only"
+          python -m playwright install chromium || true
+
+      - name: Run Layout QA & Fix stage
+        id: qa
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          cd automation
+          set +e
+          npx tsx layout-qa-stage.ts
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Capture CSS diff
+        if: always()
+        run: |
+          git diff -- src/styles/global.css > /tmp/global-css.diff || true
+          cp /tmp/global-css.diff automation/test-output/global-css.diff 2>/dev/null || true
+          echo "=== global.css diff (fixes applied by the stage) ==="
+          cat /tmp/global-css.diff || echo "(no changes)"
+
+      - name: Upload Layout QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: layout-qa-output
+          path: |
+            automation/test-output/
+          retention-days: 14
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Layout QA result"
+            echo ""
+            echo "Stage exit code: \`${{ steps.qa.outputs.exit_code }}\` (0 = clean / fixed, 1 = issues remain)"
+            echo ""
+            if [ -f automation/test-output/layout-qa-summary.md ]; then
+              cat automation/test-output/layout-qa-summary.md
+            fi
+            echo ""
+            echo "<details><summary>global.css diff</summary>"
+            echo ""
+            echo '```diff'
+            cat /tmp/global-css.diff 2>/dev/null || echo "(no changes)"
+            echo '```'
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open PR with fixes
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet -- src/styles/global.css; then
+            echo "No CSS changes to PR."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          BRANCH="layout-qa/$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "Layout QA: fix geometry defects"
+          git push -u origin "$BRANCH"
+          gh pr create \
+            --title "Layout QA: fix geometry defects" \
+            --body-file automation/test-output/layout-qa-summary.md \
+            --head "$BRANCH" --base main
