@@ -2,15 +2,15 @@
 import { getCollection } from 'astro:content';
 import TagLayout from '../layouts/TagLayout.astro';
 
-const PROGRAMMING_TAGS = ['python', 'django', 'java', 'spring', 'kafka', 'faust', 'programming', 'tech'];
+const programmingTags = ['python', 'django', 'java', 'spring batch', 'kafka', 'faust'];
 
 const posts = (await getCollection('blog'))
-  .filter((p) => p.data.tags?.some((t) => PROGRAMMING_TAGS.includes(t)))
+  .filter((p) => p.data.tags.some((t) => programmingTags.includes(t)))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <TagLayout
   title="Programming"
-  description="Django, Java, Python, Kafka, and software engineering patterns."
+  description="Posts about Python, Django, Java, and other programming topics."
   posts={posts}
 />

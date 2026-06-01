@@ -3,12 +3,12 @@ import { getCollection } from 'astro:content';
 import TagLayout from '../layouts/TagLayout.astro';
 
 const posts = (await getCollection('blog'))
-  .filter((p) => p.data.tags?.some((t) => ['postgres', 'postgresql', 'pgbouncer', 'rds'].includes(t)))
+  .filter((p) => p.data.tags.some((t) => ['postgres', 'pgbouncer'].includes(t)))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <TagLayout
-  title="PostgreSQL"
-  description="Indexes, performance, UUIDs, ULID, and Postgres internals."
+  title="Postgres"
+  description="Posts about PostgreSQL, performance, indexing, and database management."
   posts={posts}
 />

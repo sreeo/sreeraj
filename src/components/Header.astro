@@ -1,255 +1,185 @@
 ---
-const pathname = Astro.url.pathname;
+interface Props {
+  theme?: 'tech' | 'trek';
+}
+
+const { theme = 'tech' } = Astro.props;
 
 const navItems = [
-  { label: 'About', href: '/about/' },
-  { label: 'DevOps', href: '/devops/' },
-  { label: 'Programming', href: '/programming/' },
-  { label: 'PostgreSQL', href: '/postgres/' },
-  { label: 'Treks', href: '/treks/' },
-  { label: 'Archive', href: '/archive/' },
+  { label: 'Home', href: '/', icon: null },
+  { label: 'About', href: '/about/', icon: null },
+  { label: 'DevOps', href: '/devops/', icon: 'led' },
+  { label: 'Treks', href: '/treks/', icon: 'flags' },
+  { label: 'Programming', href: '/programming/', icon: 'brackets' },
+  { label: 'Postgres', href: '/postgres/', icon: 'elephant' },
 ];
 
-function isActive(href: string) {
-  if (href === '/') return pathname === '/';
-  return pathname.startsWith(href);
-}
+const currentPath = Astro.url.pathname;
 ---
 
-<header class="site-header">
-  <div class="header-inner">
-    <a href="/" class="header-brand" aria-label="sreeraj.dev home">
-      <span class="header-brand-name">sreeraj.dev</span>
-      <span class="header-brand-cursor" aria-hidden="true">_</span>
+<header class="nav-bar sticky top-0 z-50">
+  <nav class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="/" class="nav-brand text-xl">
+      sreeraj.dev
     </a>
 
-    <nav class="header-nav" aria-label="Main navigation">
+    <button
+      id="menu-toggle"
+      class="md:hidden p-2 nav-link"
+      aria-label="Toggle menu"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+
+    <ul class="hidden md:flex items-center gap-6 text-sm font-medium">
       {navItems.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            class:list={[
+              'nav-link transition-colors inline-flex items-center gap-1.5',
+              currentPath === item.href && 'active',
+            ]}
+          >
+            {item.icon === 'led' && (
+              <span class="signal-led" aria-hidden="true"></span>
+            )}
+            {item.icon === 'flags' && (
+              <span class="signal-flags" aria-hidden="true">
+                <span class="sf sf-1"></span>
+                <span class="sf sf-2"></span>
+                <span class="sf sf-3"></span>
+                <span class="sf sf-4"></span>
+                <span class="sf sf-5"></span>
+              </span>
+            )}
+            {item.icon === 'brackets' && (
+              <span class="signal-brackets" aria-hidden="true">{`{}`}</span>
+            )}
+            {item.icon === 'elephant' && (
+              <span class="signal-elephant" aria-hidden="true">🐘</span>
+            )}
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  <ul id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-1">
+    {navItems.map((item) => (
+      <li>
         <a
           href={item.href}
-          class={`header-nav-link ${isActive(item.href) ? 'is-active' : ''}`}
-          aria-current={isActive(item.href) ? 'page' : undefined}
+          class:list={[
+            'block py-2 text-sm font-medium nav-link transition-colors inline-flex items-center gap-1.5',
+            currentPath === item.href && 'active',
+          ]}
         >
+          {item.icon === 'led' && (
+            <span class="signal-led" aria-hidden="true"></span>
+          )}
+          {item.icon === 'flags' && (
+            <span class="signal-flags" aria-hidden="true">
+              <span class="sf sf-1"></span>
+              <span class="sf sf-2"></span>
+              <span class="sf sf-3"></span>
+              <span class="sf sf-4"></span>
+              <span class="sf sf-5"></span>
+            </span>
+          )}
+          {item.icon === 'brackets' && (
+            <span class="signal-brackets" aria-hidden="true">{`{}`}</span>
+          )}
+          {item.icon === 'elephant' && (
+            <span class="signal-elephant" aria-hidden="true">🐘</span>
+          )}
           {item.label}
         </a>
-      ))}
-    </nav>
-
-    <button class="header-menu-btn" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-  </div>
-
-  <!-- Mobile nav -->
-  <div class="mobile-nav" id="mobile-nav" aria-hidden="true">
-    {navItems.map((item) => (
-      <a
-        href={item.href}
-        class={`mobile-nav-link ${isActive(item.href) ? 'is-active' : ''}`}
-      >
-        <span class="mobile-nav-arrow">→</span>
-        {item.label}
-      </a>
+      </li>
     ))}
-  </div>
+  </ul>
 </header>
 
 <style>
-  .site-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background-color: var(--color-bg);
-    border-bottom: 1px solid var(--color-border);
-    transition: border-color 250ms ease-out;
+  /* Signal LED - DevOps */
+  .signal-led {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22d3ee;
+    animation: led-blink 2s ease infinite;
+  }
+  @keyframes led-blink {
+    0%, 100% { opacity: 1; box-shadow: 0 0 4px #22d3ee; }
+    50% { opacity: 0.3; box-shadow: none; }
   }
 
-  .site-header.scrolled {
-    border-bottom-color: var(--color-border-light);
+  /* Prayer Flags - Treks */
+  .signal-flags {
+    display: inline-flex;
+    gap: 1px;
+    align-items: flex-start;
+  }
+  .sf {
+    display: inline-block;
+    width: 3px;
+    height: 8px;
+    transform-origin: top center;
+    animation: flag-wave 1.5s ease-in-out infinite;
+  }
+  .sf-1 { background: #3b82f6; animation-delay: 0s; }
+  .sf-2 { background: #ffffff; animation-delay: 0.15s; }
+  .sf-3 { background: #ef4444; animation-delay: 0.3s; }
+  .sf-4 { background: #22c55e; animation-delay: 0.45s; }
+  .sf-5 { background: #eab308; animation-delay: 0.6s; }
+  @keyframes flag-wave {
+    0%, 100% { transform: skewX(0deg); }
+    25% { transform: skewX(8deg); }
+    75% { transform: skewX(-5deg); }
   }
 
-  .header-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    height: 56px;
-  }
-
-  .header-brand {
-    display: flex;
-    align-items: baseline;
-    gap: 0;
-    text-decoration: none;
-    color: var(--color-text);
-    transition: color 150ms ease-out;
-  }
-
-  .header-brand:hover {
-    color: var(--color-accent);
-  }
-
-  .header-brand-name {
+  /* Brackets - Programming */
+  .signal-brackets {
     font-family: var(--font-mono);
-    font-size: 0.9375rem;
-    font-weight: 500;
-    letter-spacing: -0.02em;
+    font-size: 10px;
+    font-weight: 700;
+    color: #cc5de8;
+    animation: bracket-pulse 2s ease infinite;
+  }
+  @keyframes bracket-pulse {
+    0%, 100% { opacity: 1; letter-spacing: 0px; }
+    50% { opacity: 0.6; letter-spacing: 2px; }
   }
 
-  .header-brand-cursor {
-    font-family: var(--font-mono);
-    font-size: 0.9375rem;
-    color: var(--color-accent);
-    animation: blink 1s step-end infinite;
+  /* Elephant - Postgres */
+  .signal-elephant {
+    font-size: 11px;
+    line-height: 1;
+    display: inline-block;
+    animation: elephant-sway 3s ease-in-out infinite;
+  }
+  @keyframes elephant-sway {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    75% { transform: rotate(-5deg); }
   }
 
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  .header-nav {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .header-nav-link {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-muted);
-    text-decoration: none;
-    padding: 0.375rem 0.625rem;
-    border-radius: 2px;
-    transition: color 150ms ease-out, background-color 150ms ease-out;
-    position: relative;
-  }
-
-  .header-nav-link:hover {
-    color: var(--color-text);
-    background-color: var(--color-surface);
-  }
-
-  .header-nav-link.is-active {
-    color: var(--color-accent);
-    background-color: var(--color-accent-dim);
-  }
-
-  .header-menu-btn {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
-    width: 32px;
-    height: 32px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-  }
-
-  .header-menu-btn span {
-    display: block;
-    width: 100%;
-    height: 1px;
-    background-color: var(--color-text-muted);
-    transition: transform 200ms ease-out, opacity 200ms ease-out;
-  }
-
-  .header-menu-btn[aria-expanded="true"] span:nth-child(1) {
-    transform: translateY(6px) rotate(45deg);
-  }
-  .header-menu-btn[aria-expanded="true"] span:nth-child(2) {
-    opacity: 0;
-  }
-  .header-menu-btn[aria-expanded="true"] span:nth-child(3) {
-    transform: translateY(-6px) rotate(-45deg);
-  }
-
-  .mobile-nav {
-    display: none;
-    flex-direction: column;
-    padding: 1rem 2rem 1.5rem;
-    border-top: 1px solid var(--color-border);
-    gap: 0;
-  }
-
-  .mobile-nav.is-open {
-    display: flex;
-  }
-
-  .mobile-nav-link {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-muted);
-    text-decoration: none;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--color-border);
-    transition: color 150ms ease-out;
-  }
-
-  .mobile-nav-link:last-child {
-    border-bottom: none;
-  }
-
-  .mobile-nav-link:hover,
-  .mobile-nav-link.is-active {
-    color: var(--color-accent);
-  }
-
-  .mobile-nav-arrow {
-    color: var(--color-text-dim);
-    transition: transform 150ms ease-out, color 150ms ease-out;
-  }
-
-  .mobile-nav-link:hover .mobile-nav-arrow {
-    transform: translateX(4px);
-    color: var(--color-accent);
-  }
-
-  @media (max-width: 768px) {
-    .header-nav {
-      display: none;
+  @media (prefers-reduced-motion: reduce) {
+    .signal-led, .sf, .signal-brackets, .signal-elephant {
+      animation: none;
     }
-    .header-menu-btn {
-      display: flex;
-    }
+    .signal-led { opacity: 1; box-shadow: 0 0 4px #22d3ee; }
   }
 </style>
 
 <script>
-  document.addEventListener('astro:page-load', () => {
-    const toggle = document.getElementById('menu-toggle');
-    const mobileNav = document.getElementById('mobile-nav');
-
-    toggle?.addEventListener('click', () => {
-      const isOpen = mobileNav?.classList.toggle('is-open');
-      toggle.setAttribute('aria-expanded', String(!!isOpen));
-      mobileNav?.setAttribute('aria-hidden', String(!isOpen));
-    });
-
-    // Scroll effect
-    const header = document.querySelector('.site-header') as HTMLElement;
-    const onScroll = () => {
-      if (window.scrollY > 0) {
-        header?.classList.add('scrolled');
-      } else {
-        header?.classList.remove('scrolled');
-      }
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+  const toggle = document.getElementById('menu-toggle');
+  const menu = document.getElementById('mobile-menu');
+  toggle?.addEventListener('click', () => {
+    menu?.classList.toggle('hidden');
   });
 </script>

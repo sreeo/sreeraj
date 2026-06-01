@@ -3,20 +3,19 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pages = await getCollection('pages');
-const contact = pages.find((p) => p.data.slug === 'contact');
-const { Content } = contact ? await render(contact) : { Content: null };
+const contactPage = pages.find((p) => p.data.slug === 'contact');
+const { Content } = contactPage ? await render(contactPage) : { Content: null };
 ---
 
-<BaseLayout title="Contact — sreeraj.dev" description="Get in touch with Sreeraj.">
-  <article style="max-width: 700px; margin: 0 auto; padding: 6rem 2rem 8rem;">
-    <h1 class="page-title" style="margin-bottom: 3rem;">Contact</h1>
-
+<BaseLayout title="Contact — sreeraj.dev" theme="tech">
+  <article class="max-w-[720px] mx-auto">
+    <h1 class="page-title text-3xl mb-8">Contact</h1>
     {Content ? (
       <div class="prose">
         <Content />
       </div>
     ) : (
-      <p style="opacity: 0.5;">Page not found.</p>
+      <p class="page-description">Contact page content not found.</p>
     )}
   </article>
 </BaseLayout>
