@@ -32,6 +32,10 @@ STATE_DIR="${REDESIGN_STATE_DIR:-$HOME/.local/share/sreeraj-redesign/state}"
 HC_URL="${HEALTHCHECK_URL:-}"
 DRY_RUN="${REDESIGN_DRY_RUN:-0}"
 export PLAYWRIGHT_CHROME_CHANNEL="${PLAYWRIGHT_CHROME_CHANNEL:-chrome}"
+# Ubuntu 26.04 can't download Playwright's bundled browsers — we use system
+# Chrome via the channel above. Make any stray `playwright install` a no-op so
+# it can never hang the run (this bit the first full run via claude's self-check).
+export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD="${PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD:-1}"
 
 # --- Load nvm so node/npm/npx/tsx/claude resolve under systemd ---
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
