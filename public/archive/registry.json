@@ -5,7 +5,8 @@
       "trend": "Cutting-Edge Terminal",
       "description": "Dark terminal aesthetic with cyan accents, monospace git-log timeline, WebGL mountains, and dual tech/trek theming",
       "primaryColor": "#22d3ee",
-      "deployedAt": "2026-05-01T00:00:00Z"
+      "deployedAt": "2026-05-01T00:00:00Z",
+      "sourceRef": "edition/2026-05"
     }
   ]
 }

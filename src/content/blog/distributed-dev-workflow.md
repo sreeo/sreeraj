@@ -4,7 +4,7 @@ slug: "distributed-dev-workflow"
 description: "How I run my dev workflows across a Macbook Pro, a Hetzner instance and my phone, stitched together with tmux, Tailscale and Claude Code."
 pubDate: "2026-06-01T00:00:00.000+00:00"
 updatedDate: "2026-06-01T00:00:00.000+00:00"
-featured: false
+featured: true
 featureImage: "/images/distributed-dev-workflow/IMG_8431.jpg"
 tags:
   - "programming"

@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "archives:rebuild": "cd automation && npm ci && npx tsx rebuild-archives.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",

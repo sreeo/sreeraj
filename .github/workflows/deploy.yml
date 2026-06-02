@@ -19,11 +19,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history + tags so rebuild-archives can git-worktree each
+          # edition's source (edition/<month> tags).
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
       - run: npm ci
+      # Rebuild every archived edition from its source with the CURRENT content,
+      # so new blog posts appear in past designs too. Non-blocking: a failure
+      # here must not block the deploy (the committed archives remain a fallback).
+      - name: Rebuild archived editions with current content
+        run: npm run archives:rebuild || echo "::warning::archive rebuild failed; deploying committed archives as-is"
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
