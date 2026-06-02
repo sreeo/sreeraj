@@ -6,12 +6,8 @@ name: Layout QA (standalone)
 # dispatched with dry_run=false.
 
 on:
-  # Auto-run on this feature branch so we can verify the stage in real CI without
-  # needing the workflow on the default branch. Remove this branch entry before
-  # merging to main (keep workflow_dispatch for manual use).
-  push:
-    branches:
-      - 'feat/layout-qa-stage'
+  # Manual only. Runs the Layout QA & Fix stage against the current committed
+  # CSS; opens a PR only when dispatched with dry_run=false.
   workflow_dispatch:
     inputs:
       dry_run:
