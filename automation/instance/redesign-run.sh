@@ -46,11 +46,19 @@ if [ ! -d "$REPO_DIR/.git" ]; then
 fi
 cd "$REPO_DIR"
 git fetch --prune origin
-git checkout "$BASE_BRANCH"
+# Fail loudly if the configured base branch no longer exists on origin — e.g. a
+# test override (REDESIGN_BASE_BRANCH) left pointing at a since-merged/deleted
+# feature branch. Without this the reset below fails with a cryptic error.
+if ! git rev-parse --verify --quiet "origin/$BASE_BRANCH" >/dev/null; then
+  log "FATAL: base branch origin/$BASE_BRANCH not found on origin."
+  log "       Set REDESIGN_BASE_BRANCH correctly in the env file (production = main)."
+  exit 2
+fi
+git checkout -B "$BASE_BRANCH" "origin/$BASE_BRANCH"
 git reset --hard "origin/$BASE_BRANCH"
-git clean -fd -e node_modules -e automation/node_modules   # keep deps for speed
+git clean -fd   # full clean; npm ci below rebuilds node_modules reproducibly
 
-# --- 2. Dependencies (fast when node_modules persisted) ---
+# --- 2. Dependencies (clean, reproducible install) ---
 npm ci
 ( cd automation && npm ci )
 
