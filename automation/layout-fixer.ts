@@ -69,12 +69,11 @@ The authoritative report is at \`automation/test-output/layout-report.json\`. He
 ${renderIssues(issues)}
 
 Steps:
-1. Read the report and the relevant rules in \`src/styles/global.css\`.
+1. Read the report and the relevant rules in the CSS / component files for the reported selectors.
 2. Make the smallest change that fixes each root cause, applying the same fix to both \`[data-theme="tech"]\` and \`[data-theme="trek"]\` where relevant. Prefer responsive rules (media queries, \`min()\`/\`clamp()\`, \`minmax(0, 1fr)\`) over hard overrides.
-3. Run \`npm run build\` to confirm it still builds.
-4. Summarize what you changed.
+3. Summarize what you changed.
 
-Work from the repository root. Do not commit.`;
+Do NOT run \`npm run build\` or the geometry analyzer — the orchestrator rebuilds and re-checks after you finish. Spend your turns editing, not building. Work from the repository root. Do not commit.`;
 
   const summary: FixSummary = { filesChanged: [], changes: '', notes: '' };
 
