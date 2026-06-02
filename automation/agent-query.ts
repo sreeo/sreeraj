@@ -48,3 +48,28 @@ export async function agentJson<T>(
 
   return result;
 }
+
+/**
+ * Run a single Agent SDK query and return its final text output (for free-form
+ * generation like CSS). Defaults to no tools and one turn.
+ */
+export async function agentText(prompt: string, opts: AgentJsonOpts = {}): Promise<string> {
+  let out = '';
+
+  for await (const message of query({
+    prompt,
+    options: {
+      cwd: opts.cwd ?? CONFIG.projectRoot,
+      model: opts.model ?? CONFIG.layoutQa.fixerModel,
+      maxTurns: opts.maxTurns ?? 1,
+      allowedTools: opts.allowedTools ?? [],
+      permissionMode: 'acceptEdits',
+    },
+  })) {
+    if (message.type === 'result' && (message as { subtype?: string }).subtype === 'success') {
+      out = (message as { result?: string }).result ?? out;
+    }
+  }
+
+  return out;
+}

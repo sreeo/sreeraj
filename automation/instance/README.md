@@ -51,7 +51,25 @@ systemctl --user list-timers sreeraj-redesign.timer
 # Trigger a real run now (generates a redesign + opens a PR):
 systemctl --user start sreeraj-redesign.service
 journalctl --user -u sreeraj-redesign.service -f
+
+# Dry run (all stages, no PR) — leaves the redesign in the managed clone:
+REDESIGN_DRY_RUN=1 ~/.local/share/sreeraj-redesign/redesign-run.sh full
 ```
+
+## Resume after a failure
+
+The run checkpoints **after** the expensive rebuild+build: the working-tree
+changes are saved as a git patch under `~/.local/share/sreeraj-redesign/state/`.
+If a later stage (Layout QA, PR) crashes, continue without regenerating:
+
+```sh
+systemctl --user start sreeraj-redesign-resume.service     # or: redesign-run.sh resume
+```
+
+Resume fresh-resets the clone, re-applies the saved patch, and picks up at
+Layout QA. A crash *during* generation (before the checkpoint) has nothing to
+resume — just run `full` again. On success the checkpoint is cleared
+automatically, so the next monthly run starts fresh.
 
 ## Reliability notes
 

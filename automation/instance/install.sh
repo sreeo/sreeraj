@@ -25,9 +25,10 @@ else
 fi
 
 # 3. systemd user units.
-install -m 0644 "$SCRIPT_DIR/sreeraj-redesign.service"       "$UNIT_DIR/"
-install -m 0644 "$SCRIPT_DIR/sreeraj-redesign.timer"         "$UNIT_DIR/"
-install -m 0644 "$SCRIPT_DIR/sreeraj-redesign-check.service" "$UNIT_DIR/"
+install -m 0644 "$SCRIPT_DIR/sreeraj-redesign.service"        "$UNIT_DIR/"
+install -m 0644 "$SCRIPT_DIR/sreeraj-redesign.timer"          "$UNIT_DIR/"
+install -m 0644 "$SCRIPT_DIR/sreeraj-redesign-check.service"  "$UNIT_DIR/"
+install -m 0644 "$SCRIPT_DIR/sreeraj-redesign-resume.service" "$UNIT_DIR/"
 echo "  • units    -> $UNIT_DIR/"
 
 systemctl --user daemon-reload

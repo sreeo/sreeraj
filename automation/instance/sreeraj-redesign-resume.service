@@ -1,0 +1,8 @@
+[Unit]
+Description=Resume a failed sreeraj.dev redesign from its saved checkpoint
+
+[Service]
+Type=oneshot
+EnvironmentFile=-%h/.config/sreeraj-redesign/env
+ExecStart=%h/.local/share/sreeraj-redesign/redesign-run.sh resume
+TimeoutStartSec=3600
