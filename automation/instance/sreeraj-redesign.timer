@@ -1,0 +1,13 @@
+[Unit]
+Description=Run the sreeraj.dev monthly redesign on the 1st of each month
+
+[Timer]
+# 1st of every month at 03:00 (instance local time).
+OnCalendar=*-*-01 03:00:00
+# If the box was off/asleep at the scheduled time, run as soon as it's back.
+Persistent=true
+# Avoid a thundering-herd exact-second start.
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

@@ -1,8 +1,10 @@
 name: Monthly Full Redesign
 
 on:
-  schedule:
-    - cron: '0 3 1 * *'  # 1st of every month at 03:00 UTC
+  # Monthly cron moved to the Hetzner instance (systemd timer — see
+  # automation/instance/README.md). Kept dispatch-only for manual cloud runs.
+  # schedule:
+  #   - cron: '0 3 1 * *'  # 1st of every month at 03:00 UTC
   workflow_dispatch:
     inputs:
       trend:

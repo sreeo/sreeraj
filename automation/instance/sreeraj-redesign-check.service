@@ -1,0 +1,9 @@
+[Unit]
+Description=sreeraj.dev redesign plumbing check (no API key, no PR)
+
+[Service]
+Type=oneshot
+# Env file is optional for check mode (the '-' tolerates its absence).
+EnvironmentFile=-%h/.config/sreeraj-redesign/env
+ExecStart=%h/.local/share/sreeraj-redesign/redesign-run.sh check
+TimeoutStartSec=900

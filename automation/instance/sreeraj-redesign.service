@@ -1,0 +1,15 @@
+[Unit]
+Description=sreeraj.dev monthly redesign (generate + Layout QA + open PR)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Secrets (ANTHROPIC_API_KEY, optional HEALTHCHECK_URL, overrides) live here, 0600.
+EnvironmentFile=%h/.config/sreeraj-redesign/env
+# The wrapper lives OUTSIDE the managed clone so the clone's hard-reset can't
+# clobber the running script.
+ExecStart=%h/.local/share/sreeraj-redesign/redesign-run.sh full
+# Agentic rebuild + fixer can run long.
+TimeoutStartSec=3600
+# Run check-mode plumbing test with: systemctl --user start sreeraj-redesign-check

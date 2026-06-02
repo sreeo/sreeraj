@@ -1,0 +1,158 @@
+name: Layout QA (standalone)
+
+# Runs the deterministic + agentic Layout QA & Fix stage against the CURRENT
+# committed CSS — no creative redesign. Used to verify the stage end-to-end and
+# as a manual touch-up tool. It never deploys; it only opens a PR when explicitly
+# dispatched with dry_run=false.
+
+on:
+  # Manual only. Runs the Layout QA & Fix stage against the current committed
+  # CSS; opens a PR only when dispatched with dry_run=false.
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (verify only, never open a PR)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  layout-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install site dependencies
+        run: npm ci
+
+      # NOTE: do NOT install @anthropic-ai/claude-code globally — the Agent SDK
+      # bundles its own runtime, and a conflicting global install breaks auth
+      # (headless 401 "Invalid API key").
+
+      - name: Install automation dependencies
+        run: cd automation && npm install
+
+      - name: Install Playwright (Node)
+        run: cd automation && npx playwright install --with-deps chromium
+
+      - name: Setup Python (for Webwright)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Webwright (best effort, non-blocking)
+        continue-on-error: true
+        timeout-minutes: 6
+        run: |
+          # Microsoft Research Webwright — installs from git source. (The PyPI
+          # name "webwright" is an unrelated project; do NOT use it.)
+          pip install "git+https://github.com/microsoft/webwright.git" \
+            || echo "::warning::webwright install failed — stage will run on geometry only"
+          python -m playwright install chromium || true
+
+      - name: Validate ANTHROPIC_API_KEY
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # Strip any stray CR/LF a pasted secret may carry.
+          KEY="$(printf '%s' "$ANTHROPIC_API_KEY" | tr -d '\r\n')"
+          echo "key length: ${#KEY}"
+          CODE=$(curl -s -o /tmp/key_check.json -w "%{http_code}" https://api.anthropic.com/v1/messages \
+            -H "x-api-key: ${KEY}" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d '{"model":"claude-sonnet-4-6","max_tokens":4,"messages":[{"role":"user","content":"ping"}]}')
+          echo "Anthropic /v1/messages HTTP status: ${CODE}"
+          if [ "$CODE" = "401" ] || [ "$CODE" = "403" ]; then
+            echo "::error::ANTHROPIC_API_KEY is rejected by the API (HTTP ${CODE}). The secret is invalid/expired."
+            cat /tmp/key_check.json
+            exit 1
+          fi
+          echo "Key authenticates (HTTP ${CODE})."
+
+      - name: Run Layout QA & Fix stage
+        id: qa
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          cd automation
+          # Normalize the key for the SDK runtime too.
+          export ANTHROPIC_API_KEY="$(printf '%s' "$ANTHROPIC_API_KEY" | tr -d '\r\n')"
+          set +e
+          npx tsx layout-qa-stage.ts
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Capture CSS diff
+        if: always()
+        run: |
+          git diff -- src/styles/global.css > /tmp/global-css.diff || true
+          cp /tmp/global-css.diff automation/test-output/global-css.diff 2>/dev/null || true
+          echo "=== global.css diff (fixes applied by the stage) ==="
+          cat /tmp/global-css.diff || echo "(no changes)"
+
+      - name: Upload Layout QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: layout-qa-output
+          path: |
+            automation/test-output/
+          retention-days: 14
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Layout QA result"
+            echo ""
+            echo "Stage exit code: \`${{ steps.qa.outputs.exit_code }}\` (0 = clean / fixed, 1 = issues remain)"
+            echo ""
+            if [ -f automation/test-output/layout-qa-summary.md ]; then
+              cat automation/test-output/layout-qa-summary.md
+            fi
+            echo ""
+            echo "<details><summary>global.css diff</summary>"
+            echo ""
+            echo '```diff'
+            cat /tmp/global-css.diff 2>/dev/null || echo "(no changes)"
+            echo '```'
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open PR with fixes
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet -- src/styles/global.css; then
+            echo "No CSS changes to PR."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          BRANCH="layout-qa/$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "Layout QA: fix geometry defects"
+          git push -u origin "$BRANCH"
+          gh pr create \
+            --title "Layout QA: fix geometry defects" \
+            --body-file automation/test-output/layout-qa-summary.md \
+            --head "$BRANCH" --base main

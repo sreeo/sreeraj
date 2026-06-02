@@ -1,10 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk';
 import fs from 'fs';
 import path from 'path';
 import { CONFIG } from './config.js';
 import { DesignTrend } from './trend-registry.js';
-
-const client = new Anthropic();
+import { agentText } from './agent-query.js';
 
 function loadPrompt(filename: string): string {
   return fs.readFileSync(path.join(CONFIG.promptsDir, filename), 'utf-8');
@@ -67,17 +65,10 @@ ${cssContract}
 
   console.log(`Generating ${trend.name} design for ${monthLabel}...`);
 
-  const response = await client.messages.create({
-    model: CONFIG.model,
-    max_tokens: CONFIG.maxTokens,
-    temperature: CONFIG.temperature,
-    messages: [
-      { role: 'user', content: userPrompt },
-    ],
-    system: systemPrompt,
-  });
-
-  let cssContent = (response.content[0] as { type: string; text: string }).text.trim();
+  // Agent SDK on the Claude Code session (no API key). The system prompt is
+  // folded into the request; the model returns raw CSS as its final text.
+  const fullPrompt = `${systemPrompt}\n\n---\n\n${userPrompt}`;
+  let cssContent = (await agentText(fullPrompt, { maxTurns: 1 })).trim();
 
   // Strip markdown code fences if the model wrapped the output
   cssContent = cssContent.replace(/^```(?:css)?\n?/, '').replace(/\n?```$/, '').trim();

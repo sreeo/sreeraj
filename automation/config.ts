@@ -42,4 +42,21 @@ export const CONFIG = {
 
   // Archive
   maxArchiveMonths: 24,
+
+  // Layout QA & fix stage
+  layoutQa: {
+    // Model the Agent SDK fixer runs as. Current IDs (not the dated legacy ones).
+    fixerModel: 'claude-sonnet-4-6' as const,
+    maxFixPasses: 3,
+    // Per-pass turn budget for the SDK agent. The orchestrator drives the
+    // build + re-analyze loop between passes, so the agent should spend turns
+    // editing, not building — but a fresh redesign can need many edits.
+    fixerMaxTurns: 60,
+    // Webwright agentic visual review (the "vision" half). Non-blocking:
+    // if webwright isn't installed or errors, the stage continues on geometry.
+    webwrightEnabled: true,
+    webwrightModel: 'claude-sonnet-4-6' as const,
+    // Pages the webwright reviewer inspects (a subset — it's slower than geometry).
+    webwrightPages: ['/', '/treks/'],
+  },
 } as const;

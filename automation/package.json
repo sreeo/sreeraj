@@ -7,10 +7,13 @@
     "redesign": "tsx redesign-orchestrator.ts",
     "redesign:dry": "tsx redesign-orchestrator.ts --dry-run",
     "generate": "tsx design-generator.ts",
-    "validate": "tsx validate-design.ts"
+    "validate": "tsx validate-design.ts",
+    "layout:check": "tsx layout-geometry.ts",
+    "layout:qa": "tsx layout-qa-stage.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/claude-agent-sdk": "^0.3.159",
+    "@anthropic-ai/sdk": "^0.93.0",
     "@axe-core/playwright": "^4.10.0",
     "playwright": "^1.49.0",
     "serve": "^14.2.4",

@@ -305,7 +305,14 @@ async function checkPageRenders(): Promise<StepResult> {
       return { name: 'Page Render', passed: false, message: 'Server failed to start on port 4173' };
     }
 
-    const browser = await chromium.launch({ headless: true });
+    const browser = await chromium.launch({
+      headless: true,
+      // Ubuntu 26.04 can't install Playwright's bundled browsers; use system
+      // Chrome via channel when PLAYWRIGHT_CHROME_CHANNEL is set (matches
+      // layout-geometry.ts). Avoids a hang where validation triggers a browser
+      // download that never completes.
+      ...(process.env.PLAYWRIGHT_CHROME_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHROME_CHANNEL } : {}),
+    });
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
     const errors: string[] = [];
     const screenshotDir = CONFIG.testOutputDir;
@@ -403,7 +410,14 @@ async function checkAccessibility(): Promise<StepResult> {
       return { name: 'Accessibility', passed: true, message: 'Skipped: server failed to start' };
     }
 
-    const browser = await chromium.launch({ headless: true });
+    const browser = await chromium.launch({
+      headless: true,
+      // Ubuntu 26.04 can't install Playwright's bundled browsers; use system
+      // Chrome via channel when PLAYWRIGHT_CHROME_CHANNEL is set (matches
+      // layout-geometry.ts). Avoids a hang where validation triggers a browser
+      // download that never completes.
+      ...(process.env.PLAYWRIGHT_CHROME_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHROME_CHANNEL } : {}),
+    });
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto('http://localhost:4174/', { waitUntil: 'networkidle', timeout: 15_000 });
@@ -535,7 +549,14 @@ export async function validateArchive(monthKey: string): Promise<StepResult> {
       return { name: 'Archive Verification', passed: false, message: 'Server failed to start' };
     }
 
-    const browser = await chromium.launch({ headless: true });
+    const browser = await chromium.launch({
+      headless: true,
+      // Ubuntu 26.04 can't install Playwright's bundled browsers; use system
+      // Chrome via channel when PLAYWRIGHT_CHROME_CHANNEL is set (matches
+      // layout-geometry.ts). Avoids a hang where validation triggers a browser
+      // download that never completes.
+      ...(process.env.PLAYWRIGHT_CHROME_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHROME_CHANNEL } : {}),
+    });
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
     const page = await context.newPage();
 
