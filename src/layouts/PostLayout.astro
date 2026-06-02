@@ -2,11 +2,9 @@
 import BaseLayout from './BaseLayout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import TagList from '../components/TagList.astro';
-import WeatherAtmosphere from '../components/WeatherAtmosphere.astro';
-import TrekStatsBar from '../components/TrekStatsBar.astro';
-import ElevationProgress from '../components/ElevationProgress.astro';
+import TrekStats from '../components/TrekStats.astro';
 
-interface TrekStats {
+interface TrekStatsData {
   elevation?: string;
   distance?: string;
   duration?: string;
@@ -29,77 +27,51 @@ interface Props {
   theme?: 'tech' | 'trek';
   prevPost?: { slug: string; title: string } | null;
   nextPost?: { slug: string; title: string } | null;
-  trekStats?: TrekStats;
+  trekStats?: TrekStatsData;
 }
 
 const {
-  title,
-  description,
-  pubDate,
-  updatedDate,
-  featureImage,
-  tags = [],
-  author,
-  readingTime,
-  theme = 'tech',
-  prevPost,
-  nextPost,
-  trekStats,
+  title, description, pubDate, updatedDate, featureImage,
+  tags = [], author, readingTime, theme = 'tech',
+  prevPost, nextPost, trekStats,
 } = Astro.props;
 
 const isTrek = theme === 'trek';
+const kicker = isTrek ? 'Field Journal' : (tags[0] ?? 'Note');
 ---
 
 <BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage} theme={theme}>
-  {isTrek && <WeatherAtmosphere />}
-  {isTrek && trekStats && (
-    <ElevationProgress
-      startAlt={trekStats.startAlt || 1800}
-      peakAlt={trekStats.peakAlt || 4000}
-    />
-  )}
-
-  <article class:list={["max-w-[720px] mx-auto relative z-10", isTrek && "trek-journal"]}>
-    {featureImage && (
-      <div class:list={[isTrek ? "trek-hero-wrap" : ""]}>
-        <img
-          src={featureImage}
-          alt={title}
-          class:list={["post-hero-image w-full", isTrek ? "trek-hero" : "mb-6"]}
-        />
-        {isTrek && (
-          <div class="trek-hero-overlay">
-            <span class="trek-hero-tag">Field Journal</span>
-          </div>
-        )}
-      </div>
-    )}
-
-    <header class="mb-8">
-      <h1 class="post-header-title text-3xl sm:text-4xl mb-3">{title}</h1>
-      <div class="post-header-meta flex flex-wrap items-center gap-3">
-        {author && <span>{author}</span>}
-        <span>&middot;</span>
-        <FormattedDate date={pubDate} />
-        {readingTime && (
-          <>
-            <span>&middot;</span>
-            <span>{readingTime} min read</span>
-          </>
-        )}
-      </div>
-      {updatedDate && updatedDate.getTime() !== pubDate.getTime() && (
-        <p class="post-header-meta mt-1 opacity-60">
-          Updated <FormattedDate date={updatedDate} />
+  <article class="container" style="padding-top: clamp(2.5rem, 6vw, 4.5rem); padding-bottom: clamp(3.5rem, 8vw, 6rem);">
+    <!-- Header -->
+    <header style="max-width: 46rem; margin-inline: auto;">
+      <a href={isTrek ? '/treks/' : '/'} class="kicker" style="font-size: var(--fs-xs);">{kicker}</a>
+      <h1 class="post-header-title" style="font-size: var(--fs-2xl); font-weight: 800; line-height: 1.0; letter-spacing: -0.035em; margin-top: 1.25rem;">
+        {title}
+      </h1>
+      {description && (
+        <p class="page-description" style="font-size: var(--fs-md); line-height: 1.55; margin-top: 1.25rem;">
+          {description}
         </p>
       )}
+
+      <div class="rule" style="margin-top: 2rem;"></div>
+      <div class="post-header-meta flex flex-wrap items-center" style="gap: 1rem; padding: 0.9rem 0; font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.06em; text-transform: uppercase;">
+        {author && <span>{author}</span>}
+        <span>·</span>
+        <FormattedDate date={pubDate} mono />
+        {readingTime && (<><span>·</span><span>{readingTime} min read</span></>)}
+        {updatedDate && updatedDate.getTime() !== pubDate.getTime() && (
+          <><span>·</span><span style="opacity: 0.7;">upd. <FormattedDate date={updatedDate} mono /></span></>
+        )}
+      </div>
+      <div class="rule"></div>
+
       {tags.length > 0 && (
-        <div class="mt-3">
-          <TagList tags={tags} />
-        </div>
+        <div style="margin-top: 1.25rem;"><TagList tags={tags} /></div>
       )}
+
       {isTrek && trekStats && (
-        <TrekStatsBar
+        <TrekStats
           elevation={trekStats.elevation}
           distance={trekStats.distance}
           duration={trekStats.duration}
@@ -110,22 +82,37 @@ const isTrek = theme === 'trek';
       )}
     </header>
 
-    <div class:list={["prose", isTrek && "trek-prose"]}>
+    <!-- Hero image -->
+    {featureImage && (
+      <div class:list={['trek-hero-wrap']} style="max-width: 52rem; margin: clamp(2rem, 5vw, 3rem) auto 0;">
+        <img src={featureImage} alt={title} class="post-hero-image w-full" style="aspect-ratio: 16 / 9; object-fit: cover;" />
+      </div>
+    )}
+
+    <!-- Body -->
+    <div class:list={['prose', isTrek && 'trek-prose', isTrek && 'trek-journal']} style="margin: clamp(2.5rem, 6vw, 4rem) auto 0;">
       <slot />
     </div>
 
+    <!-- Prev / Next -->
     {(prevPost || nextPost) && (
-      <nav class="mt-12 pt-8 post-nav-border border-t flex justify-between gap-4">
-        {prevPost ? (
-          <a href={`/${prevPost.slug}/`} class="post-nav-link">
-            &larr; {prevPost.title}
-          </a>
-        ) : <span />}
-        {nextPost ? (
-          <a href={`/${nextPost.slug}/`} class="post-nav-link text-right">
-            {nextPost.title} &rarr;
-          </a>
-        ) : <span />}
+      <nav class="post-nav-border" style="max-width: 46rem; margin: clamp(3rem, 7vw, 5rem) auto 0; padding-top: 2rem; border-top: 1px solid; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div>
+          {prevPost && (
+            <a href={`/${prevPost.slug}/`} class="post-nav-link group block">
+              <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 0.4rem;">← Previous</span>
+              <span class="transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-sm); font-weight: 600;">{prevPost.title}</span>
+            </a>
+          )}
+        </div>
+        <div style="text-align: right;">
+          {nextPost && (
+            <a href={`/${nextPost.slug}/`} class="post-nav-link group block">
+              <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 0.4rem;">Next →</span>
+              <span class="transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-sm); font-weight: 600;">{nextPost.title}</span>
+            </a>
+          )}
+        </div>
       </nav>
     )}
   </article>

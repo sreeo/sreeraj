@@ -2,147 +2,140 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
-import TopoDivider from '../components/TopoDivider.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import SwissGrid from '../components/SwissGrid.astro';
 import { getThemeForTags } from '../utils/theme';
 
 const posts = (await getCollection('blog'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-const featuredPosts = posts.filter((p) => p.data.featured);
+const featured = posts.filter((p) => p.data.featured);
+const hero = featured[0] ?? posts[0];
+const selected = featured.filter((p) => p.data.slug !== hero.data.slug).slice(0, 3);
 
-// Build git log data
-function shortHash(slug: string): string {
-  let h = 0;
-  for (let i = 0; i < slug.length; i++) h = ((h << 5) - h + slug.charCodeAt(i)) | 0;
-  return Math.abs(h).toString(16).slice(0, 7);
+function category(tags: string[]): string {
+  if (tags.some((t) => ['treks', 'trek'].includes(t))) return 'Treks';
+  if (tags.some((t) => ['postgres', 'pgbouncer'].includes(t))) return 'Postgres';
+  if (tags.some((t) => ['devops', 'kubernetes', 'k8s', 'aws', 'nginx', 'terraform'].includes(t))) return 'DevOps';
+  if (tags.some((t) => ['python', 'django', 'java', 'kafka', 'arduino', 'esp8266'].includes(t))) return 'Programming';
+  return 'Notes';
 }
 
-function getBranch(tags: string[]): { name: string; color: string } {
-  if (tags.some(t => ['treks', 'trek'].includes(t))) return { name: 'treks', color: 'gl-branch-trek' };
-  if (tags.some(t => ['postgres'].includes(t))) return { name: 'postgres', color: 'gl-branch-postgres' };
-  if (tags.some(t => ['devops', 'kubernetes', 'k8s', 'aws'].includes(t))) return { name: 'devops', color: 'gl-branch-devops' };
-  return { name: 'programming', color: 'gl-branch-programming' };
-}
-
-// Group posts into branches and build graph
-type GitEntry = {
-  hash: string;
-  slug: string;
-  title: string;
-  date: string;
-  tags: string[];
-  branch: { name: string; color: string };
-  graph: string;
-};
-
-let lastBranch = '';
-const gitEntries: GitEntry[] = posts.map((post, i) => {
-  const branch = getBranch(post.data.tags);
-  const isMainBranch = branch.name === 'devops' || branch.name === 'programming';
-  const isBranchSwitch = branch.name !== lastBranch;
-
-  let graph = '*   ';
-  if (!isMainBranch) {
-    graph = '| * ';
-  }
-
-  // Show merge/branch points
-  let prefix = '';
-  if (isBranchSwitch && i > 0) {
-    if (!isMainBranch && (lastBranch === 'devops' || lastBranch === 'programming' || lastBranch === '')) {
-      prefix = '| |\n';
-    } else if (isMainBranch && lastBranch !== '' && lastBranch !== 'devops' && lastBranch !== 'programming') {
-      prefix = '|/\n';
-    }
-  }
-
-  lastBranch = branch.name;
-
-  return {
-    hash: shortHash(post.data.slug),
-    slug: post.data.slug,
-    title: post.data.title,
-    date: post.data.pubDate.toISOString().split('T')[0],
-    tags: post.data.tags.slice(0, 3),
-    branch,
-    graph: prefix + graph,
-  };
-});
+const total = String(posts.length).padStart(2, '0');
+const heroCat = category(hero.data.tags);
 ---
 
-<BaseLayout title="sreeraj.dev — DevOps, Programming, and Treks" theme="tech">
-  <div class="mb-8">
-    <p class="font-mono text-xs mb-2" style="color: var(--color-accent); opacity: 0.6;">
-      ~/sreeraj.dev
-    </p>
-    <h1 class="text-3xl font-bold mb-1" style="color: var(--color-tech-text);">
-      sreeraj.dev
-    </h1>
-    <p style="color: var(--color-tech-text-muted); font-size: 0.9375rem;">
-      DevOps engineer, Himalayan trekker, occasional open-source contributor.
-    </p>
-  </div>
+<BaseLayout title="sreeraj.dev — DevOps, Programming &amp; Treks" theme="tech">
+  <!-- ===================== MASTHEAD ===================== -->
+  <section class="container" style="padding-top: clamp(2.5rem, 7vw, 5.5rem); padding-bottom: clamp(2rem, 5vw, 3.5rem);">
+    <div class="grid-12" style="align-items: end; row-gap: 2.5rem;">
+      <div style="grid-column: span 7;" class="max-lg:!col-span-12">
+        <span class="kicker">Vol. MMXXVI · Field Notes</span>
+        <h1 style="font-size: var(--fs-hero); font-weight: 800; line-height: 0.92; letter-spacing: -0.04em; margin-top: 1.25rem;">
+          Systems,<br />databases<br />&amp; <span style="color: var(--color-accent);">altitude</span>.
+        </h1>
+        <p style="font-size: var(--fs-md); line-height: 1.55; max-width: 32rem; margin-top: 1.75rem; color: var(--color-tech-text-muted);">
+          The working notebook of <strong style="color: var(--color-tech-text); font-weight: 600;">Sreeraj Rajan</strong> — DevOps engineer at Medley Learning, Himalayan trekker, and occasional open-source contributor.
+        </p>
+      </div>
 
-  <!-- Git Log Timeline -->
-  <section class="mb-12">
-    <h2 class="section-title text-lg mb-4 font-mono" style="color: var(--color-tech-text-muted); font-size: 0.8125rem;">
-      $ git log --oneline --graph --all
-    </h2>
-    <div class="git-log-timeline">
-      {gitEntries.map((entry) => (
-        <div class="gl-entry">
-          <pre class="gl-graph-col">{entry.graph.split('\n').map(line => <span class="gl-graph">{line}</span>)}</pre>
-          <a href={`/${entry.slug}/`} class="gl-content">
-            <span class="gl-hash">{entry.hash}</span>
-            <span class:list={['gl-tag', entry.branch.color]}>
-              ({entry.tags.join(', ')})
-            </span>
-            <span class="gl-msg">{entry.title}</span>
-            <span class="gl-date">{entry.date}</span>
-          </a>
-        </div>
-      ))}
+      <div style="grid-column: span 4 / -1;" class="max-lg:hidden">
+        <SwissGrid />
+      </div>
     </div>
   </section>
 
-  <TopoDivider seed={42} />
+  <!-- masthead meta strip -->
+  <section class="container">
+    <div class="rule"></div>
+    <div class="flex flex-wrap items-center justify-between" style="gap: 1rem; padding: 0.9rem 0; font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-tech-text-muted);">
+      <span>{total} Entries</span>
+      <span class="max-sm:hidden">DevOps · Postgres · Programming · Treks</span>
+      <span>Updated <FormattedDate date={posts[0].data.pubDate} mono /></span>
+    </div>
+    <div class="rule"></div>
+  </section>
 
-  <!-- Card Grid (secondary view) -->
-  {featuredPosts.length > 0 && (
-    <section class="mb-12">
-      <h2 class="section-title text-2xl mb-6">Featured</h2>
-      <div class="grid gap-6 sm:grid-cols-2">
-        {featuredPosts.map((post) => (
-          <PostCard
-            title={post.data.title}
-            slug={post.data.slug}
-            description={post.data.description}
-            pubDate={post.data.pubDate}
-            featureImage={post.data.featureImage}
-            tags={post.data.tags}
-            readingTime={post.data.readingTime}
-            variant={getThemeForTags(post.data.tags)}
-          />
+  <!-- ===================== FEATURED HERO ===================== -->
+  <section class="container reveal" style="padding-top: clamp(3rem, 7vw, 5.5rem); padding-bottom: clamp(2.5rem, 6vw, 4.5rem);">
+    <span class="kicker" style="margin-bottom: 2rem; display: inline-flex;">Featured Dispatch</span>
+    <a href={`/${hero.data.slug}/`} class="grid-12 group" style="row-gap: 1.75rem; align-items: start; margin-top: 1.75rem;">
+      <div style="grid-column: span 7;" class="max-lg:!col-span-12 overflow-hidden">
+        <div style="aspect-ratio: 16 / 10;" class="overflow-hidden">
+          <img src={hero.data.featureImage} alt={hero.data.title} class="post-card-image w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" style="border: 1px solid var(--color-tech-rule);" />
+        </div>
+      </div>
+      <div style="grid-column: span 5 / -1;" class="max-lg:!col-span-12">
+        <div class="flex items-center justify-between" style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-tech-text-muted);">
+          <span>{heroCat}</span>
+          <span class="post-card-index" style="color: var(--color-accent); font-weight: 700;">★</span>
+        </div>
+        <h2 class="transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-xl); font-weight: 800; line-height: 1.04; letter-spacing: -0.03em; margin-top: 1rem;">
+          {hero.data.title}
+        </h2>
+        <p style="font-size: var(--fs-base); line-height: 1.65; margin-top: 1.1rem; color: var(--color-tech-text-muted);">
+          {hero.data.description}
+        </p>
+        <div class="flex items-center gap-3" style="margin-top: 1.5rem; font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-tech-text-muted);">
+          <FormattedDate date={hero.data.pubDate} mono />
+          {hero.data.readingTime && <span>· {hero.data.readingTime} min</span>}
+        </div>
+        <span class="inline-flex items-center gap-2" style="margin-top: 1.5rem; font-weight: 600; color: var(--color-accent);">
+          Read the entry <span class="transition-transform group-hover:translate-x-1">→</span>
+        </span>
+      </div>
+    </a>
+  </section>
+
+  <!-- ===================== SELECTED WRITING ===================== -->
+  {selected.length > 0 && (
+    <section class="container reveal" style="padding-bottom: clamp(3rem, 7vw, 5rem);">
+      <div class="flex items-baseline justify-between" style="margin-bottom: 2rem;">
+        <h2 class="section-title" style="font-size: var(--fs-xl); font-weight: 800; letter-spacing: -0.03em;">Selected</h2>
+        <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-tech-text-muted);">Editor's picks</span>
+      </div>
+      <div class="grid-12" style="row-gap: 1.5rem;">
+        {selected.map((post, i) => (
+          <div style="grid-column: span 4;" class="max-lg:!col-span-6 max-sm:!col-span-12">
+            <PostCard
+              title={post.data.title}
+              slug={post.data.slug}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              featureImage={post.data.featureImage}
+              tags={post.data.tags}
+              readingTime={post.data.readingTime}
+              variant={getThemeForTags(post.data.tags)}
+              index={i + 1}
+            />
+          </div>
         ))}
       </div>
     </section>
   )}
 
-  <section>
-    <h2 class="section-title text-2xl mb-6">All Posts</h2>
-    <div class="grid gap-6 sm:grid-cols-2">
-      {posts.map((post) => (
-        <PostCard
-          title={post.data.title}
-          slug={post.data.slug}
-          description={post.data.description}
-          pubDate={post.data.pubDate}
-          featureImage={post.data.featureImage}
-          tags={post.data.tags}
-          readingTime={post.data.readingTime}
-          variant={getThemeForTags(post.data.tags)}
-        />
+  <!-- ===================== THE INDEX ===================== -->
+  <section class="container reveal" style="padding-bottom: clamp(4rem, 9vw, 7rem);">
+    <div class="flex items-baseline justify-between" style="margin-bottom: 1rem;">
+      <h2 class="section-title" style="font-size: var(--fs-xl); font-weight: 800; letter-spacing: -0.03em;">Index</h2>
+      <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-tech-text-muted);">All {total} entries</span>
+    </div>
+
+    <div>
+      {posts.map((post, i) => (
+        <a href={`/${post.data.slug}/`} class="index-row group flex items-baseline" style="gap: 1.25rem; padding: 1.1rem 0.5rem;">
+          <span class="index-num" style="font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; width: 2.25rem; flex-shrink: 0;">{String(i + 1).padStart(2, '0')}</span>
+          <span class="flex-1 transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-md); font-weight: 600; letter-spacing: -0.015em; line-height: 1.25;">
+            {post.data.title}
+          </span>
+          <span class="index-cat max-sm:hidden" style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.06em; text-transform: uppercase; width: 8rem; flex-shrink: 0;">{category(post.data.tags)}</span>
+          <span class="index-date max-md:hidden" style="font-family: var(--font-mono); font-size: var(--fs-2xs); width: 6rem; flex-shrink: 0;">
+            <FormattedDate date={post.data.pubDate} mono />
+          </span>
+          <span class="index-arrow transition-transform group-hover:translate-x-1" style="flex-shrink: 0;">→</span>
+        </a>
       ))}
+      <div class="index-row" style="height: 0;"></div>
     </div>
   </section>
 </BaseLayout>

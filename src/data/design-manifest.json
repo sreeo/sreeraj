@@ -1,6 +1,6 @@
 {
-  "trend": "Neo-Brutalist Editorial",
-  "description": "Raw editorial design with exposed grid structures, Space Grotesk + JetBrains Mono typography, violet accent on deep dark, git-log timeline layout, and generative geometric canvas background",
-  "primaryColor": "#a78bfa",
-  "fonts": ["Space Grotesk", "Inter", "JetBrains Mono", "Lora"]
+  "trend": "Swiss International Typographic",
+  "description": "Strict 12-column grid, neo-grotesque Inter set flush-left ragged-right, hairline rules, zero radius, and a single signal-red accent on warm off-white. Signature numbered editorial index plus a generative Müller-Brockmann grid composition.",
+  "primaryColor": "#e1261c",
+  "fonts": ["Inter", "JetBrains Mono"]
 }

@@ -2,33 +2,45 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import registryData from '../../../public/archive/registry.json';
 
-const archives = registryData.archives ?? [];
+const archives = (registryData.archives ?? []).slice().sort((a, b) => b.month.localeCompare(a.month));
+const total = String(archives.length).padStart(2, '0');
 ---
 
-<BaseLayout title="Archive — sreeraj.dev" description="Monthly design archives — each month a new design trend.">
-  <section style="max-width: 900px; margin: 0 auto; padding: 6rem 2rem 8rem;">
-    <header style="margin-bottom: 3rem;">
-      <h1 class="section-title">Archive</h1>
-      <p class="page-description" style="margin-top: 0.5rem;">A new design ships every month. This is the history.</p>
-    </header>
+<BaseLayout title="Archive — sreeraj.dev" description="A new design ships every month. This is the history.">
+  <section class="container" style="padding-top: clamp(3rem, 7vw, 5rem); padding-bottom: clamp(4rem, 9vw, 7rem);">
+    <div class="grid-12" style="align-items: end; row-gap: 1.5rem;">
+      <div style="grid-column: span 9;" class="max-md:!col-span-12">
+        <span class="kicker">Design Ledger</span>
+        <h1 class="page-title" style="font-size: var(--fs-2xl); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; margin-top: 1.1rem;">Archive</h1>
+        <p class="page-description" style="font-size: var(--fs-md); line-height: 1.55; max-width: 34rem; margin-top: 1.25rem;">
+          This site is rebuilt in a new visual idiom every month. Each previous design is preserved, frozen in time.
+        </p>
+      </div>
+      <div style="grid-column: span 3;" class="max-md:!col-span-12 md:text-right">
+        <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6;">Editions</span>
+        <div style="font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--color-accent);">{total}</div>
+      </div>
+    </div>
+
+    <div class="rule" style="margin-top: 2rem;"></div>
 
     {archives.length > 0 ? (
-      <div style="display: grid; gap: 1rem;">
+      <div>
         {archives.map((archive) => (
-          <a href={`/archive/${archive.month}/`} class="post-card" style="padding: 1.5rem;">
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
-              <div
-                style={`width: 10px; height: 10px; border-radius: 50%; background: ${archive.primaryColor}; flex-shrink: 0;`}
-              ></div>
-              <span style="font-family: var(--font-mono); font-size: 0.75rem; opacity: 0.5;">{archive.month}</span>
-            </div>
-            <div class="post-card-title">{archive.trend}</div>
-            <p class="post-card-description" style="margin-top: 0.5rem;">{archive.description}</p>
+          <a href={`/archive/${archive.month}/`} class="index-row group flex items-baseline" style="gap: 1.25rem; padding: 1.5rem 0.5rem;">
+            <span aria-hidden="true" style={`width: 0.85rem; height: 0.85rem; flex-shrink: 0; align-self: center; background: ${archive.primaryColor};`}></span>
+            <span class="index-num max-sm:hidden" style="font-family: var(--font-mono); font-size: var(--fs-2xs); width: 5rem; flex-shrink: 0;">{archive.month}</span>
+            <span class="flex-1">
+              <span class="block transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-md); font-weight: 700; letter-spacing: -0.02em;">{archive.trend}</span>
+              <span class="block" style="font-size: var(--fs-sm); color: var(--color-tech-text-muted); margin-top: 0.3rem; max-width: 42rem;">{archive.description}</span>
+            </span>
+            <span class="index-arrow transition-transform group-hover:translate-x-1" style="flex-shrink: 0; align-self: center;">→</span>
           </a>
         ))}
+        <div class="index-row" style="height: 0;"></div>
       </div>
     ) : (
-      <p style="opacity: 0.5;">No archives yet.</p>
+      <p class="page-description" style="margin-top: 2rem; font-size: var(--fs-md);">No archived editions yet.</p>
     )}
   </section>
 </BaseLayout>

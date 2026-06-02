@@ -1,0 +1,32 @@
+---
+interface Props {
+  elevation?: string;
+  distance?: string;
+  duration?: string;
+  difficulty?: string;
+  basecamp?: string;
+  season?: string;
+}
+
+const { elevation, distance, duration, difficulty, basecamp, season } = Astro.props;
+
+const stats = [
+  { label: 'Elevation', value: elevation },
+  { label: 'Distance', value: distance },
+  { label: 'Duration', value: duration },
+  { label: 'Difficulty', value: difficulty },
+  { label: 'Basecamp', value: basecamp },
+  { label: 'Season', value: season },
+].filter((s) => s.value);
+---
+
+{stats.length > 0 && (
+  <div class="trek-stats">
+    {stats.map((s) => (
+      <div class="trek-stat">
+        <div class="trek-stat-label">{s.label}</div>
+        <div class="trek-stat-value">{s.value}</div>
+      </div>
+    ))}
+  </div>
+)}

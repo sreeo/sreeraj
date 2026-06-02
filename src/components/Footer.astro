@@ -1,14 +1,43 @@
 ---
 const year = new Date().getFullYear();
+
+const links = [
+  { label: 'RSS', href: '/rss.xml' },
+  { label: 'Tags', href: '/tags/' },
+  { label: 'Archive', href: '/archive/' },
+  { label: 'Contact', href: '/contact/' },
+];
 ---
 
-<footer class="site-footer mt-16">
-  <div class="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-    <p>&copy; {year} Sreeraj Rajan</p>
-    <nav class="flex items-center gap-6">
-      <a href="/contact/" class="transition-colors">Contact</a>
-      <a href="/rss.xml" class="transition-colors">RSS</a>
-      <a href="/tags/" class="transition-colors">Tags</a>
-    </nav>
+<footer class="site-footer" style="margin-top: clamp(4rem, 10vw, 8rem);">
+  <div class="container" style="padding-top: 3rem; padding-bottom: 3rem;">
+    <div class="grid-12" style="row-gap: 2rem;">
+      <div style="grid-column: span 6;" class="max-md:!col-span-12">
+        <div class="nav-brand" style="font-size: 1.5rem; letter-spacing: -0.03em;">
+          sreeraj<span class="dot" style="color: var(--color-accent);">.</span>dev
+        </div>
+        <p style="font-size: var(--fs-sm); max-width: 26rem; margin-top: 0.75rem;">
+          DevOps engineering, database notes, and dispatches from the Himalaya. Redesigned monthly.
+        </p>
+      </div>
+
+      <nav style="grid-column: span 3;" class="max-md:!col-span-6 flex flex-col" >
+        <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; margin-bottom: 0.85rem;">Navigate</span>
+        {links.map((l) => (
+          <a href={l.href} style="font-size: var(--fs-sm); padding: 0.25rem 0; width: fit-content;">{l.label}</a>
+        ))}
+      </nav>
+
+      <div style="grid-column: span 3;" class="max-md:!col-span-6 flex flex-col">
+        <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6; margin-bottom: 0.85rem;">Elsewhere</span>
+        <a href="https://twitter.com/bot_sree" style="font-size: var(--fs-sm); padding: 0.25rem 0; width: fit-content;">Twitter ↗</a>
+        <a href="mailto:contact@sreeraj.dev" style="font-size: var(--fs-sm); padding: 0.25rem 0; width: fit-content;">Email ↗</a>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between" style="margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid currentColor;">
+      <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.08em;">© {year} SREERAJ RAJAN</span>
+      <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.08em;">SET IN INTER · BUILT WITH ASTRO</span>
+    </div>
   </div>
 </footer>
