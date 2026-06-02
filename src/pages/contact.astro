@@ -5,17 +5,39 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const pages = await getCollection('pages');
 const contactPage = pages.find((p) => p.data.slug === 'contact');
 const { Content } = contactPage ? await render(contactPage) : { Content: null };
+
+const channels = [
+  { label: 'Email', value: 'contact [at] sreeraj [dot] dev', href: 'mailto:contact@sreeraj.dev' },
+  { label: 'Twitter', value: '@bot_sree', href: 'https://twitter.com/bot_sree' },
+  { label: 'RSS', value: '/rss.xml', href: '/rss.xml' },
+];
 ---
 
-<BaseLayout title="Contact — sreeraj.dev" theme="tech">
-  <article class="max-w-[720px] mx-auto">
-    <h1 class="page-title text-3xl mb-8">Contact</h1>
-    {Content ? (
-      <div class="prose">
-        <Content />
+<BaseLayout title="Contact — sreeraj.dev" description="Get in touch." theme="tech">
+  <section class="container" style="padding-top: clamp(3rem, 7vw, 5rem); padding-bottom: clamp(4rem, 9vw, 7rem);">
+    <div class="grid-12" style="row-gap: 3rem; column-gap: clamp(2rem, 5vw, 4rem);">
+      <div style="grid-column: span 6;" class="max-lg:!col-span-12">
+        <span class="kicker">Say hello</span>
+        <h1 class="page-title" style="font-size: var(--fs-2xl); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; margin-top: 1.1rem;">
+          Get in<br />touch.
+        </h1>
+        <p class="page-description" style="font-size: var(--fs-md); line-height: 1.55; max-width: 28rem; margin-top: 1.5rem;">
+          Questions about infrastructure, Postgres, or a trail recommendation? The inbox is open.
+        </p>
+        {Content && <div class="prose" style="margin-top: 2rem; max-width: 30rem;"><Content /></div>}
       </div>
-    ) : (
-      <p class="page-description">Contact page content not found.</p>
-    )}
-  </article>
+
+      <div style="grid-column: span 6 / -1;" class="max-lg:!col-span-12">
+        <div class="rule"></div>
+        {channels.map((c) => (
+          <a href={c.href} class="index-row group flex items-baseline justify-between" style="gap: 1.25rem; padding: 1.35rem 0.25rem;">
+            <span class="index-cat" style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; width: 6rem; flex-shrink: 0;">{c.label}</span>
+            <span class="flex-1 transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-md); font-weight: 600;">{c.value}</span>
+            <span class="index-arrow transition-transform group-hover:translate-x-1">→</span>
+          </a>
+        ))}
+        <div class="index-row" style="height: 0;"></div>
+      </div>
+    </div>
+  </section>
 </BaseLayout>

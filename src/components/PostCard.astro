@@ -1,7 +1,5 @@
 ---
 import FormattedDate from './FormattedDate.astro';
-import TagList from './TagList.astro';
-import CairnIcon from './CairnIcon.astro';
 
 interface Props {
   title: string;
@@ -12,52 +10,47 @@ interface Props {
   tags?: string[];
   readingTime?: number;
   variant?: 'tech' | 'trek';
+  index?: number;
 }
 
-const { title, slug, description, pubDate, featureImage, tags = [], readingTime, variant = 'tech' } = Astro.props;
-const isTrek = variant === 'trek';
+const { title, slug, description, pubDate, featureImage, tags = [], readingTime, variant = 'tech', index } = Astro.props;
+const primaryTag = tags[0] ?? 'note';
+const num = index != null ? String(index).padStart(2, '0') : null;
 ---
 
-<article class:list={['post-card group', isTrek && 'trek-card']}>
-  <a href={`/${slug}/`} class="block">
-    <div class:list={['post-card-visual flex items-end gap-4', !isTrek && 'mb-3', isTrek && 'overflow-hidden']}>
-      {featureImage ? (
+<article class:list={['post-card group flex flex-col h-full', variant === 'trek' && 'trek-card']}>
+  <a href={`/${slug}/`} class="flex flex-col h-full" style="padding: 1.25rem;">
+    <div class="flex items-baseline justify-between" style="margin-bottom: 1rem;">
+      <span class="kicker" style="font-size: var(--fs-2xs);">{primaryTag}</span>
+      {num && <span class="post-card-index" style="font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600;">{num}</span>}
+    </div>
+
+    {featureImage && (
+      <div class="overflow-hidden" style="margin-bottom: 1.1rem; aspect-ratio: 16 / 10;">
         <img
           src={featureImage}
           alt={title}
-          class:list={[
-            'post-card-image w-full object-cover transition-transform duration-300 group-hover:scale-105',
-            !isTrek && 'h-40 rounded-lg',
-            isTrek && 'h-52',
-          ]}
           loading="lazy"
+          class="post-card-image w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
-      ) : (
-        <div class:list={[
-          'flex items-center justify-center w-full',
-          !isTrek && 'h-40 rounded-lg',
-          isTrek && 'h-52',
-        ]} style={`background: ${isTrek ? 'rgba(217,119,6,0.05)' : 'rgba(34,211,238,0.05)'};`}>
-          <CairnIcon title={title} variant={variant} />
-        </div>
-      )}
-    </div>
-    <div class:list={[isTrek && 'post-card-body']}>
-      <h3 class:list={['post-card-title text-lg mb-1 transition-colors', !isTrek && 'font-semibold']}>
-        {title}
-      </h3>
-      <div class="post-card-meta flex items-center gap-2 mb-2">
-        <FormattedDate date={pubDate} />
-        {readingTime && <span>· {readingTime} min read</span>}
       </div>
-      {description && (
-        <p class="post-card-description text-sm line-clamp-2">{description}</p>
-      )}
+    )}
+
+    <h3 class="post-card-title transition-colors" style="font-size: var(--fs-lg); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em;">
+      {title}
+    </h3>
+
+    {description && (
+      <p class="post-card-description" style="font-size: var(--fs-sm); line-height: 1.6; margin-top: 0.6rem;">
+        {description}
+      </p>
+    )}
+
+    <div class="post-card-divider" style="height: 1px; margin-top: 1.1rem; margin-bottom: 0.85rem;"></div>
+
+    <div class="post-card-meta flex items-center gap-3 mt-auto" style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.04em; text-transform: uppercase;">
+      <FormattedDate date={pubDate} mono />
+      {readingTime && <span>· {readingTime} min</span>}
     </div>
   </a>
-  {tags.length > 0 && (
-    <div class:list={['mt-2', isTrek && 'px-5 pb-4']}>
-      <TagList tags={tags} />
-    </div>
-  )}
 </article>

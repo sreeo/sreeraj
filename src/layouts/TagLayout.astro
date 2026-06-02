@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
+import { getThemeForTags } from '../utils/theme';
 
 interface Post {
   data: {
@@ -19,31 +20,61 @@ interface Props {
   description?: string;
   posts: Post[];
   theme?: 'tech' | 'trek';
+  kicker?: string;
 }
 
-const { title, description, posts, theme = 'tech' } = Astro.props;
+const { title, description, posts, theme = 'tech', kicker = 'Section' } = Astro.props;
+const count = String(posts.length).padStart(2, '0');
 ---
 
 <BaseLayout title={`${title} — sreeraj.dev`} description={description} theme={theme}>
-  <h1 class="page-title text-3xl mb-2">{title}</h1>
-  {description && <p class="page-description mb-8">{description}</p>}
-
-  {posts.length === 0 ? (
-    <p class="page-description">No posts found.</p>
-  ) : (
-    <div class="grid gap-6 sm:grid-cols-2">
-      {posts.map((post) => (
-        <PostCard
-          title={post.data.title}
-          slug={post.data.slug}
-          description={post.data.description}
-          pubDate={post.data.pubDate}
-          featureImage={post.data.featureImage}
-          tags={post.data.tags}
-          readingTime={post.data.readingTime}
-          variant={theme}
-        />
-      ))}
+  <!-- Section header -->
+  <section class="container" style="padding-top: clamp(3rem, 7vw, 5rem); padding-bottom: clamp(2rem, 4vw, 3rem);">
+    <div class="grid-12" style="align-items: end; row-gap: 1.5rem;">
+      <div style="grid-column: span 9;" class="max-md:!col-span-12">
+        <span class="kicker">{kicker}</span>
+        <h1 class="page-title" style="font-size: var(--fs-2xl); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; margin-top: 1.1rem;">
+          {title}
+        </h1>
+        {description && (
+          <p class="page-description" style="font-size: var(--fs-md); line-height: 1.55; max-width: 36rem; margin-top: 1.25rem;">
+            {description}
+          </p>
+        )}
+      </div>
+      <div style="grid-column: span 3;" class="max-md:!col-span-12 md:text-right">
+        <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6;">Entries</span>
+        <div style="font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--color-accent);">{count}</div>
+      </div>
     </div>
-  )}
+  </section>
+
+  <section class="container">
+    <div class="rule"></div>
+  </section>
+
+  <!-- Post grid -->
+  <section class="container" style="padding-top: clamp(2.5rem, 5vw, 3.5rem); padding-bottom: clamp(4rem, 9vw, 7rem);">
+    {posts.length === 0 ? (
+      <p class="page-description" style="font-size: var(--fs-md);">No entries in this section yet.</p>
+    ) : (
+      <div class="grid-12" style="row-gap: 1.5rem;">
+        {posts.map((post, i) => (
+          <div style="grid-column: span 4;" class="max-lg:!col-span-6 max-sm:!col-span-12 reveal">
+            <PostCard
+              title={post.data.title}
+              slug={post.data.slug}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              featureImage={post.data.featureImage}
+              tags={post.data.tags}
+              readingTime={post.data.readingTime}
+              variant={getThemeForTags(post.data.tags ?? [])}
+              index={i + 1}
+            />
+          </div>
+        ))}
+      </div>
+    )}
+  </section>
 </BaseLayout>

@@ -29,8 +29,9 @@ const theme = getThemeForTags([tag]);
 ---
 
 <TagLayout
-  title={`#${tag}`}
-  description={`Posts tagged with "${tag}"`}
+  kicker="Tagged"
+  title={tag}
+  description={`Every entry filed under "${tag}".`}
   posts={posts}
   theme={theme}
 />
