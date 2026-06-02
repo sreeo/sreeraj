@@ -20,9 +20,23 @@ system Chrome, and the agentic Layout QA stage can run as long as it needs.
 
 ```sh
 automation/instance/install.sh
-# then add your key:
-$EDITOR ~/.config/sreeraj-redesign/env      # set ANTHROPIC_API_KEY (and HEALTHCHECK_URL)
+# optional config (no API key needed by default — see Auth below):
+$EDITOR ~/.config/sreeraj-redesign/env      # e.g. set HEALTHCHECK_URL
 ```
+
+## Auth — runs on your Claude Code session (no API key)
+
+Everything Claude-powered goes through the Claude Code session
+(subscription/OAuth): `claude -p` generation, the Agent SDK layout fixer, the
+vision quality gate, and trend discovery. So **no `ANTHROPIC_API_KEY` is
+required** — leave it unset.
+
+- If a key **is** set in the env file, `claude`/the Agent SDK switch to
+  API-billing mode for everything and will fail on an invalid key. Only set it
+  if you want the optional, non-blocking **Webwright** reviewer (which needs a
+  raw key), and then it must be valid.
+- The session token can expire and need an interactive `claude` re-login; the
+  healthcheck (below) surfaces a run that fails because of this.
 
 ## Verify
 

@@ -71,8 +71,17 @@ if [ "$MODE" = "check" ]; then
   exit 0
 fi
 
-# --- full mode needs the API key ---
-: "${ANTHROPIC_API_KEY:?ANTHROPIC_API_KEY not set (populate the env file)}"
+# --- Auth ---
+# Generation (claude -p), the Agent SDK layout fixer, the vision gate and trend
+# discovery all run on the Claude Code SESSION (subscription/OAuth) — no API key.
+# An ANTHROPIC_API_KEY is OPTIONAL and only used by the non-blocking Webwright
+# reviewer. NOTE: if a key IS set, claude/the SDK switch to API-billing mode and
+# will fail on an invalid key — so leave it unset to use session auth.
+if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+  log "ANTHROPIC_API_KEY is set — API-billing mode (also used by Webwright)."
+else
+  log "No ANTHROPIC_API_KEY — using Claude Code session auth; Webwright will skip."
+fi
 
 # --- 3. Discover the design trend (web search + Claude; registry fallback) ---
 TREND="${REDESIGN_TREND:-}"

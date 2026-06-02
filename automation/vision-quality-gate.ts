@@ -1,7 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
 import fs from 'fs';
 import path from 'path';
 import { CONFIG } from './config.js';
+import { agentJson } from './agent-query.js';
 
 // --- Types ---
 
@@ -88,107 +88,95 @@ Think about these sites as 8-9/10 benchmarks:
 
 A personal blog doesn't need to match these exactly, but should aspire to their level of care and intentionality.
 
-## Response Format
-Return ONLY valid JSON (no markdown fences, no explanation):
-{
-  "typography": <number>,
-  "spacing": <number>,
-  "colorHarmony": <number>,
-  "visualHierarchy": <number>,
-  "polish": <number>,
-  "cohesion": <number>,
-  "overall": <number>,
-  "issues": ["<specific problem 1>", "<specific problem 2>"],
-  "strengths": ["<what works well 1>", "<what works well 2>"],
-  "recommendation": "accept" | "reject" | "marginal"
-}
+The "overall" score should be a weighted average emphasizing typography and visual hierarchy (they matter most for a blog). Set "recommendation" to "accept" if overall >= the stated threshold, "reject" if overall < threshold - 1, "marginal" if in between.`;
 
-The "overall" score should be a weighted average emphasizing typography and visual hierarchy (they matter most for a blog). Set "recommendation" to "accept" if overall >= THRESHOLD, "reject" if overall < THRESHOLD - 1, "marginal" if in between.`;
+// JSON schema the Agent SDK validates the returned score against.
+const VISION_SCORE_SCHEMA = {
+  type: 'object',
+  properties: {
+    typography: { type: 'number' },
+    spacing: { type: 'number' },
+    colorHarmony: { type: 'number' },
+    visualHierarchy: { type: 'number' },
+    polish: { type: 'number' },
+    cohesion: { type: 'number' },
+    overall: { type: 'number' },
+    issues: { type: 'array', items: { type: 'string' } },
+    strengths: { type: 'array', items: { type: 'string' } },
+    recommendation: { type: 'string', enum: ['accept', 'reject', 'marginal'] },
+  },
+  required: [
+    'typography', 'spacing', 'colorHarmony', 'visualHierarchy',
+    'polish', 'cohesion', 'overall', 'recommendation',
+  ],
+  additionalProperties: false,
+} as const;
 
 // --- Core evaluation ---
+// Score the screenshots via the Agent SDK (session auth). The agent Reads each
+// PNG (which presents it visually) and returns the rubric scores as validated
+// JSON — no raw image API call, no ANTHROPIC_API_KEY required.
+async function scoreScreenshots(
+  screenshotDir: string,
+  minScore: number,
+  extraContext = '',
+): Promise<VisionResult> {
+  const screenshots = fs.readdirSync(screenshotDir)
+    .filter(f => f.endsWith('.png'))
+    .slice(0, CONFIG.visionMaxScreenshots);
+
+  if (screenshots.length === 0) {
+    return { passed: false, score: emptyScore('No screenshots found'), screenshotsEvaluated: 0 };
+  }
+
+  const paths = screenshots.map(f => path.join(screenshotDir, f));
+  const pages = screenshots.map(f => f.replace('.png', '').replace(/_/g, '/')).join(', ');
+
+  const prompt = `${VISION_SCORING_PROMPT}
+
+---
+
+Use the Read tool on EACH of these ${screenshots.length} screenshot files so you can see them, then score the design. Pages shown: ${pages}.
+Acceptance threshold: ${minScore}/10.${extraContext}
+
+Screenshot files:
+${paths.map(p => `- ${p}`).join('\n')}`;
+
+  const parsed = await agentJson<Partial<VisionScore>>(prompt, VISION_SCORE_SCHEMA, {
+    allowedTools: ['Read'],
+    maxTurns: 6,
+  });
+
+  if (!parsed) {
+    return {
+      passed: false,
+      score: emptyScore('Agent returned no structured score'),
+      screenshotsEvaluated: screenshots.length,
+    };
+  }
+
+  const score: VisionScore = {
+    overall: clamp(parsed.overall ?? 0),
+    typography: clamp(parsed.typography ?? 0),
+    spacing: clamp(parsed.spacing ?? 0),
+    colorHarmony: clamp(parsed.colorHarmony ?? 0),
+    visualHierarchy: clamp(parsed.visualHierarchy ?? 0),
+    polish: clamp(parsed.polish ?? 0),
+    cohesion: clamp(parsed.cohesion ?? 0),
+    issues: parsed.issues ?? [],
+    strengths: parsed.strengths ?? [],
+    recommendation: parsed.recommendation ?? (((parsed.overall ?? 0) >= minScore) ? 'accept' : 'reject'),
+  };
+
+  return { passed: score.overall >= minScore, score, screenshotsEvaluated: screenshots.length };
+}
 
 export async function evaluateVisualQuality(
   screenshotDir: string,
   threshold?: number,
 ): Promise<VisionResult> {
   const minScore = threshold ?? CONFIG.visionThreshold;
-
-  const screenshots = fs.readdirSync(screenshotDir)
-    .filter(f => f.endsWith('.png'))
-    .slice(0, CONFIG.visionMaxScreenshots);
-
-  if (screenshots.length === 0) {
-    return {
-      passed: false,
-      score: emptyScore('No screenshots found'),
-      screenshotsEvaluated: 0,
-    };
-  }
-
-  const imageBlocks: Anthropic.ImageBlockParam[] = screenshots.map(file => ({
-    type: 'image' as const,
-    source: {
-      type: 'base64' as const,
-      media_type: 'image/png' as const,
-      data: fs.readFileSync(path.join(screenshotDir, file)).toString('base64'),
-    },
-  }));
-
-  const textBlock: Anthropic.TextBlockParam = {
-    type: 'text' as const,
-    text: `Here are ${screenshots.length} screenshots of a personal tech blog. The pages shown are: ${screenshots.map(f => f.replace('.png', '').replace(/_/g, '/')).join(', ')}.\n\nThe acceptance threshold is ${minScore}/10. Score this design.`,
-  };
-
-  const client = new Anthropic();
-
-  const response = await client.messages.create({
-    model: CONFIG.visionModel,
-    max_tokens: 2048,
-    system: VISION_SCORING_PROMPT,
-    messages: [
-      {
-        role: 'user',
-        content: [...imageBlocks, textBlock],
-      },
-    ],
-  });
-
-  const text = response.content
-    .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-    .map(b => b.text)
-    .join('');
-
-  try {
-    // Strip markdown fences if present
-    const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    const parsed = JSON.parse(cleaned);
-
-    const score: VisionScore = {
-      overall: clamp(parsed.overall ?? 0),
-      typography: clamp(parsed.typography ?? 0),
-      spacing: clamp(parsed.spacing ?? 0),
-      colorHarmony: clamp(parsed.colorHarmony ?? 0),
-      visualHierarchy: clamp(parsed.visualHierarchy ?? 0),
-      polish: clamp(parsed.polish ?? 0),
-      cohesion: clamp(parsed.cohesion ?? 0),
-      issues: parsed.issues ?? [],
-      strengths: parsed.strengths ?? [],
-      recommendation: parsed.recommendation ?? (parsed.overall >= minScore ? 'accept' : 'reject'),
-    };
-
-    return {
-      passed: score.overall >= minScore,
-      score,
-      screenshotsEvaluated: screenshots.length,
-    };
-  } catch {
-    console.error('Failed to parse vision response:', text.slice(0, 500));
-    return {
-      passed: false,
-      score: emptyScore('Failed to parse AI response'),
-      screenshotsEvaluated: screenshots.length,
-    };
-  }
+  return scoreScreenshots(screenshotDir, minScore);
 }
 
 // --- Feedback-aware evaluation (for multi-pass loop) ---
@@ -200,86 +188,10 @@ export async function evaluateWithFeedback(
   threshold?: number,
 ): Promise<VisionResult> {
   const minScore = threshold ?? CONFIG.visionThreshold;
-
-  const screenshots = fs.readdirSync(screenshotDir)
-    .filter(f => f.endsWith('.png'))
-    .slice(0, CONFIG.visionMaxScreenshots);
-
-  if (screenshots.length === 0) {
-    return {
-      passed: false,
-      score: emptyScore('No screenshots found'),
-      screenshotsEvaluated: 0,
-    };
-  }
-
-  const imageBlocks: Anthropic.ImageBlockParam[] = screenshots.map(file => ({
-    type: 'image' as const,
-    source: {
-      type: 'base64' as const,
-      media_type: 'image/png' as const,
-      data: fs.readFileSync(path.join(screenshotDir, file)).toString('base64'),
-    },
-  }));
-
   const feedbackContext = previousIssues.length > 0
     ? `\n\nThis is evaluation pass ${passNumber}. Previous issues that should have been fixed:\n${previousIssues.map(i => `- ${i}`).join('\n')}\n\nPay special attention to whether these issues were addressed.`
     : '';
-
-  const textBlock: Anthropic.TextBlockParam = {
-    type: 'text' as const,
-    text: `Here are ${screenshots.length} screenshots of a personal tech blog. Pages: ${screenshots.map(f => f.replace('.png', '').replace(/_/g, '/')).join(', ')}.\n\nAcceptance threshold: ${minScore}/10.${feedbackContext}\n\nScore this design.`,
-  };
-
-  const client = new Anthropic();
-
-  const response = await client.messages.create({
-    model: CONFIG.visionModel,
-    max_tokens: 2048,
-    system: VISION_SCORING_PROMPT,
-    messages: [
-      {
-        role: 'user',
-        content: [...imageBlocks, textBlock],
-      },
-    ],
-  });
-
-  const text = response.content
-    .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-    .map(b => b.text)
-    .join('');
-
-  try {
-    const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    const parsed = JSON.parse(cleaned);
-
-    const score: VisionScore = {
-      overall: clamp(parsed.overall ?? 0),
-      typography: clamp(parsed.typography ?? 0),
-      spacing: clamp(parsed.spacing ?? 0),
-      colorHarmony: clamp(parsed.colorHarmony ?? 0),
-      visualHierarchy: clamp(parsed.visualHierarchy ?? 0),
-      polish: clamp(parsed.polish ?? 0),
-      cohesion: clamp(parsed.cohesion ?? 0),
-      issues: parsed.issues ?? [],
-      strengths: parsed.strengths ?? [],
-      recommendation: parsed.recommendation ?? (parsed.overall >= minScore ? 'accept' : 'reject'),
-    };
-
-    return {
-      passed: score.overall >= minScore,
-      score,
-      screenshotsEvaluated: screenshots.length,
-    };
-  } catch {
-    console.error('Failed to parse vision response:', text.slice(0, 500));
-    return {
-      passed: false,
-      score: emptyScore('Failed to parse AI response'),
-      screenshotsEvaluated: screenshots.length,
-    };
-  }
+  return scoreScreenshots(screenshotDir, minScore, feedbackContext);
 }
 
 // --- CLI entry point ---
