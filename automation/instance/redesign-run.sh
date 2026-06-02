@@ -110,6 +110,51 @@ else
   # --- Full: clear stale state, then generate ---
   rm -f "$STAGE_FILE" "$PATCH_FILE" "$TREND_FILE"
 
+  # --- Archive the OUTGOING design as an edition (self-maintaining archives) ---
+  # HEAD is still the current/live design here. Tag it edition/<its-month> and
+  # add a registry entry with that sourceRef; rebuild-archives (run at deploy)
+  # then builds its frozen snapshot from current content. Skipped if the live
+  # manifest has no month or it equals this run's month.
+  NEW_MONTH="$(date -u +%Y-%m)"
+  ARCHIVE_INFO="$(NEW_MONTH="$NEW_MONTH" python3 - <<'PY'
+import json, os
+try:
+    m = json.load(open('src/data/design-manifest.json'))
+except Exception:
+    m = {}
+out = m.get('month')
+if out and out != os.environ['NEW_MONTH']:
+    print('\t'.join([out, m.get('trend', 'Previous design'),
+                     m.get('description', ''), m.get('primaryColor', '#000000')]))
+PY
+)"
+  if [ -n "$ARCHIVE_INFO" ]; then
+    OUT_MONTH="$(printf '%s' "$ARCHIVE_INFO" | cut -f1)"
+    log "Archiving outgoing design as edition $OUT_MONTH"
+    git tag -f "edition/$OUT_MONTH" HEAD >/dev/null 2>&1 || true
+    git push -f origin "edition/$OUT_MONTH" >/dev/null 2>&1 || log "edition tag push failed (continuing)"
+    ARCHIVE_INFO="$ARCHIVE_INFO" python3 - <<'PY'
+import json, os, datetime
+month, trend, desc, color = os.environ['ARCHIVE_INFO'].split('\t')
+p = 'public/archive/registry.json'
+try:
+    reg = json.load(open(p))
+except Exception:
+    reg = {'archives': []}
+reg['archives'] = [a for a in reg.get('archives', []) if a.get('month') != month]
+reg['archives'].append({
+    'month': month, 'trend': trend, 'description': desc, 'primaryColor': color,
+    'deployedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    'sourceRef': f'edition/{month}',
+})
+reg['archives'].sort(key=lambda a: a['month'], reverse=True)
+json.dump(reg, open(p, 'w'), indent=2, ensure_ascii=False)
+open(p, 'a').write('\n')
+PY
+  else
+    log "No outgoing edition to archive (manifest has no month, or same month)."
+  fi
+
   # 3. Discover the design trend (web search via Agent SDK; registry fallback).
   TREND="${REDESIGN_TREND:-}"
   if [ -z "$TREND" ]; then
@@ -154,6 +199,28 @@ PY
   # 5. Creative rebuild (Claude Code session auth).
   claude -p "$(cat /tmp/rebuild-prompt.md)" --print --dangerously-skip-permissions --max-turns 50 \
     || log "claude rebuild exited non-zero (continuing with changes made)"
+
+  # Stamp this run's month (and trend) into the new design's manifest, so next
+  # month's run can archive it as edition/$NEW_MONTH.
+  NEW_MONTH="$NEW_MONTH" TREND="$TREND" python3 - <<'PY'
+import json, os, re
+p = 'src/data/design-manifest.json'
+try:
+    m = json.load(open(p))
+except Exception:
+    m = {}
+m['month'] = os.environ['NEW_MONTH']
+m.setdefault('trend', os.environ['TREND'].split(' — ')[0])
+if not m.get('primaryColor'):
+    try:
+        css = open('src/styles/global.css').read()
+        hit = re.search(r'--color-accent:\s*(#[0-9a-fA-F]{3,8})', css)
+        m['primaryColor'] = hit.group(1) if hit else '#000000'
+    except Exception:
+        m['primaryColor'] = '#000000'
+json.dump(m, open(p, 'w'), indent=2, ensure_ascii=False)
+open(p, 'a').write('\n')
+PY
 
   # 6. Build.
   npm run build
