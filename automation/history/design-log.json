@@ -8,6 +8,24 @@
       "timestamp": "2026-03-21T11:35:46.512Z",
       "description": "Clean lines, organic curves, and bold graphic elements from the 1950s-60s design era. Think Eames, Saul Bass, and Herb Lubalin. Geometric yet warm, structured yet playful.",
       "primaryColor": "#ff6b35"
+    },
+    {
+      "month": "2026-05",
+      "trendId": "cutting-edge-terminal",
+      "trendName": "Cutting-Edge Terminal",
+      "status": "success",
+      "timestamp": "2026-05-01T00:00:00.000Z",
+      "description": "Dark terminal aesthetic with cyan accents, monospace git-log timeline, dual tech/trek theming.",
+      "primaryColor": "#22d3ee"
+    },
+    {
+      "month": "2026-06",
+      "trendId": "swiss-international-typographic",
+      "trendName": "Swiss International Typographic",
+      "status": "success",
+      "timestamp": "2026-06-01T00:00:00.000Z",
+      "description": "Strict 12-column grid, neo-grotesque Inter flush-left, hairline rules, zero radius, single signal-red accent.",
+      "primaryColor": "#e1261c"
     }
   ]
 }
