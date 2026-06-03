@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
+import FormattedDate from '../components/FormattedDate.astro';
 import { getThemeForTags } from '../utils/theme';
 
 interface Post {
@@ -25,6 +26,13 @@ interface Props {
 
 const { title, description, posts, theme = 'tech', kicker = 'Section' } = Astro.props;
 const count = String(posts.length).padStart(2, '0');
+
+// Featured lead = most recent entry; the rest fall into the modular grid.
+const lead = posts[0] ?? null;
+const rest = posts.slice(1);
+const ruleVar = theme === 'trek' ? 'var(--color-trek-rule)' : 'var(--color-tech-rule)';
+const mutedVar = theme === 'trek' ? 'var(--color-trek-text-muted)' : 'var(--color-tech-text-muted)';
+const leadTag = lead?.data.tags?.[0] ?? 'note';
 ---
 
 <BaseLayout title={`${title} — sreeraj.dev`} description={description} theme={theme}>
@@ -53,28 +61,70 @@ const count = String(posts.length).padStart(2, '0');
     <div class="rule"></div>
   </section>
 
-  <!-- Post grid -->
+  <!-- Featured lead + modular grid -->
   <section class="container" style="padding-top: clamp(2.5rem, 5vw, 3.5rem); padding-bottom: clamp(4rem, 9vw, 7rem);">
     {posts.length === 0 ? (
       <p class="page-description" style="font-size: var(--fs-md);">No entries in this section yet.</p>
     ) : (
-      <div class="grid-12" style="row-gap: 1.5rem;">
-        {posts.map((post, i) => (
-          <div style="grid-column: span 4;" class="max-lg:!col-span-6 max-sm:!col-span-12 reveal">
-            <PostCard
-              title={post.data.title}
-              slug={post.data.slug}
-              description={post.data.description}
-              pubDate={post.data.pubDate}
-              featureImage={post.data.featureImage}
-              tags={post.data.tags}
-              readingTime={post.data.readingTime}
-              variant={getThemeForTags(post.data.tags ?? [])}
-              index={i + 1}
-            />
-          </div>
-        ))}
-      </div>
+      <>
+        {lead && (
+          <a href={`/${lead.data.slug}/`} class="grid-12 group reveal" style="row-gap: 1.5rem; align-items: start;">
+            {lead.data.featureImage && (
+              <div style="grid-column: span 7;" class="max-lg:!col-span-12 overflow-hidden">
+                <div style="aspect-ratio: 16 / 10;" class="overflow-hidden">
+                  <img
+                    src={lead.data.featureImage}
+                    alt={lead.data.title}
+                    class="post-card-image w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    style={`border: 1px solid ${ruleVar};`}
+                  />
+                </div>
+              </div>
+            )}
+            <div style={`grid-column: span ${lead.data.featureImage ? '5 / -1' : '12'};`} class="max-lg:!col-span-12">
+              <div class="flex items-center justify-between" style={`font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; color: ${mutedVar};`}>
+                <span class="kicker" style="font-size: var(--fs-2xs);">{leadTag}</span>
+                <span style="color: var(--color-accent); font-weight: 700;">★ Latest</span>
+              </div>
+              <h2 class="transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-xl); font-weight: 800; line-height: 1.04; letter-spacing: -0.03em; margin-top: 1rem;">
+                {lead.data.title}
+              </h2>
+              {lead.data.description && (
+                <p style={`font-size: var(--fs-base); line-height: 1.65; margin-top: 1.1rem; color: ${mutedVar};`}>
+                  {lead.data.description}
+                </p>
+              )}
+              <div class="flex items-center gap-3" style={`margin-top: 1.5rem; font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.05em; text-transform: uppercase; color: ${mutedVar};`}>
+                <FormattedDate date={lead.data.pubDate} mono />
+                {lead.data.readingTime && <span>· {lead.data.readingTime} min</span>}
+              </div>
+            </div>
+          </a>
+        )}
+
+        {rest.length > 0 && (
+          <>
+            <div class="rule" style="margin-top: clamp(2.5rem, 5vw, 3.5rem); margin-bottom: clamp(2.5rem, 5vw, 3.5rem);"></div>
+            <div class="grid-12" style="row-gap: 1.5rem;">
+              {rest.map((post, i) => (
+                <div style="grid-column: span 4;" class="max-lg:!col-span-6 max-sm:!col-span-12 reveal">
+                  <PostCard
+                    title={post.data.title}
+                    slug={post.data.slug}
+                    description={post.data.description}
+                    pubDate={post.data.pubDate}
+                    featureImage={post.data.featureImage}
+                    tags={post.data.tags}
+                    readingTime={post.data.readingTime}
+                    variant={getThemeForTags(post.data.tags ?? [])}
+                    index={i + 2}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </>
     )}
   </section>
 </BaseLayout>
