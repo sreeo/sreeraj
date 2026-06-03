@@ -64,7 +64,12 @@ if ! git rev-parse --verify --quiet "origin/$BASE_BRANCH" >/dev/null; then
   log "       Set REDESIGN_BASE_BRANCH correctly in the env file (production = main)."
   exit 2
 fi
-git checkout -B "$BASE_BRANCH" "origin/$BASE_BRANCH"
+# Scrub the working tree FIRST — the clone persists between runs, so a previous
+# run's leftover changes (incl. untracked files) would otherwise make the
+# branch switch abort ("untracked working tree files would be overwritten").
+git reset --hard HEAD 2>/dev/null || true
+git clean -fd
+git checkout -fB "$BASE_BRANCH" "origin/$BASE_BRANCH"
 git reset --hard "origin/$BASE_BRANCH"
 git clean -fd   # full clean; npm ci below rebuilds node_modules reproducibly
 
