@@ -78,14 +78,22 @@ Rules for generative elements:
 
 ### Design Evolution Context
 
-This site is redesigned monthly. Each month should feel distinctly different while maintaining the same content quality. Here is the history of recent designs:
+This site is redesigned monthly. Each month must feel like a **different site** — not a recolor of the last one. Recent designs:
 
 {{DESIGN_HISTORY}}
 
-Your design should:
-- Feel **distinctly different** from the most recent design — different layout structure, different color temperature, different typographic voice
-- You may carry forward ONE element from a previous design if it was exceptional (a particularly good interaction, an elegant component pattern)
-- Consider how this design contributes to the site's evolving identity — it's a portfolio of design sensibility over time
+## ⚠️ STRUCTURAL DIVERGENCE IS MANDATORY — the #1 failure mode
+
+The most common failure is **reskinning the previous design**: keeping its layout/structure and just swapping colors and fonts. That is an automatic REJECT. The *trend* changes the look; YOU must change the **bones**.
+
+Before designing anything, READ the current design you are replacing — `src/pages/index.astro`, `src/layouts/BaseLayout.astro`, `src/components/Header.astro`, `src/styles/global.css` — and note its structural signature: page skeleton, hero concept, eyebrow/kicker text, section order, nav placement, post-list/card layout, and signature visual element.
+
+Your new design MUST differ on **every** one of those axes:
+- **Page architecture** — reinvent the homepage skeleton. If the current one is "oversized hero + editorial index list", do something categorically different: a dense terminal/dashboard, a vertical scrolling timeline, a magazine/editorial spread, a single-column zine, an asymmetric split-screen, a card-wall, etc.
+- **Hero** — do NOT reuse the current hero's copy framing, eyebrow/kicker (e.g. a "VOL. …" or "FIELD NOTES" tag), the oversized-headline-with-one-highlighted-word treatment, or a right-side decorative panel/canvas. Conceive a different opening entirely.
+- **Navigation** — different placement and style. **Section order** — different. **Post list/cards** — different structure. **Signature interaction** — different.
+
+Rule of thumb: if last month's homepage and this month's were placed side by side, a viewer must NOT recognize them as the same underlying layout. **Do NOT carry over layout, structure, component shapes, or copy framing from the previous design — rebuild the skeleton from scratch.** Reskinning is failure.
 
 ## Reference Sites for Quality Bar
 
