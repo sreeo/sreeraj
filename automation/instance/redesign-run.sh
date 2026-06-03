@@ -115,7 +115,8 @@ else
   # add a registry entry with that sourceRef; rebuild-archives (run at deploy)
   # then builds its frozen snapshot from current content. Skipped if the live
   # manifest has no month or it equals this run's month.
-  NEW_MONTH="$(date -u +%Y-%m)"
+  # REDESIGN_MONTH overrides the month (used for rehearsal/back-dated runs).
+  NEW_MONTH="${REDESIGN_MONTH:-$(date -u +%Y-%m)}"
   ARCHIVE_INFO="$(NEW_MONTH="$NEW_MONTH" python3 - <<'PY'
 import json, os
 try:
