@@ -43,7 +43,7 @@ export async function discoverTrend(
 
   const classicList = TRENDS.map(t => `- ${t.name}: ${t.description}`).join('\n');
 
-  console.log('Discovering current design trends via web search...');
+  console.error('Discovering current design trends via web search...');
 
   const prompt = `You are selecting a design style for a personal tech blog (sreeraj.dev) for ${monthLabel}.
 
@@ -76,14 +76,14 @@ structure, typography, spacing, interactions (each a detailed description), refe
     });
 
     if (!trend || !trend.id || !trend.name || !trend.description || !trend.structure || !trend.typography) {
-      console.log('  Discovery returned no/incomplete trend, falling back to classic.');
+      console.error('  Discovery returned no/incomplete trend, falling back to classic.');
       return fallbackToClassic(designLog);
     }
 
-    console.log(`  Discovered: ${trend.name} (${trend.source})`);
+    console.error(`  Discovered: ${trend.name} (${trend.source})`);
     return trend;
   } catch (e) {
-    console.log(`  Discovery failed (${e instanceof Error ? e.message : e}), falling back to classic.`);
+    console.error(`  Discovery failed (${e instanceof Error ? e.message : e}), falling back to classic.`);
     return fallbackToClassic(designLog);
   }
 }

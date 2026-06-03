@@ -161,24 +161,15 @@ PY
     log "No outgoing edition to archive (manifest has no month, or same month)."
   fi
 
-  # 3. Discover the design trend (web search via Agent SDK; registry fallback).
+  # 3. Discover the design trend (Agent SDK web search; registry fallback).
+  # pick-trend.ts is a real file (reliable relative-import resolution, unlike
+  # `tsx -e`) and always prints a usable trend on stdout (progress -> stderr).
   TREND="${REDESIGN_TREND:-}"
   if [ -z "$TREND" ]; then
-    TREND=$(cd automation && npx tsx -e "
-      import { discoverTrend } from './trend-discovery.js';
-      import fs from 'fs';
-      const log = fs.existsSync('history/design-log.json') ? JSON.parse(fs.readFileSync('history/design-log.json','utf-8')) : { designs: [] };
-      const last = log.designs.length ? log.designs[log.designs.length-1].trendName : null;
-      const t = await discoverTrend(log, last);
-      console.log(t.name + ' — ' + t.description);
-    " 2>/dev/null) || TREND=""
-    if [ -z "$TREND" ] || echo "$TREND" | grep -qi error; then
-      log "Trend discovery failed; falling back to registry."
-      TREND=$(cd automation && npx tsx -e "
-        import { selectTrend } from './trend-registry.js';
-        const t = selectTrend({ designs: [] });
-        console.log(t.name + ' — ' + t.description);
-      ")
+    TREND="$(cd automation && npx tsx pick-trend.ts 2>>/tmp/pick-trend.err)" || TREND=""
+    if [ -z "$TREND" ]; then
+      log "Trend selection produced nothing; using a safe default."
+      TREND="Editorial Minimalism — restrained type-driven layout, generous whitespace, a single accent, clear hierarchy"
     fi
   fi
   printf '%s' "$TREND" > "$TREND_FILE"
