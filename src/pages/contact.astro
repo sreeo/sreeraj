@@ -30,13 +30,12 @@ const channels = [
       <div style="grid-column: span 6 / -1;" class="max-lg:!col-span-12">
         <div class="rule"></div>
         {channels.map((c) => (
-          <a href={c.href} class="index-row group flex items-baseline justify-between" style="gap: 1.25rem; padding: 1.35rem 0.25rem;">
+          <a href={c.href} class="index-row group flex items-baseline justify-between" style="gap: 1.25rem; padding: 1.35rem 1.25rem;">
             <span class="index-cat" style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; width: 6rem; flex-shrink: 0;">{c.label}</span>
             <span class="flex-1 transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-md); font-weight: 600;">{c.value}</span>
             <span class="index-arrow transition-transform group-hover:translate-x-1">→</span>
           </a>
         ))}
-        <div class="index-row" style="height: 0;"></div>
       </div>
     </div>
   </section>

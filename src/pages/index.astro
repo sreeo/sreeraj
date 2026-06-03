@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import SwissGrid from '../components/SwissGrid.astro';
+import BrutalArt from '../components/BrutalArt.astro';
 import { getThemeForTags } from '../utils/theme';
 
 const posts = (await getCollection('blog'))
@@ -32,7 +32,7 @@ const heroCat = category(hero.data.tags);
       <div style="grid-column: span 7;" class="max-lg:!col-span-12">
         <span class="kicker">Vol. MMXXVI · Field Notes</span>
         <h1 style="font-size: var(--fs-hero); font-weight: 800; line-height: 0.92; letter-spacing: -0.04em; margin-top: 1.25rem;">
-          Systems,<br />databases<br />&amp; <span style="color: var(--color-accent);">altitude</span>.
+          Systems,<br />databases<br />&amp; <span class="mark">altitude</span>.
         </h1>
         <p style="font-size: var(--fs-md); line-height: 1.55; max-width: 32rem; margin-top: 1.75rem; color: var(--color-tech-text-muted);">
           The working notebook of <strong style="color: var(--color-tech-text); font-weight: 600;">Sreeraj Rajan</strong> — generalist software engineer at Medley Learning, Himalayan trekker, and occasional open-source contributor.
@@ -40,7 +40,7 @@ const heroCat = category(hero.data.tags);
       </div>
 
       <div style="grid-column: span 4 / -1;" class="max-lg:hidden">
-        <SwissGrid />
+        <BrutalArt />
       </div>
     </div>
   </section>
@@ -60,9 +60,9 @@ const heroCat = category(hero.data.tags);
   <section class="container reveal" style="padding-top: clamp(3rem, 7vw, 5.5rem); padding-bottom: clamp(2.5rem, 6vw, 4.5rem);">
     <span class="kicker" style="margin-bottom: 2rem; display: inline-flex;">Featured Dispatch</span>
     <a href={`/${hero.data.slug}/`} class="grid-12 group" style="row-gap: 1.75rem; align-items: start; margin-top: 1.75rem;">
-      <div style="grid-column: span 7;" class="max-lg:!col-span-12 overflow-hidden">
-        <div style="aspect-ratio: 16 / 10;" class="overflow-hidden">
-          <img src={hero.data.featureImage} alt={hero.data.title} class="post-card-image w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" style="border: 1px solid var(--color-tech-rule);" />
+      <div style="grid-column: span 7;" class="max-lg:!col-span-12">
+        <div class="brutal-frame overflow-hidden" style="aspect-ratio: 16 / 10;">
+          <img src={hero.data.featureImage} alt={hero.data.title} class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
         </div>
       </div>
       <div style="grid-column: span 5 / -1;" class="max-lg:!col-span-12">
@@ -123,7 +123,7 @@ const heroCat = category(hero.data.tags);
 
     <div>
       {posts.map((post, i) => (
-        <a href={`/${post.data.slug}/`} class="index-row group flex items-baseline" style="gap: 1.25rem; padding: 1.1rem 0.5rem;">
+        <a href={`/${post.data.slug}/`} class="index-row group flex items-baseline" style="gap: 1.25rem; padding: 1.1rem 1.15rem;">
           <span class="index-num" style="font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; width: 2.25rem; flex-shrink: 0;">{String(i + 1).padStart(2, '0')}</span>
           <span class="flex-1 transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-md); font-weight: 600; letter-spacing: -0.015em; line-height: 1.25;">
             {post.data.title}
@@ -135,7 +135,6 @@ const heroCat = category(hero.data.tags);
           <span class="index-arrow transition-transform group-hover:translate-x-1" style="flex-shrink: 0;">→</span>
         </a>
       ))}
-      <div class="index-row" style="height: 0;"></div>
     </div>
   </section>
 </BaseLayout>

@@ -26,12 +26,11 @@ const routes = [
       <nav style="grid-column: span 4 / -1;" class="max-lg:!col-span-12">
         <div class="rule"></div>
         {routes.map((r) => (
-          <a href={r.href} class="index-row group flex items-baseline justify-between" style="gap: 1rem; padding: 1.1rem 0.25rem;">
+          <a href={r.href} class="index-row group flex items-baseline justify-between" style="gap: 1rem; padding: 1.1rem 1.15rem;">
             <span class="transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-md); font-weight: 600;">{r.label}</span>
             <span class="index-arrow transition-transform group-hover:translate-x-1">→</span>
           </a>
         ))}
-        <div class="index-row" style="height: 0;"></div>
       </nav>
     </div>
   </section>

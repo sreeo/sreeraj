@@ -1,9 +1,10 @@
 {
-  "trend": "Swiss International Typographic",
-  "month": "2026-06",
-  "description": "Strict 12-column grid, neo-grotesque Inter set flush-left ragged-right, hairline rules, zero radius, and a single signal-red accent on warm off-white. Signature numbered editorial index plus a generative Müller-Brockmann grid composition.",
-  "primaryColor": "#e1261c",
+  "trend": "Neubrutalism",
+  "month": "2026-07",
+  "description": "Block & Tackle — a raw-but-friendly neubrutalist system: chunky 2px ink borders, hard offset drop-shadows that snap to an electric-violet accent on hover, sunflower-yellow highlight blocks, and warm buttered-paper grounds. Space Grotesk display headlines over Inter, a stacked bordered index, and a generative composition of bordered blocks with hard shadows.",
+  "primaryColor": "#7c3aed",
   "fonts": [
+    "Space Grotesk",
     "Inter",
     "JetBrains Mono"
   ]

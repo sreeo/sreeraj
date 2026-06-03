@@ -27,7 +27,7 @@ const total = String(archives.length).padStart(2, '0');
     {archives.length > 0 ? (
       <div>
         {archives.map((archive) => (
-          <a href={`/archive/${archive.month}/`} class="index-row group flex items-baseline" style="gap: 1.25rem; padding: 1.5rem 0.5rem;">
+          <a href={`/archive/${archive.month}/`} class="index-row group flex items-baseline" style="gap: 1.25rem; padding: 1.35rem 1.25rem;">
             <span aria-hidden="true" style={`width: 0.85rem; height: 0.85rem; flex-shrink: 0; align-self: center; background: ${archive.primaryColor};`}></span>
             <span class="index-num max-sm:hidden" style="font-family: var(--font-mono); font-size: var(--fs-2xs); width: 5rem; flex-shrink: 0;">{archive.month}</span>
             <span class="flex-1">
@@ -37,7 +37,6 @@ const total = String(archives.length).padStart(2, '0');
             <span class="index-arrow transition-transform group-hover:translate-x-1" style="flex-shrink: 0; align-self: center;">→</span>
           </a>
         ))}
-        <div class="index-row" style="height: 0;"></div>
       </div>
     ) : (
       <p class="page-description" style="margin-top: 2rem; font-size: var(--fs-md);">No archived editions yet.</p>

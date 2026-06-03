@@ -26,6 +26,14 @@
       "timestamp": "2026-06-01T00:00:00.000Z",
       "description": "Strict 12-column grid, neo-grotesque Inter flush-left, hairline rules, zero radius, single signal-red accent.",
       "primaryColor": "#e1261c"
+    },
+    {
+      "month": "2026-06",
+      "trendId": "full-rebuild",
+      "trendName": "Neubrutalism \u2014 Modern take on brutalism \u2014 bold shadows, thick borders, bright accents on neutral backgrounds. Popularized by Figma, Gumroad, and modern SaaS. Raw but friendly, not aggressive.",
+      "status": "success",
+      "timestamp": "2026-06-03T09:01:39.441700+00:00",
+      "description": "Neubrutalism \u2014 Modern take on brutalism \u2014 bold shadows, thick borders, bright accents on neutral backgrounds. Popularized by Figma, Gumroad, and modern SaaS. Raw but friendly, not aggressive."
     }
   ]
 }
