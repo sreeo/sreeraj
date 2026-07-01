@@ -19,36 +19,36 @@ const num = index != null ? String(index).padStart(2, '0') : null;
 ---
 
 <article class:list={['post-card group flex flex-col h-full', variant === 'trek' && 'trek-card']}>
-  <a href={`/${slug}/`} class="flex flex-col h-full" style="padding: 1.25rem;">
+  <a href={`/${slug}/`} class="flex flex-col h-full" style="padding: 1.4rem 1.4rem 1.5rem;">
     <div class="flex items-baseline justify-between" style="margin-bottom: 1rem;">
-      <span class="kicker" style="font-size: var(--fs-2xs);">{primaryTag}</span>
-      {num && <span class="post-card-index" style="font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600;">{num}</span>}
+      <span class="folio" style="color: var(--color-accent);">{primaryTag}</span>
+      {num && <span class="post-card-index folio">N&ordm; {num}</span>}
     </div>
 
     {featureImage && (
-      <div class="overflow-hidden" style="margin-bottom: 1.1rem; aspect-ratio: 16 / 10;">
+      <div class="feature-img-wrap" style="margin-bottom: 1.15rem; aspect-ratio: 16 / 10;">
         <img
           src={featureImage}
           alt={title}
           loading="lazy"
-          class="post-card-image w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          class="post-card-image w-full h-full object-cover"
         />
       </div>
     )}
 
-    <h3 class="post-card-title transition-colors" style="font-size: var(--fs-lg); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em;">
+    <h3 class="post-card-title" style="font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 700; line-height: 1.08; letter-spacing: -0.025em; font-variation-settings: 'opsz' 72, 'wght' 700;">
       {title}
     </h3>
 
     {description && (
-      <p class="post-card-description" style="font-size: var(--fs-sm); line-height: 1.6; margin-top: 0.6rem;">
+      <p class="post-card-description" style="font-family: var(--font-sans); font-size: var(--fs-sm); line-height: 1.6; margin-top: 0.7rem;">
         {description}
       </p>
     )}
 
-    <div class="post-card-divider" style="height: 1px; margin-top: 1.1rem; margin-bottom: 0.85rem;"></div>
+    <div class="post-card-divider" style="height: 1px; margin-top: 1.2rem; margin-bottom: 0.85rem;"></div>
 
-    <div class="post-card-meta flex items-center gap-3 mt-auto" style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.04em; text-transform: uppercase;">
+    <div class="post-card-meta byline flex items-center gap-2 mt-auto">
       <FormattedDate date={pubDate} mono />
       {readingTime && <span>· {readingTime} min</span>}
     </div>
