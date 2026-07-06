@@ -26,6 +26,14 @@
       "timestamp": "2026-06-01T00:00:00.000Z",
       "description": "Strict 12-column grid, neo-grotesque Inter flush-left, hairline rules, zero radius, single signal-red accent.",
       "primaryColor": "#e1261c"
+    },
+    {
+      "month": "2026-07",
+      "trendId": "full-rebuild",
+      "trendName": "Editorial / Magazine Layout \u2014 Large-format editorial design inspired by print magazines like Bloomberg Businessweek, Monocle, The New York Times Magazine. Dramatic typography, pull quotes, multi-column layouts.",
+      "status": "success",
+      "timestamp": "2026-07-01T04:03:57.865826+00:00",
+      "description": "Editorial / Magazine Layout \u2014 Large-format editorial design inspired by print magazines like Bloomberg Businessweek, Monocle, The New York Times Magazine. Dramatic typography, pull quotes, multi-column layouts."
     }
   ]
 }

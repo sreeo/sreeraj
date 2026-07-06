@@ -7,68 +7,50 @@ const { theme = 'tech' } = Astro.props;
 
 const navItems = [
   { label: 'Index', href: '/' },
-  { label: 'About', href: '/about/' },
   { label: 'DevOps', href: '/devops/' },
   { label: 'Treks', href: '/treks/' },
   { label: 'Programming', href: '/programming/' },
   { label: 'Postgres', href: '/postgres/' },
+  { label: 'About', href: '/about/' },
   { label: 'Archive', href: '/archive/' },
 ];
 
 const currentPath = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+
+const now = new Date();
+const issueNo = String(Math.max(1, (now.getFullYear() - 2026) * 12 + now.getMonth() + 1)).padStart(2, '0');
+const issueDate = now
+  .toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  .toUpperCase();
 ---
 
-<div class="site-ethos-bar">
+<header class:list={['nav-bar', theme === 'trek' && 'trek']}>
+  <!-- Folio line -->
   <div class="container">
-    <p class="site-ethos">This site is rebuilt in a new visual idiom every month. Each previous design is preserved, frozen in time.</p>
+    <div class="folio-bar">
+      <span class="folio">Est. MMXXVI</span>
+      <span class="folio center max-md:hidden">A Field Journal of Systems &amp; Summits</span>
+      <span class="folio">{issueDate} · N&ordm;&nbsp;{issueNo}</span>
+    </div>
   </div>
-</div>
 
-<header class="nav-bar sticky top-0 z-50">
-  <div class="container flex items-center justify-between" style="height: 4.25rem;">
-    <a href="/" class="nav-brand" style="font-size: 1.25rem;">
-      sreeraj<span class="dot">.</span>dev
+  <!-- Nameplate -->
+  <div class="container" style="text-align: center; padding-block: clamp(1.1rem, 3vw, 1.9rem);">
+    <a href="/" class="nav-brand" style="font-size: clamp(2.4rem, 7vw, 4.25rem);">
+      Sreeraj<span class="dot">.</span>dev
     </a>
+  </div>
 
-    <button id="menu-toggle" class="md:hidden nav-link" aria-label="Toggle menu" aria-expanded="false">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="3" y1="7" x2="21" y2="7" /><line x1="3" y1="17" x2="21" y2="17" />
-      </svg>
-    </button>
-
-    <nav class="hidden md:flex items-center" style="gap: 1.6rem;">
+  <!-- Department navigation -->
+  <div class="container">
+    <nav class="dept-nav" aria-label="Sections">
       {navItems.map((item) => (
-        <a
-          href={item.href}
-          class:list={['nav-link', isActive(item.href) && 'active']}
-          style="font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.08em; text-transform: uppercase; padding-bottom: 4px;"
-        >
+        <a href={item.href} class:list={['nav-link', isActive(item.href) && 'active']}>
           {item.label}
         </a>
       ))}
     </nav>
   </div>
-
-  <nav id="mobile-menu" class="hidden md:hidden container" style="padding-bottom: 1.25rem;">
-    {navItems.map((item) => (
-      <a
-        href={item.href}
-        class:list={['nav-link block', isActive(item.href) && 'active']}
-        style="font-family: var(--font-mono); font-size: var(--fs-sm); letter-spacing: 0.06em; text-transform: uppercase; padding: 0.5rem 0; width: fit-content;"
-      >
-        {item.label}
-      </a>
-    ))}
-  </nav>
 </header>
-
-<script>
-  const toggle = document.getElementById('menu-toggle');
-  const menu = document.getElementById('mobile-menu');
-  toggle?.addEventListener('click', () => {
-    const hidden = menu?.classList.toggle('hidden');
-    toggle.setAttribute('aria-expanded', String(hidden === false));
-  });
-</script>

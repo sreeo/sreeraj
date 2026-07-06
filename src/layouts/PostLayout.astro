@@ -37,79 +37,86 @@ const {
 } = Astro.props;
 
 const isTrek = theme === 'trek';
-const kicker = isTrek ? 'Field Journal' : (tags[0] ?? 'Note');
+const kicker = isTrek ? 'Field Journal' : (tags[0] ?? 'Dispatch');
+
+const excerptDeck = (s: string, n = 200) => {
+  const t = (s || '').replace(/\s+/g, ' ').trim();
+  return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t;
+};
 ---
 
 <BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage} theme={theme}>
   <article class="container" style="padding-top: clamp(2.5rem, 6vw, 4.5rem); padding-bottom: clamp(3.5rem, 8vw, 6rem);">
     <!-- Header -->
-    <header style="max-width: 46rem; margin-inline: auto;">
-      <a href={isTrek ? '/treks/' : '/'} class="kicker" style="font-size: var(--fs-xs);">{kicker}</a>
-      <h1 class="post-header-title" style="font-size: var(--fs-2xl); font-weight: 800; line-height: 1.0; letter-spacing: -0.035em; margin-top: 1.25rem;">
+    <header style="max-width: 46rem; margin-inline: auto; text-align: center;">
+      <a href={isTrek ? '/treks/' : '/'} class="eyebrow" style="justify-content: center;">{kicker}</a>
+      <h1 class="post-header-title" style="font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 900; line-height: 0.98; letter-spacing: -0.035em; margin-top: 1.25rem; font-variation-settings: 'opsz' 144, 'wght' 900;">
         {title}
       </h1>
       {description && (
-        <p class="page-description" style="font-size: var(--fs-md); line-height: 1.55; margin-top: 1.25rem;">
-          {description}
+        <p class="deck page-description" style="font-size: var(--fs-md); margin-top: 1.35rem; max-width: 34rem; margin-inline: auto;">
+          {excerptDeck(description)}
         </p>
       )}
 
-      <div class="rule" style="margin-top: 2rem;"></div>
-      <div class="post-header-meta flex flex-wrap items-center" style="gap: 1rem; padding: 0.9rem 0; font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.06em; text-transform: uppercase;">
+      <div class="rule-double" style="margin-top: 2rem;"></div>
+      <div class="post-header-meta byline flex flex-wrap items-center justify-center" style="gap: 0.85rem; padding: 0.95rem 0;">
         {author && <span>{author}</span>}
-        <span>·</span>
-        <FormattedDate date={pubDate} mono />
-        {readingTime && (<><span>·</span><span>{readingTime} min read</span></>)}
+        <span aria-hidden="true">·</span>
+        <FormattedDate date={pubDate} />
+        {readingTime && (<><span aria-hidden="true">·</span><span>{readingTime} min read</span></>)}
         {updatedDate && updatedDate.getTime() !== pubDate.getTime() && (
-          <><span>·</span><span style="opacity: 0.7;">upd. <FormattedDate date={updatedDate} mono /></span></>
+          <><span aria-hidden="true">·</span><span>upd. <FormattedDate date={updatedDate} mono /></span></>
         )}
       </div>
       <div class="rule"></div>
 
       {tags.length > 0 && (
-        <div style="margin-top: 1.25rem;"><TagList tags={tags} /></div>
+        <div class="flex justify-center" style="margin-top: 1.25rem;"><TagList tags={tags} /></div>
       )}
 
       {isTrek && trekStats && (
-        <TrekStats
-          elevation={trekStats.elevation}
-          distance={trekStats.distance}
-          duration={trekStats.duration}
-          difficulty={trekStats.difficulty}
-          basecamp={trekStats.basecamp}
-          season={trekStats.season}
-        />
+        <div style="max-width: 46rem; margin-inline: auto; text-align: left;">
+          <TrekStats
+            elevation={trekStats.elevation}
+            distance={trekStats.distance}
+            duration={trekStats.duration}
+            difficulty={trekStats.difficulty}
+            basecamp={trekStats.basecamp}
+            season={trekStats.season}
+          />
+        </div>
       )}
     </header>
 
     <!-- Hero image -->
     {featureImage && (
-      <div class:list={['trek-hero-wrap']} style="max-width: 52rem; margin: clamp(2rem, 5vw, 3rem) auto 0;">
+      <figure class:list={['trek-hero-wrap']} style="max-width: 54rem; margin: clamp(2.25rem, 5vw, 3.25rem) auto 0;">
         <img src={featureImage} alt={title} class="post-hero-image w-full" style="aspect-ratio: 16 / 9; object-fit: cover;" />
-      </div>
+      </figure>
     )}
 
     <!-- Body -->
-    <div class:list={['prose', isTrek && 'trek-prose', isTrek && 'trek-journal']} style="margin: clamp(2.5rem, 6vw, 4rem) auto 0;">
+    <div class:list={['prose', !isTrek && 'article-body', isTrek && 'trek-prose', isTrek && 'trek-journal']} style="margin: clamp(2.5rem, 6vw, 4rem) auto 0;">
       <slot />
     </div>
 
     <!-- Prev / Next -->
     {(prevPost || nextPost) && (
-      <nav class="post-nav-border" style="max-width: 46rem; margin: clamp(3rem, 7vw, 5rem) auto 0; padding-top: 2rem; border-top: 1px solid; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+      <nav class="post-nav-border" style="max-width: 46rem; margin: clamp(3rem, 7vw, 5rem) auto 0; padding-top: 2rem; border-top: 2px solid; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
         <div>
           {prevPost && (
             <a href={`/${prevPost.slug}/`} class="post-nav-link group block">
-              <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 0.4rem;">← Previous</span>
-              <span class="transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-sm); font-weight: 600;">{prevPost.title}</span>
+              <span class="folio" style="display: block; margin-bottom: 0.5rem; color: var(--color-accent);">← Previous</span>
+              <span class="transition-colors" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 600; line-height: 1.15;">{prevPost.title}</span>
             </a>
           )}
         </div>
         <div style="text-align: right;">
           {nextPost && (
             <a href={`/${nextPost.slug}/`} class="post-nav-link group block">
-              <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 0.4rem;">Next →</span>
-              <span class="transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-sm); font-weight: 600;">{nextPost.title}</span>
+              <span class="folio" style="display: block; margin-bottom: 0.5rem; color: var(--color-accent);">Next →</span>
+              <span class="transition-colors" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 600; line-height: 1.15;">{nextPost.title}</span>
             </a>
           )}
         </div>

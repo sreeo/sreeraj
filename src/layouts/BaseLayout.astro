@@ -28,7 +28,7 @@ const { title, description, image, theme = 'tech' } = Astro.props;
     <Footer theme={theme} />
 
     <script>
-      // Scroll progress bar
+      // Scroll progress rule
       const bar = document.getElementById('scroll-progress');
       if (bar) {
         const onScroll = () => {
@@ -40,7 +40,7 @@ const { title, description, image, theme = 'tech' } = Astro.props;
         onScroll();
       }
 
-      // Reveal-on-scroll
+      // Reveal-on-scroll — robust fallback so content never sticks at opacity:0
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const items = document.querySelectorAll('.reveal');
       if (reduce || !('IntersectionObserver' in window)) {
@@ -50,7 +50,7 @@ const { title, description, image, theme = 'tech' } = Astro.props;
           entries.forEach((e) => {
             if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); }
           });
-        }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.04 });
         items.forEach((el) => io.observe(el));
       }
     </script>

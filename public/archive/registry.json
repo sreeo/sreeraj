@@ -1,6 +1,14 @@
 {
   "archives": [
     {
+      "month": "2026-06",
+      "trend": "Swiss International Typographic",
+      "description": "Strict 12-column grid, neo-grotesque Inter set flush-left ragged-right, hairline rules, zero radius, and a single signal-red accent on warm off-white. Signature numbered editorial index plus a generative Müller-Brockmann grid composition.",
+      "primaryColor": "#e1261c",
+      "deployedAt": "2026-07-01T03:04:21.018963+00:00",
+      "sourceRef": "edition/2026-06"
+    },
+    {
       "month": "2026-05",
       "trend": "Cutting-Edge Terminal",
       "description": "Dark terminal aesthetic with cyan accents, monospace git-log timeline, WebGL mountains, and dual tech/trek theming",

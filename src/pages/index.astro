@@ -1,141 +1,190 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PostCard from '../components/PostCard.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import SwissGrid from '../components/SwissGrid.astro';
-import { getThemeForTags } from '../utils/theme';
+import ContourField from '../components/ContourField.astro';
 
 const posts = (await getCollection('blog'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const featured = posts.filter((p) => p.data.featured);
-const hero = featured[0] ?? posts[0];
-const selected = featured.filter((p) => p.data.slug !== hero.data.slug).slice(0, 3);
+const withImg = (arr: typeof posts) => arr.filter((p) => p.data.featureImage);
 
-function category(tags: string[]): string {
+// Cover = most recent featured with an image (fall back gracefully)
+const cover =
+  withImg(featured)[0] ?? featured[0] ?? withImg(posts)[0] ?? posts[0];
+
+const rest = posts.filter((p) => p.data.slug !== cover.data.slug);
+const well = withImg(rest).slice(0, 3);
+const wellSlugs = new Set(well.map((p) => p.data.slug));
+const coverLines = rest.filter((p) => !wellSlugs.has(p.data.slug)).slice(0, 4);
+
+const excerpt = (s: string, n = 170) => {
+  const t = (s || '').replace(/\s+/g, ' ').trim();
+  return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t;
+};
+
+function dept(tags: string[]): string {
   if (tags.some((t) => ['treks', 'trek'].includes(t))) return 'Treks';
-  if (tags.some((t) => ['postgres', 'pgbouncer'].includes(t))) return 'Postgres';
-  if (tags.some((t) => ['devops', 'kubernetes', 'k8s', 'aws', 'nginx', 'terraform'].includes(t))) return 'DevOps';
-  if (tags.some((t) => ['python', 'django', 'java', 'kafka', 'arduino', 'esp8266'].includes(t))) return 'Programming';
-  return 'Notes';
+  if (tags.some((t) => ['postgres', 'pgbouncer', 'sql', 'ulid', 'uuid'].includes(t))) return 'Postgres';
+  if (tags.some((t) => ['devops', 'kubernetes', 'k8s', 'aws', 'nginx', 'terraform', 'traefik', 'docker', 'signoz', 'opentelemetry'].includes(t))) return 'DevOps';
+  if (tags.some((t) => ['python', 'django', 'java', 'kafka', 'arduino', 'esp8266', 'javascript', 'nextjs', 'next'].includes(t))) return 'Programming';
+  return 'Field Notes';
 }
 
+const DEPTS = ['DevOps', 'Postgres', 'Programming', 'Treks', 'Field Notes'];
+let folioN = 0;
+const grouped = DEPTS
+  .map((name) => ({ name, items: posts.filter((p) => dept(p.data.tags) === name) }))
+  .filter((g) => g.items.length > 0)
+  .map((g) => ({
+    name: g.name,
+    items: g.items.map((post) => ({ post, folio: String(++folioN).padStart(2, '0') })),
+  }));
+
 const total = String(posts.length).padStart(2, '0');
-const heroCat = category(hero.data.tags);
+const coverDept = dept(cover.data.tags);
 ---
 
-<BaseLayout title="sreeraj.dev — DevOps, Programming &amp; Treks" theme="tech">
-  <!-- ===================== MASTHEAD ===================== -->
-  <section class="container" style="padding-top: clamp(2.5rem, 7vw, 5.5rem); padding-bottom: clamp(2rem, 5vw, 3.5rem);">
-    <div class="grid-12" style="align-items: end; row-gap: 2.5rem;">
+<BaseLayout title="sreeraj.dev — A Field Journal of Systems &amp; Summits" theme="tech">
+  <!-- ===================== COVER STORY ===================== -->
+  <section class="container" style="padding-top: clamp(2rem, 5vw, 3.5rem); padding-bottom: clamp(2.5rem, 6vw, 4rem);">
+    <div class="grid-12" style="row-gap: 2.75rem; align-items: start;">
+      <!-- Lead text -->
       <div style="grid-column: span 7;" class="max-lg:!col-span-12">
-        <span class="kicker">Vol. MMXXVI · Field Notes</span>
-        <h1 style="font-size: var(--fs-hero); font-weight: 800; line-height: 0.92; letter-spacing: -0.04em; margin-top: 1.25rem;">
-          Systems,<br />databases<br />&amp; <span style="color: var(--color-accent);">altitude</span>.
-        </h1>
-        <p style="font-size: var(--fs-md); line-height: 1.55; max-width: 32rem; margin-top: 1.75rem; color: var(--color-tech-text-muted);">
-          The working notebook of <strong style="color: var(--color-tech-text); font-weight: 600;">Sreeraj Rajan</strong> — generalist software engineer at Medley Learning, Himalayan trekker, and occasional open-source contributor.
-        </p>
-      </div>
-
-      <div style="grid-column: span 4 / -1;" class="max-lg:hidden">
-        <SwissGrid />
-      </div>
-    </div>
-  </section>
-
-  <!-- masthead meta strip -->
-  <section class="container">
-    <div class="rule"></div>
-    <div class="flex flex-wrap items-center justify-between" style="gap: 1rem; padding: 0.9rem 0; font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-tech-text-muted);">
-      <span>{total} Entries</span>
-      <span class="max-sm:hidden">DevOps · Postgres · Programming · Treks</span>
-      <span>Updated <FormattedDate date={posts[0].data.pubDate} mono /></span>
-    </div>
-    <div class="rule"></div>
-  </section>
-
-  <!-- ===================== FEATURED HERO ===================== -->
-  <section class="container reveal" style="padding-top: clamp(3rem, 7vw, 5.5rem); padding-bottom: clamp(2.5rem, 6vw, 4.5rem);">
-    <span class="kicker" style="margin-bottom: 2rem; display: inline-flex;">Featured Dispatch</span>
-    <a href={`/${hero.data.slug}/`} class="grid-12 group" style="row-gap: 1.75rem; align-items: start; margin-top: 1.75rem;">
-      <div style="grid-column: span 7;" class="max-lg:!col-span-12 overflow-hidden">
-        <div style="aspect-ratio: 16 / 10;" class="overflow-hidden">
-          <img src={hero.data.featureImage} alt={hero.data.title} class="post-card-image w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" style="border: 1px solid var(--color-tech-rule);" />
+        <span class="eyebrow">The Cover Story · {coverDept}</span>
+        <a href={`/${cover.data.slug}/`} class="cover-hed" style="display: block; margin-top: 1.4rem;">
+          <h1 class="cover-headline">{cover.data.title}</h1>
+        </a>
+        {cover.data.description && (
+          <p class="cover-deck" style="margin-top: 1.5rem; max-width: 34rem;">
+            {excerpt(cover.data.description, 210)}
+          </p>
+        )}
+        <div class="byline" style="margin-top: 1.75rem; color: var(--color-tech-text-muted); display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+          <span>By {cover.data.author ?? 'Sreeraj Rajan'}</span>
+          <span aria-hidden="true">·</span>
+          <FormattedDate date={cover.data.pubDate} />
+          {cover.data.readingTime && (<><span aria-hidden="true">·</span><span>{cover.data.readingTime} min read</span></>)}
         </div>
+        <a href={`/${cover.data.slug}/`} class="group" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.9rem; font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent);">
+          Continue reading <span class="transition-transform group-hover:translate-x-1">→</span>
+        </a>
       </div>
+
+      <!-- Cover plate + issue contents -->
       <div style="grid-column: span 5 / -1;" class="max-lg:!col-span-12">
-        <div class="flex items-center justify-between" style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-tech-text-muted);">
-          <span>{heroCat}</span>
-          <span class="post-card-index" style="color: var(--color-accent); font-weight: 700;">★</span>
+        {cover.data.featureImage && (
+          <a href={`/${cover.data.slug}/`} class="group" style="display: block;">
+            <div class="feature-img-wrap" style="aspect-ratio: 4 / 5; border: 1px solid var(--color-tech-rule);">
+              <img src={cover.data.featureImage} alt={cover.data.title} class="feature-img post-hero-image w-full h-full object-cover" />
+            </div>
+            <p class="feature-cap byline" style="margin-top: 0.65rem;">Plate № 01 · The Cover</p>
+          </a>
+        )}
+
+        <div class="cover-lines" style="margin-top: 2rem; padding-top: 1.25rem;">
+          <span class="folio" style="color: var(--color-accent);">In This Issue</span>
+          <div style="margin-top: 0.5rem;">
+            {coverLines.map((p, i) => (
+              <a href={`/${p.data.slug}/`} class="cl-row group" style="display: grid; grid-template-columns: 2.25rem 1fr; gap: 0.75rem; align-items: baseline; padding: 0.85rem 0;">
+                <span class="cl-folio folio">{String(i + 1).padStart(2, '0')}</span>
+                <span>
+                  <span class="cl-title" style="display: block; font-family: var(--font-display); font-weight: 600; font-size: var(--fs-md); line-height: 1.12; letter-spacing: -0.02em;">{p.data.title}</span>
+                  <span class="cl-dept folio" style="display: block; margin-top: 0.3rem;">{dept(p.data.tags)}</span>
+                </span>
+              </a>
+            ))}
+          </div>
         </div>
-        <h2 class="transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-xl); font-weight: 800; line-height: 1.04; letter-spacing: -0.03em; margin-top: 1rem;">
-          {hero.data.title}
-        </h2>
-        <p style="font-size: var(--fs-base); line-height: 1.65; margin-top: 1.1rem; color: var(--color-tech-text-muted);">
-          {hero.data.description}
-        </p>
-        <div class="flex items-center gap-3" style="margin-top: 1.5rem; font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-tech-text-muted);">
-          <FormattedDate date={hero.data.pubDate} mono />
-          {hero.data.readingTime && <span>· {hero.data.readingTime} min</span>}
-        </div>
-        <span class="inline-flex items-center gap-2" style="margin-top: 1.5rem; font-weight: 600; color: var(--color-accent);">
-          Read the entry <span class="transition-transform group-hover:translate-x-1">→</span>
-        </span>
       </div>
-    </a>
+    </div>
   </section>
 
-  <!-- ===================== SELECTED WRITING ===================== -->
-  {selected.length > 0 && (
-    <section class="container reveal" style="padding-bottom: clamp(3rem, 7vw, 5rem);">
-      <div class="flex items-baseline justify-between" style="margin-bottom: 2rem;">
-        <h2 class="section-title" style="font-size: var(--fs-xl); font-weight: 800; letter-spacing: -0.03em;">Selected</h2>
-        <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-tech-text-muted);">Editor's picks</span>
+  <!-- ===================== PULL QUOTE BAND (signature) ===================== -->
+  <section class="pullquote-band reveal" style="position: relative; overflow: hidden; margin-top: clamp(1rem, 3vw, 2rem);">
+    <ContourField />
+    <div class="container" style="position: relative; z-index: 1; padding-block: clamp(3.5rem, 8vw, 6.5rem);">
+      <blockquote class="pullquote" style="max-width: 22ch; margin-inline: auto;">
+        <span class="mark">“</span>The same discipline runs the deploy and the summit push<span class="mark">.”</span>
+      </blockquote>
+      <p class="folio" style="text-align: center; margin-top: 2rem; color: var(--color-tech-text-muted);">Measure · Iterate · Respect the weather</p>
+    </div>
+  </section>
+
+  <!-- ===================== THE FEATURES WELL ===================== -->
+  {well.length > 0 && (
+    <section class="container reveal" style="padding-top: clamp(3.5rem, 8vw, 6rem); padding-bottom: clamp(2rem, 5vw, 3.5rem);">
+      <div class="flex items-end justify-between" style="gap: 1rem; margin-bottom: 1.75rem;">
+        <h2 class="section-title" style="font-size: var(--fs-xl);">The Features</h2>
+        <span class="folio" style="color: var(--color-tech-text-muted); padding-bottom: 0.35rem;">Long reads</span>
       </div>
-      <div class="grid-12" style="row-gap: 1.5rem;">
-        {selected.map((post, i) => (
-          <div style="grid-column: span 4;" class="max-lg:!col-span-6 max-sm:!col-span-12">
-            <PostCard
-              title={post.data.title}
-              slug={post.data.slug}
-              description={post.data.description}
-              pubDate={post.data.pubDate}
-              featureImage={post.data.featureImage}
-              tags={post.data.tags}
-              readingTime={post.data.readingTime}
-              variant={getThemeForTags(post.data.tags)}
-              index={i + 1}
-            />
+      <div class="rule-double" style="margin-bottom: 2.5rem;"></div>
+
+      <div class="grid-12" style="row-gap: 2.5rem;">
+        <!-- Lead feature -->
+        <a href={`/${well[0].data.slug}/`} class:list={['group', 'max-lg:!col-span-12']} style="grid-column: span 7; display: block;">
+          <div class="feature-img-wrap" style="aspect-ratio: 16 / 10; border: 1px solid var(--color-tech-rule);">
+            <img src={well[0].data.featureImage} alt={well[0].data.title} loading="lazy" class="feature-img w-full h-full object-cover" />
           </div>
-        ))}
+          <span class="folio" style="display: block; margin-top: 1.1rem; color: var(--color-accent);">{dept(well[0].data.tags)}</span>
+          <h3 class="feature-title" style="font-size: var(--fs-2xl); margin-top: 0.6rem;">{well[0].data.title}</h3>
+          {well[0].data.description && (
+            <p style="font-family: var(--font-sans); font-size: var(--fs-base); line-height: 1.6; margin-top: 0.9rem; max-width: 40rem; color: var(--color-tech-text-muted);">{excerpt(well[0].data.description, 180)}</p>
+          )}
+          <div class="byline" style="margin-top: 1rem; color: var(--color-tech-text-muted);">
+            <FormattedDate date={well[0].data.pubDate} mono />{well[0].data.readingTime && <span> · {well[0].data.readingTime} min</span>}
+          </div>
+        </a>
+
+        <!-- Digest features -->
+        <div style="grid-column: span 5 / -1;" class="max-lg:!col-span-12 flex flex-col" >
+          {well.slice(1).map((p, i) => (
+            <a href={`/${p.data.slug}/`} class="group" style={`display: grid; grid-template-columns: 8rem 1fr; gap: 1.1rem; align-items: start; padding: ${i === 0 ? '0' : '1.6rem'} 0 1.6rem; ${i > 0 ? 'border-top: 1px solid var(--color-tech-border);' : ''}`}>
+              <div class="feature-img-wrap" style="aspect-ratio: 1 / 1; border: 1px solid var(--color-tech-rule);">
+                <img src={p.data.featureImage} alt={p.data.title} loading="lazy" class="feature-img w-full h-full object-cover" />
+              </div>
+              <div>
+                <span class="folio" style="display: block; color: var(--color-accent);">{dept(p.data.tags)}</span>
+                <h4 class="feature-title" style="font-size: var(--fs-lg); margin-top: 0.4rem;">{p.data.title}</h4>
+                <div class="byline" style="margin-top: 0.6rem; color: var(--color-tech-text-muted);">
+                  <FormattedDate date={p.data.pubDate} mono />
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
     </section>
   )}
 
-  <!-- ===================== THE INDEX ===================== -->
-  <section class="container reveal" style="padding-bottom: clamp(4rem, 9vw, 7rem);">
-    <div class="flex items-baseline justify-between" style="margin-bottom: 1rem;">
-      <h2 class="section-title" style="font-size: var(--fs-xl); font-weight: 800; letter-spacing: -0.03em;">Index</h2>
-      <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-tech-text-muted);">All {total} entries</span>
+  <!-- ===================== THE CONTENTS ===================== -->
+  <section class="container reveal" style="padding-top: clamp(3rem, 7vw, 5rem); padding-bottom: clamp(4rem, 9vw, 7rem);">
+    <div class="flex items-end justify-between" style="gap: 1rem; margin-bottom: 1.75rem;">
+      <h2 class="section-title" style="font-size: var(--fs-xl);">The Contents</h2>
+      <span class="folio" style="color: var(--color-tech-text-muted); padding-bottom: 0.35rem;">{total} Dispatches</span>
     </div>
+    <div class="rule-double" style="margin-bottom: 2.75rem;"></div>
 
-    <div>
-      {posts.map((post, i) => (
-        <a href={`/${post.data.slug}/`} class="index-row group flex items-baseline" style="gap: 1.25rem; padding: 1.1rem 0.5rem;">
-          <span class="index-num" style="font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; width: 2.25rem; flex-shrink: 0;">{String(i + 1).padStart(2, '0')}</span>
-          <span class="flex-1 transition-colors group-hover:text-[var(--color-accent)]" style="font-size: var(--fs-md); font-weight: 600; letter-spacing: -0.015em; line-height: 1.25;">
-            {post.data.title}
-          </span>
-          <span class="index-cat max-sm:hidden" style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.06em; text-transform: uppercase; width: 8rem; flex-shrink: 0;">{category(post.data.tags)}</span>
-          <span class="index-date max-md:hidden" style="font-family: var(--font-mono); font-size: var(--fs-2xs); width: 6rem; flex-shrink: 0;">
-            <FormattedDate date={post.data.pubDate} mono />
-          </span>
-          <span class="index-arrow transition-transform group-hover:translate-x-1" style="flex-shrink: 0;">→</span>
-        </a>
+    <div class="columns-1 md:columns-2" style="column-gap: clamp(2rem, 5vw, 4rem);">
+      {grouped.map((g) => (
+        <section class="break-inside-avoid" style="margin-bottom: 2.75rem;">
+          <div class="dept-head">
+            <span class="dept-name">{g.name}</span>
+            <span class="folio" style="color: var(--color-tech-text-muted);">{String(g.items.length).padStart(2, '0')}</span>
+          </div>
+          {g.items.map(({ post, folio }) => (
+            <a href={`/${post.data.slug}/`} class="toc-row group">
+              <span class="toc-folio">{folio}</span>
+              <span>
+                <span class="toc-title" style="display: block;">{post.data.title}</span>
+                {post.data.description && <span class="toc-deck" style="display: block;">{excerpt(post.data.description, 92)}</span>}
+              </span>
+              <span class="toc-date"><FormattedDate date={post.data.pubDate} mono /></span>
+            </a>
+          ))}
+        </section>
       ))}
-      <div class="index-row" style="height: 0;"></div>
     </div>
   </section>
 </BaseLayout>

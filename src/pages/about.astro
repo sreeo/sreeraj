@@ -9,34 +9,43 @@ const image = aboutPage?.data.featureImage;
 ---
 
 <BaseLayout title="About — sreeraj.dev" description="Engineer, trekker, occasional open-source contributor." theme="tech">
-  <section class="container" style="padding-top: clamp(3rem, 7vw, 5rem); padding-bottom: clamp(4rem, 9vw, 7rem);">
-    <div class="grid-12" style="row-gap: 3rem; column-gap: clamp(2rem, 5vw, 4rem);">
-      <!-- Left: identity -->
-      <aside style="grid-column: span 5;" class="max-lg:!col-span-12">
-        <div style="position: sticky; top: 6rem;">
-          <span class="kicker">Colophon</span>
-          <h1 class="page-title" style="font-size: var(--fs-2xl); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; margin-top: 1.1rem;">
-            About<br />the author
-          </h1>
+  <!-- Masthead -->
+  <section class="container" style="padding-top: clamp(2.5rem, 6vw, 4rem); padding-bottom: clamp(1.5rem, 3vw, 2.25rem);">
+    <span class="eyebrow">The Colophon</span>
+    <h1 class="page-title" style="font-family: var(--font-display); font-size: clamp(3rem, 9vw, 6rem); font-weight: 900; line-height: 0.9; letter-spacing: -0.04em; margin-top: 1.2rem; font-variation-settings: 'opsz' 144, 'wght' 900;">
+      About the editor
+    </h1>
+    <p class="deck page-description" style="font-size: var(--fs-md); max-width: 40rem; margin-top: 1.35rem;">
+      Generalist software engineer by trade, Himalayan trekker by weekend — this is the notebook where both practices are written down.
+    </p>
+    <div class="rule-double" style="margin-top: 1.75rem;"></div>
+  </section>
+
+  <section class="container" style="padding-bottom: clamp(4rem, 9vw, 7rem);">
+    <div class="grid-12" style="row-gap: 2.5rem; column-gap: clamp(2rem, 5vw, 4rem);">
+      <!-- Author plate -->
+      <aside style="grid-column: span 4;" class="max-lg:!col-span-12">
+        <div style="position: sticky; top: 2rem;">
           {image && (
-            <img src={image} alt="Sreeraj Rajan" style="margin-top: 2rem; border: 1px solid var(--color-tech-rule); filter: grayscale(100%); aspect-ratio: 4 / 3; object-fit: cover; width: 100%; max-width: 22rem;" />
+            <div class="feature-img-wrap" style="border: 1px solid var(--color-tech-rule);">
+              <img src={image} alt="Sreeraj Rajan" class="feature-img w-full" style="aspect-ratio: 4 / 5; object-fit: cover;" />
+            </div>
           )}
-          <dl style="margin-top: 2rem; display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1.25rem; font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.04em; text-transform: uppercase;">
-            <dt style="color: var(--color-tech-text-muted);">Role</dt><dd>Generalist Software Engineer</dd>
-            <dt style="color: var(--color-tech-text-muted);">At</dt><dd>Medley Learning</dd>
-            <dt style="color: var(--color-tech-text-muted);">Based</dt><dd>India</dd>
-            <dt style="color: var(--color-tech-text-muted);">Off-hours</dt><dd>Himalayan trails</dd>
+          <dl style="margin-top: 1.75rem; display: grid; grid-template-columns: auto 1fr; gap: 0.65rem 1.25rem;">
+            <dt class="folio" style="color: var(--color-tech-text-muted);">Role</dt><dd class="byline" style="letter-spacing: 0.04em;">Generalist Engineer</dd>
+            <dt class="folio" style="color: var(--color-tech-text-muted);">At</dt><dd class="byline" style="letter-spacing: 0.04em;">Medley Learning</dd>
+            <dt class="folio" style="color: var(--color-tech-text-muted);">Based</dt><dd class="byline" style="letter-spacing: 0.04em;">India</dd>
+            <dt class="folio" style="color: var(--color-tech-text-muted);">Off-hours</dt><dd class="byline" style="letter-spacing: 0.04em;">Himalayan trails</dd>
           </dl>
         </div>
       </aside>
 
-      <!-- Right: prose -->
-      <div style="grid-column: span 7 / -1;" class="max-lg:!col-span-12">
-        <div class="rule" style="margin-bottom: 2.5rem;"></div>
+      <!-- Prose -->
+      <div style="grid-column: span 8 / -1;" class="max-lg:!col-span-12">
         {Content ? (
-          <div class="prose" style="max-width: 38rem;"><Content /></div>
+          <div class="prose article-body" style="max-width: 40rem;"><Content /></div>
         ) : (
-          <p class="page-description">About page content not found.</p>
+          <p class="deck page-description">About page content not found.</p>
         )}
       </div>
     </div>

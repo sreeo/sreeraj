@@ -13,28 +13,39 @@ for (const post of posts) {
 
 const sortedTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
 const total = String(sortedTags.length).padStart(2, '0');
+const maxCount = Math.max(1, ...sortedTags.map(([, c]) => c));
 ---
 
-<BaseLayout title="Tags — sreeraj.dev" description="Browse every topic." theme="tech">
-  <section class="container" style="padding-top: clamp(3rem, 7vw, 5rem); padding-bottom: clamp(4rem, 9vw, 7rem);">
-    <div class="grid-12" style="align-items: end;">
+<BaseLayout title="Topics — sreeraj.dev" description="Browse every subject in the journal." theme="tech">
+  <section class="container" style="padding-top: clamp(2.5rem, 6vw, 4rem); padding-bottom: clamp(1.5rem, 3vw, 2.25rem);">
+    <span class="eyebrow">The Taxonomy</span>
+    <div class="grid-12" style="align-items: end; row-gap: 1.25rem; margin-top: 1.2rem;">
       <div style="grid-column: span 9;" class="max-md:!col-span-12">
-        <span class="kicker">Taxonomy</span>
-        <h1 class="page-title" style="font-size: var(--fs-2xl); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; margin-top: 1.1rem;">Tags</h1>
+        <h1 class="page-title" style="font-family: var(--font-display); font-size: clamp(3rem, 9vw, 6rem); font-weight: 900; line-height: 0.9; letter-spacing: -0.04em; font-variation-settings: 'opsz' 144, 'wght' 900;">
+          Every topic
+        </h1>
+        <p class="deck page-description" style="font-size: var(--fs-md); max-width: 34rem; margin-top: 1.35rem;">
+          The whole subject index, sorted by how often it appears in the journal.
+        </p>
       </div>
       <div style="grid-column: span 3;" class="max-md:!col-span-12 md:text-right">
-        <span style="font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.6;">Topics</span>
-        <div style="font-size: var(--fs-2xl); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--color-accent);">{total}</div>
+        <span class="folio" style="color: var(--color-accent);">Subjects</span>
+        <div style="font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-top: 0.25rem; font-variation-settings: 'opsz' 144, 'wght' 900;">{total}</div>
       </div>
     </div>
+    <div class="rule-double" style="margin-top: 1.75rem;"></div>
+  </section>
 
-    <div class="rule" style="margin-top: 2rem; margin-bottom: 2.5rem;"></div>
-
-    <div class="flex flex-wrap" style="gap: 0.75rem;">
+  <section class="container" style="padding-bottom: clamp(4rem, 9vw, 7rem);">
+    <div class="flex flex-wrap items-baseline" style="gap: 0.75rem;">
       {sortedTags.map(([tag, count]) => (
-        <a href={`/tags/${tag}/`} class="tag-pill inline-flex items-baseline transition-colors" style="padding: 0.5rem 0.9rem; gap: 0.5rem; font-size: var(--fs-sm);">
+        <a
+          href={`/tags/${tag}/`}
+          class="tag-pill inline-flex items-baseline transition-colors"
+          style={`padding: 0.5rem 0.95rem; gap: 0.55rem; font-size: ${count >= maxCount * 0.66 ? 'var(--fs-sm)' : 'var(--fs-2xs)'};`}
+        >
           {tag}
-          <span style="font-size: var(--fs-2xs); opacity: 0.6;">{String(count).padStart(2, '0')}</span>
+          <span style="color: currentColor;">{String(count).padStart(2, '0')}</span>
         </a>
       ))}
     </div>
