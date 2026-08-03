@@ -2,50 +2,46 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import registryData from '../../../public/archive/registry.json';
 
-const archives = (registryData.archives ?? []).slice().sort((a, b) => b.month.localeCompare(a.month));
-const total = String(archives.length).padStart(2, '0');
+const archives = (registryData.archives || []).slice().sort((a, b) => (a.month < b.month ? 1 : -1));
+
+const iso = (s: string) => (s ? s.slice(0, 10) : '—');
 ---
 
-<BaseLayout title="Archive — sreeraj.dev" description="A new design ships every month. This is the back-catalogue.">
-  <section class="container" style="padding-top: clamp(2.5rem, 6vw, 4rem); padding-bottom: clamp(1.5rem, 3vw, 2.25rem);">
-    <span class="eyebrow">The Design Ledger</span>
-    <div class="grid-12" style="align-items: end; row-gap: 1.25rem; margin-top: 1.2rem;">
-      <div style="grid-column: span 9;" class="max-md:!col-span-12">
-        <h1 class="page-title" style="font-family: var(--font-display); font-size: clamp(3rem, 9vw, 6rem); font-weight: 900; line-height: 0.9; letter-spacing: -0.04em; font-variation-settings: 'opsz' 144, 'wght' 900;">
-          Back issues
-        </h1>
-        <p class="deck page-description" style="font-size: var(--fs-md); max-width: 36rem; margin-top: 1.35rem;">
-          The site is reset in a new visual idiom every month. Each past edition is preserved, frozen exactly as it shipped.
-        </p>
-      </div>
-      <div style="grid-column: span 3;" class="max-md:!col-span-12 md:text-right">
-        <span class="folio" style="color: var(--color-accent);">Editions</span>
-        <div style="font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-top: 0.25rem; font-variation-settings: 'opsz' 144, 'wght' 900;">{total}</div>
-      </div>
-    </div>
-    <div class="rule-double" style="margin-top: 1.75rem;"></div>
-  </section>
+<BaseLayout title="Archive — sreeraj.dev" description="Every monthly redesign of sreeraj.dev, preserved as deployed.">
+  <section class="wrap section-tight">
+    <nav class="crumbs" aria-label="Breadcrumb" style="margin-bottom: var(--s-5);">
+      <a href="/">~</a>
+      <span aria-hidden="true">/</span>
+      <span>archive</span>
+    </nav>
 
-  <section class="container" style="padding-bottom: clamp(4rem, 9vw, 7rem);">
-    {archives.length > 0 ? (
-      <div>
-        {archives.map((archive) => (
-          <a href={`/archive/${archive.month}/`} class="toc-row group" style="grid-template-columns: 5.5rem 1fr auto; align-items: center;">
-            <span class="toc-folio folio" style="display: inline-flex; align-items: center; gap: 0.55rem;">
-              <span aria-hidden="true" style={`display: inline-block; width: 0.8rem; height: 0.8rem; border: 1px solid var(--color-tech-rule); background: ${archive.primaryColor};`}></span>
-              {archive.month}
-            </span>
-            <span>
-              <span class="toc-title" style="display: block;">{archive.trend}</span>
-              <span class="toc-deck" style="display: block;">{archive.description}</span>
-            </span>
-            <span class="transition-transform group-hover:translate-x-1" style="color: var(--color-accent); align-self: center;">→</span>
-          </a>
-        ))}
-        <div class="rule"></div>
-      </div>
-    ) : (
-      <p class="deck page-description" style="font-size: var(--fs-md);">No archived editions yet.</p>
-    )}
+    <div class="slab">
+      <h1>INDEX OF /ARCHIVE</h1>
+      <span class="slab-note">{archives.length} EDITIONS · ONE PER MONTH</span>
+    </div>
+
+    <p style="margin-top: var(--s-4); max-width: 62ch; font-size: var(--t-md); line-height: 1.65; color: var(--muted);">
+      This site is torn down and redesigned every month in a different style.
+      Old editions are not deleted — they are archived exactly as deployed,
+      dead pixels and all. You are currently reading the Brutalist edition.
+    </p>
+
+    <div style="margin-top: var(--s-5); border-bottom: var(--rule-3);">
+      {archives.map((a) => (
+        <a href={`/archive/${a.month}/`} class="arch-row">
+          <span class="arch-month">{a.month}</span>
+          <span>
+            <span class="arch-trend">{a.trend}</span>
+            {a.description && <span class="arch-desc">{a.description}</span>}
+          </span>
+          <span class="arch-color">
+            <span class="swatch" style={`background: ${a.primaryColor};`}></span>
+            <span>{a.primaryColor}</span>
+            <span aria-hidden="true">·</span>
+            <span>{iso(a.deployedAt)}</span>
+          </span>
+        </a>
+      ))}
+    </div>
   </section>
 </BaseLayout>

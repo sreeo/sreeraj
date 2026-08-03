@@ -5,33 +5,24 @@ import { getThemeForTags } from '../../utils/theme';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-
-  const tagSet = new Set<string>();
-  for (const post of posts) {
-    for (const tag of post.data.tags) {
-      tagSet.add(tag);
-    }
-  }
-
-  return [...tagSet].map((tag) => ({
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
     params: { tag },
     props: {
-      tag,
       posts: posts
         .filter((p) => p.data.tags.includes(tag))
         .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+      tag,
     },
   }));
 }
 
-const { tag, posts } = Astro.props;
-const theme = getThemeForTags([tag]);
+const { posts, tag } = Astro.props;
 ---
 
 <TagLayout
-  kicker="Tagged"
-  title={tag}
-  description={`Every entry filed under "${tag}".`}
+  title={`Tag: ${tag}`}
+  path={`tags/${tag}`}
   posts={posts}
-  theme={theme}
+  theme={getThemeForTags([tag])}
 />

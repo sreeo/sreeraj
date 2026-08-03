@@ -30,10 +30,18 @@
     {
       "month": "2026-07",
       "trendId": "full-rebuild",
-      "trendName": "Editorial / Magazine Layout \u2014 Large-format editorial design inspired by print magazines like Bloomberg Businessweek, Monocle, The New York Times Magazine. Dramatic typography, pull quotes, multi-column layouts.",
+      "trendName": "Editorial / Magazine Layout — Large-format editorial design inspired by print magazines like Bloomberg Businessweek, Monocle, The New York Times Magazine. Dramatic typography, pull quotes, multi-column layouts.",
       "status": "success",
       "timestamp": "2026-07-01T04:03:57.865826+00:00",
-      "description": "Editorial / Magazine Layout \u2014 Large-format editorial design inspired by print magazines like Bloomberg Businessweek, Monocle, The New York Times Magazine. Dramatic typography, pull quotes, multi-column layouts."
+      "description": "Editorial / Magazine Layout — Large-format editorial design inspired by print magazines like Bloomberg Businessweek, Monocle, The New York Times Magazine. Dramatic typography, pull quotes, multi-column layouts."
+    },
+    {
+      "month": "2026-08",
+      "trendId": "brutalist-web-design",
+      "trendName": "Brutalist Web Design — Raw, honest, no-nonsense web design that celebrates the medium. Visible structure, system fonts aesthetic, monospace layouts. Not ugly-on-purpose — intentionally raw and functional, like early web but with modern craft.",
+      "status": "success",
+      "timestamp": "2026-08-03T18:34:49.054573+00:00",
+      "description": "Brutalist Web Design — Raw, honest, no-nonsense web design that celebrates the medium. Visible structure, system fonts aesthetic, monospace layouts. Not ugly-on-purpose — intentionally raw and functional, like early web but with modern craft."
     }
   ]
 }

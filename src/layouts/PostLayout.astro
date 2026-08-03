@@ -1,8 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import FormattedDate from '../components/FormattedDate.astro';
 import TagList from '../components/TagList.astro';
-import TrekStats from '../components/TrekStats.astro';
 
 interface TrekStatsData {
   elevation?: string;
@@ -17,6 +15,7 @@ interface TrekStatsData {
 
 interface Props {
   title: string;
+  slug: string;
   description?: string;
   pubDate: Date;
   updatedDate?: Date;
@@ -31,96 +30,110 @@ interface Props {
 }
 
 const {
-  title, description, pubDate, updatedDate, featureImage,
-  tags = [], author, readingTime, theme = 'tech',
-  prevPost, nextPost, trekStats,
+  title, slug, description, pubDate, updatedDate, featureImage,
+  tags = [], author = 'Sreeraj', readingTime = 1, theme = 'tech',
+  prevPost = null, nextPost = null, trekStats,
 } = Astro.props;
 
-const isTrek = theme === 'trek';
-const kicker = isTrek ? 'Field Journal' : (tags[0] ?? 'Dispatch');
+const pad = (n: number) => String(n).padStart(2, '0');
+const iso = (d: Date) => `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 
-const excerptDeck = (s: string, n = 200) => {
-  const t = (s || '').replace(/\s+/g, ' ').trim();
-  return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t;
-};
+const SECTIONS: Array<{ label: string; href: string; match: string[] }> = [
+  { label: 'treks', href: '/treks/', match: ['treks', 'trek'] },
+  { label: 'devops', href: '/devops/', match: ['devops'] },
+  { label: 'postgres', href: '/postgres/', match: ['postgres'] },
+  { label: 'programming', href: '/programming/', match: ['programming'] },
+];
+const section = SECTIONS.find((s) => s.match.some((m) => tags.includes(m)));
+
+const specRows: Array<[string, string]> = [
+  ['date', iso(pubDate)],
+  ...(updatedDate && updatedDate.getTime() !== pubDate.getTime()
+    ? [['updated', iso(updatedDate)] as [string, string]]
+    : []),
+  ['author', author],
+  ['read time', `${readingTime} min`],
+  ...(trekStats
+    ? ([
+        ['elevation', trekStats.elevation],
+        ['distance', trekStats.distance],
+        ['duration', trekStats.duration],
+        ['difficulty', trekStats.difficulty],
+        ['basecamp', trekStats.basecamp],
+        ['season', trekStats.season],
+      ].filter(([, v]) => v) as Array<[string, string]>)
+    : []),
+];
 ---
 
 <BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage} theme={theme}>
-  <article class="container" style="padding-top: clamp(2.5rem, 6vw, 4.5rem); padding-bottom: clamp(3.5rem, 8vw, 6rem);">
-    <!-- Header -->
-    <header style="max-width: 46rem; margin-inline: auto; text-align: center;">
-      <a href={isTrek ? '/treks/' : '/'} class="eyebrow" style="justify-content: center;">{kicker}</a>
-      <h1 class="post-header-title" style="font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 900; line-height: 0.98; letter-spacing: -0.035em; margin-top: 1.25rem; font-variation-settings: 'opsz' 144, 'wght' 900;">
-        {title}
-      </h1>
-      {description && (
-        <p class="deck page-description" style="font-size: var(--fs-md); margin-top: 1.35rem; max-width: 34rem; margin-inline: auto;">
-          {excerptDeck(description)}
-        </p>
+  <article class="wrap section-tight">
+    <!-- Path -->
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="/">~</a>
+      <span aria-hidden="true">/</span>
+      {section && (
+        <>
+          <a href={section.href}>{section.label}</a>
+          <span aria-hidden="true">/</span>
+        </>
       )}
+      <span>{slug}</span>
+    </nav>
 
-      <div class="rule-double" style="margin-top: 2rem;"></div>
-      <div class="post-header-meta byline flex flex-wrap items-center justify-center" style="gap: 0.85rem; padding: 0.95rem 0;">
-        {author && <span>{author}</span>}
-        <span aria-hidden="true">·</span>
-        <FormattedDate date={pubDate} />
-        {readingTime && (<><span aria-hidden="true">·</span><span>{readingTime} min read</span></>)}
-        {updatedDate && updatedDate.getTime() !== pubDate.getTime() && (
-          <><span aria-hidden="true">·</span><span>upd. <FormattedDate date={updatedDate} mono /></span></>
+    <!-- Title block -->
+    <header>
+      <h1 class="post-title">{title}</h1>
+      {description && <p class="post-lead">{description}</p>}
+
+      <!-- Spec sheet -->
+      <dl class="spec" style="margin-top: var(--s-5); max-width: 680px;">
+        {specRows.map(([k, v]) => (
+          <>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </>
+        ))}
+        {tags.length > 0 && (
+          <>
+            <dt>tags</dt>
+            <dd><TagList tags={tags} /></dd>
+          </>
         )}
-      </div>
-      <div class="rule"></div>
-
-      {tags.length > 0 && (
-        <div class="flex justify-center" style="margin-top: 1.25rem;"><TagList tags={tags} /></div>
-      )}
-
-      {isTrek && trekStats && (
-        <div style="max-width: 46rem; margin-inline: auto; text-align: left;">
-          <TrekStats
-            elevation={trekStats.elevation}
-            distance={trekStats.distance}
-            duration={trekStats.duration}
-            difficulty={trekStats.difficulty}
-            basecamp={trekStats.basecamp}
-            season={trekStats.season}
-          />
-        </div>
-      )}
+      </dl>
     </header>
 
-    <!-- Hero image -->
+    <!-- Figure -->
     {featureImage && (
-      <figure class:list={['trek-hero-wrap']} style="max-width: 54rem; margin: clamp(2.25rem, 5vw, 3.25rem) auto 0;">
-        <img src={featureImage} alt={title} class="post-hero-image w-full" style="aspect-ratio: 16 / 9; object-fit: cover;" />
+      <figure class="fig" style="margin-top: var(--s-6); max-width: 820px;">
+        <img src={featureImage} alt={title} />
+        <figcaption>FIG. 01 — {title}</figcaption>
       </figure>
     )}
 
-    <!-- Body -->
-    <div class:list={['prose', !isTrek && 'article-body', isTrek && 'trek-prose', isTrek && 'trek-journal']} style="margin: clamp(2.5rem, 6vw, 4rem) auto 0;">
+    <!-- Document body -->
+    <div class="doc" style="margin-top: var(--s-7);">
       <slot />
     </div>
 
-    <!-- Prev / Next -->
-    {(prevPost || nextPost) && (
-      <nav class="post-nav-border" style="max-width: 46rem; margin: clamp(3rem, 7vw, 5rem) auto 0; padding-top: 2rem; border-top: 2px solid; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-        <div>
-          {prevPost && (
-            <a href={`/${prevPost.slug}/`} class="post-nav-link group block">
-              <span class="folio" style="display: block; margin-bottom: 0.5rem; color: var(--color-accent);">← Previous</span>
-              <span class="transition-colors" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 600; line-height: 1.15;">{prevPost.title}</span>
-            </a>
-          )}
-        </div>
-        <div style="text-align: right;">
-          {nextPost && (
-            <a href={`/${nextPost.slug}/`} class="post-nav-link group block">
-              <span class="folio" style="display: block; margin-bottom: 0.5rem; color: var(--color-accent);">Next →</span>
-              <span class="transition-colors" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 600; line-height: 1.15;">{nextPost.title}</span>
-            </a>
-          )}
-        </div>
-      </nav>
-    )}
+    <!-- Prev / next -->
+    <nav class="pager" style="margin-top: var(--s-8); max-width: 820px;" aria-label="Adjacent posts">
+      {prevPost ? (
+        <a href={`/${prevPost.slug}/`} class="pager-cell">
+          <span class="pager-label">&larr; Older</span>
+          <span class="pager-title">{prevPost.title}</span>
+        </a>
+      ) : (
+        <div><span class="end">— start of log —</span></div>
+      )}
+      {nextPost ? (
+        <a href={`/${nextPost.slug}/`} class="pager-cell" style="text-align: right;">
+          <span class="pager-label">Newer &rarr;</span>
+          <span class="pager-title">{nextPost.title}</span>
+        </a>
+      ) : (
+        <div style="text-align: right;"><span class="end">— end of log —</span></div>
+      )}
+    </nav>
   </article>
 </BaseLayout>

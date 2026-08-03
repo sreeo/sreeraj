@@ -1,5 +1,5 @@
-const TREK_TAGS = new Set(['treks', 'trek']);
+const TREK_TAGS = ['treks', 'trek'];
 
 export function getThemeForTags(tags: string[]): 'tech' | 'trek' {
-  return tags.some((t) => TREK_TAGS.has(t)) ? 'trek' : 'tech';
+  return tags.some((t) => TREK_TAGS.includes(t)) ? 'trek' : 'tech';
 }

@@ -8,8 +8,8 @@ const posts = (await getCollection('blog'))
 ---
 
 <TagLayout
-  kicker="Department № 01"
   title="DevOps"
-  description="Infrastructure, Kubernetes, CI/CD, and the long road to faster, calmer deploys."
+  path="devops"
   posts={posts}
+  note="Pipelines, clusters, ingresses, and the occasional 3 a.m. incident. Notes from keeping things running."
 />

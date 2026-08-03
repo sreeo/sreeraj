@@ -1,6 +1,14 @@
 {
   "archives": [
     {
+      "month": "2026-07",
+      "trend": "Editorial / Magazine Layout",
+      "description": "A broadsheet magazine — 'The Dispatch'. Stacked newspaper masthead with a Fraunces nameplate, a cover-story lead in high-contrast display serif, a full-width pull-quote band over a generative topographic-contour engraving, an asymmetric features well, and a department-grouped table of contents. Lora serif reading column with drop caps, folios, and double rules on warm ivory newsprint with a single claret accent.",
+      "primaryColor": "#9a2a24",
+      "deployedAt": "2026-08-03T17:57:35.813369+00:00",
+      "sourceRef": "edition/2026-07"
+    },
+    {
       "month": "2026-06",
       "trend": "Swiss International Typographic",
       "description": "Strict 12-column grid, neo-grotesque Inter set flush-left ragged-right, hairline rules, zero radius, and a single signal-red accent on warm off-white. Signature numbered editorial index plus a generative Müller-Brockmann grid composition.",
