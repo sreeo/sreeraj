@@ -98,6 +98,22 @@ else
   log "No ANTHROPIC_API_KEY — using Claude Code session auth; Webwright will skip."
 fi
 
+# Preflight: prove we can actually authenticate BEFORE mutating anything.
+# The Claude Code OAuth session expires periodically; without this gate an
+# expired session let the run continue and produce a bogus "redesign" PR that
+# only bumped the month (2026-08). Fail fast and loudly instead.
+if [ "$MODE" != "check" ]; then
+  AUTH_OUT="$(timeout 120 claude -p 'Reply with exactly: AUTHOK' --print 2>&1 || true)"
+  if ! printf '%s' "$AUTH_OUT" | grep -q 'AUTHOK'; then
+    log "FATAL: Claude Code auth preflight failed — no redesign attempted."
+    log "       Response: $(printf '%s' "$AUTH_OUT" | head -c 300)"
+    log "       Fix: run 'claude' interactively on $(hostname) and re-login, then:"
+    log "       systemctl --user start sreeraj-redesign.service"
+    exit 4
+  fi
+  log "Auth preflight OK."
+fi
+
 STAGE_FILE="$STATE_DIR/stage"
 PATCH_FILE="$STATE_DIR/generation.patch"
 TREND_FILE="$STATE_DIR/trend.txt"
@@ -136,6 +152,9 @@ PY
 )"
   if [ -n "$ARCHIVE_INFO" ]; then
     OUT_MONTH="$(printf '%s' "$ARCHIVE_INFO" | cut -f1)"
+    # Remember the outgoing trend so the manifest stamp can tell whether the
+    # rebuild actually rewrote the manifest for the new design.
+    PREV_TREND="$(printf '%s' "$ARCHIVE_INFO" | cut -f2)"
     log "Archiving outgoing design as edition $OUT_MONTH"
     git tag -f "edition/$OUT_MONTH" HEAD >/dev/null 2>&1 || true
     git push -f origin "edition/$OUT_MONTH" >/dev/null 2>&1 || log "edition tag push failed (continuing)"
@@ -194,12 +213,29 @@ open(p, 'w').write(s)
 PY
 
   # 5. Creative rebuild (Claude Code session auth).
+  # A non-zero exit may still mean useful work (e.g. hit max-turns), so don't
+  # abort on it alone — the substantive check is the src/ diff below.
+  REBUILD_RC=0
   claude -p "$(cat /tmp/rebuild-prompt.md)" --print --dangerously-skip-permissions --max-turns 50 \
-    || log "claude rebuild exited non-zero (continuing with changes made)"
+    || REBUILD_RC=$?
+  [ "$REBUILD_RC" -ne 0 ] && log "claude rebuild exited $REBUILD_RC"
 
-  # Stamp this run's month (and trend) into the new design's manifest, so next
+  # HARD GATE: the rebuild must actually have changed the presentation layer.
+  # Without this, a failed rebuild (e.g. expired OAuth) still produced a PR
+  # whose only content was the runner's own bookkeeping — a "redesign" that
+  # just bumped the month. No src/ change = no redesign = abort.
+  if git diff --quiet -- src/ && [ -z "$(git status --porcelain -- src/)" ]; then
+    log "FATAL: the creative rebuild produced NO changes under src/ (rc=$REBUILD_RC)."
+    log "       Refusing to open a bookkeeping-only PR. Nothing was pushed."
+    log "       Check the log above for the cause (auth expiry, max-turns, API error),"
+    log "       then re-run: systemctl --user start sreeraj-redesign.service"
+    exit 5
+  fi
+  log "Rebuild changed $(git status --porcelain -- src/ | wc -l) file(s) under src/."
+
+  # Stamp this run's month + trend into the new design's manifest, so next
   # month's run can archive it as edition/$NEW_MONTH.
-  NEW_MONTH="$NEW_MONTH" TREND="$TREND" python3 - <<'PY'
+  NEW_MONTH="$NEW_MONTH" TREND="$TREND" PREV_TREND="${PREV_TREND:-}" python3 - <<'PY'
 import json, os, re
 p = 'src/data/design-manifest.json'
 try:
@@ -207,7 +243,14 @@ try:
 except Exception:
     m = {}
 m['month'] = os.environ['NEW_MONTH']
-m.setdefault('trend', os.environ['TREND'].split(' — ')[0])
+# The rebuild is supposed to rewrite this manifest for the new design. If it
+# left the OUTGOING design's trend in place (or none), record this run's trend
+# ourselves — otherwise the manifest would describe last month's design with
+# only the month bumped (the 2026-08 failure).
+prev = os.environ.get('PREV_TREND', '')
+if not m.get('trend') or (prev and m['trend'] == prev):
+    m['trend'] = os.environ['TREND'].split(' — ')[0]
+    m['description'] = os.environ['TREND']
 if not m.get('primaryColor'):
     try:
         css = open('src/styles/global.css').read()
@@ -236,7 +279,9 @@ QA_RC=0
 log "layout-qa exit: $QA_RC"
 
 # --- 8. Record the design in the log (used by trend discovery to avoid repeats) ---
-TREND="$TREND" python3 - <<'PY'
+# Record the ACTUAL outcome, not a hardcoded success — a design logged as
+# 'success' is treated as shipped and avoided by future trend discovery.
+TREND="$TREND" NEW_MONTH="${NEW_MONTH:-}" QA_RC="$QA_RC" python3 - <<'PY'
 import json, os, datetime
 p = 'automation/history/design-log.json'
 try:
@@ -245,15 +290,26 @@ except Exception:
     log = {'designs': []}
 now = datetime.datetime.now(datetime.timezone.utc)
 log.setdefault('designs', []).append({
-    'month': now.strftime('%Y-%m'),
+    'month': os.environ.get('NEW_MONTH') or now.strftime('%Y-%m'),
     'trendId': 'full-rebuild',
     'trendName': os.environ['TREND'],
-    'status': 'success',
+    'status': 'success' if os.environ.get('QA_RC') == '0' else 'layout-qa-failed',
     'timestamp': now.isoformat(),
     'description': os.environ['TREND'],
 })
-json.dump(log, open(p, 'w'), indent=2)
+json.dump(log, open(p, 'w'), indent=2, ensure_ascii=False)
+open(p, 'a').write('\n')
 PY
+
+# --- 8b. Generate archive snapshots so /archive/<month>/ is COMMITTED in the PR ---
+# The archive step registered the outgoing edition in the registry + tagged it,
+# but the frozen snapshot DIRECTORY must also exist in the committed tree —
+# otherwise /archive/<month>/ 404s in any build that didn't run archives:rebuild
+# first (PR preview, local build), and there's no fallback if the deploy-time
+# rebuild fails. Generate them now so the `git add -A` below commits them.
+log "Generating archive snapshots for commit..."
+( cd automation && npx tsx rebuild-archives.ts ) \
+  || log "archive snapshot rebuild failed (continuing; deploy will regenerate)"
 
 # --- 9. Open a PR (skipped in dry-run; never auto-merges) ---
 if [ "$DRY_RUN" = "1" ]; then

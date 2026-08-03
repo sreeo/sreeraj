@@ -34,6 +34,23 @@ jobs:
       - name: Rebuild archived editions with current content
         run: npm run archives:rebuild || echo "::warning::archive rebuild failed; deploying committed archives as-is"
       - run: npm run build
+      # Guard: every edition listed in the archive registry MUST have a servable
+      # snapshot in the built output. Fails the deploy loudly rather than
+      # shipping a /archive/<month>/ that 404s (the failure mode from 2026-06).
+      - name: Verify all archive editions are servable
+        run: |
+          node -e '
+            const fs = require("fs");
+            const reg = JSON.parse(fs.readFileSync("public/archive/registry.json", "utf8"));
+            const missing = (reg.archives || [])
+              .map(a => a.month)
+              .filter(m => !fs.existsSync(`dist/archive/${m}/index.html`));
+            if (missing.length) {
+              console.error(`::error::Archive editions missing a built snapshot: ${missing.join(", ")}. /archive/<month>/ would 404.`);
+              process.exit(1);
+            }
+            console.log(`All ${(reg.archives||[]).length} archive edition(s) present in dist.`);
+          '
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
