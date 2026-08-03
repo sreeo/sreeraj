@@ -4,7 +4,24 @@ You are rebuilding sreeraj.dev — a personal tech blog built with Astro 5.
 
 Completely redesign and rebuild the presentation layer of sreeraj.dev in the style of: **{{TREND}}**
 
+## Style Specification
+
+{{TREND_SPEC}}
+
+Treat this specification as the design brief. Where it conflicts with any general guideline below, **the specification and the idiom win**.
+
 You must generate ALL layout, component, page, and style files from scratch. The content (blog posts, images) stays as-is — you are only rebuilding how it looks and feels.
+
+## THE STYLE WINS — read this before the craft rules below
+
+The craft rules below (type scales, palette counts, spacing ratios, hover conventions) are **defaults for when the idiom doesn't say otherwise** — they describe modern-minimalist good taste, and this site is often NOT modern-minimalist. Commit to the chosen idiom with total conviction:
+
+- If the idiom is terminal, teletext, or brutalist → monospace-everything, pure #000/#fff, stepped timing, and dense layouts are CORRECT. Execute them with craft.
+- If the idiom is Memphis, psychedelic, riso, or Y2K → a polychrome palette is CORRECT. Orchestrate many colors deliberately instead of "restraining" to one accent.
+- If the idiom is Victorian print or zine collage → mixing many typefaces, dense ornament, and irregular layouts are CORRECT when hierarchically organized.
+- Readability of body text and WCAG contrast are the ONLY non-negotiables. Everything else bends to the idiom.
+
+A design that half-commits — the idiom's colors on a generic minimal layout — is a failure. Better a fully-realized weird thing than a tasteful compromise.
 
 ## Design Quality Bar
 
@@ -37,22 +54,20 @@ You are not building a template. You are building a site that could win an Awwwa
 - Use CSS background effects that match the style: subtle gradients, grid patterns, noise textures, or geometric accents.
 
 ### Color
-- Use a restrained palette: 1 accent, 1 background, 1 surface, 2-3 text shades, 1 border color.
-- Accent color for interactive elements only (links, active states, tags). Never for body text.
-- Ensure minimum 4.5:1 contrast on all text. Muted text should still be easily readable.
-- Dark themes: text should be #e2e8f0 range (not pure white). Background should be #0f1729 range (not pure black).
-- Light themes: text should be #1a1a1a range (not pure black). Background should be #fafafa range (not pure white).
+- Default: a restrained palette (1 accent, 1 background, 1 surface, 2-3 text shades, 1 border color). BUT if the idiom is inherently polychrome (Memphis, psychedelic, riso, teletext, Y2K), use its full palette — orchestrated with clear roles per color, not at random.
+- Accent color(s) should have consistent, purposeful roles. Never colorize body text arbitrarily.
+- Ensure minimum 4.5:1 contrast on all body text. Muted text should still be easily readable. This is the one non-negotiable.
+- Default dark themes: text ~#e2e8f0 on ~#0f1729. Default light: ~#1a1a1a on ~#fafafa. Override freely when the idiom demands it — phosphor green/amber on black, pure ink on paper white, blueprint cyan on Prussian blue are all legitimate when executed with conviction.
 
 ### What Makes Sites Look Amateur (AVOID)
-- Pure black (#000) text on pure white (#fff) background
-- Random spacing with no consistent scale
+- Accidental choices — anything that looks like a default rather than a decision
+- Random spacing with no consistent system (even zine chaos needs an underlying discipline)
 - Headings and body text too close in size
-- No hover states
-- Cards with no depth or visual separation
-- Cluttered homepage with no visual hierarchy
+- Interactive elements with no state feedback at all
+- Cluttered layout with no hierarchy (density is fine; disorder is not)
 - Generic "blog template" feel — grid of identical cards with no featured content
-- Borders that are too heavy (>1px for most elements)
-- Drop shadows that are too dark or too large
+- Half-committed idioms: the trend's colors painted onto a generic minimal layout
+- Heavy borders or hard black-on-white *in a style that doesn't call for them* — in brutalist/print/terminal idioms they're the point
 
 ### Generative & Interactive Elements (Experimental)
 
@@ -95,15 +110,13 @@ Your new design MUST differ on **every** one of those axes:
 
 Rule of thumb: if last month's homepage and this month's were placed side by side, a viewer must NOT recognize them as the same underlying layout. **Do NOT carry over layout, structure, component shapes, or copy framing from the previous design — rebuild the skeleton from scratch.** Reskinning is failure.
 
-## Reference Sites for Quality Bar
+## Reference Bar — craft level, NOT aesthetic
 
-Study these for structural quality (not to copy, but to match the caliber):
-- **stripe.com** — typography, spacing, scroll animations
-- **linear.app** — minimal design with perfect interactions
-- **vercel.com** — clean layout, excellent type hierarchy
-- **apple.com** — whitespace mastery, product storytelling
-- **pentagram.com** — bold editorial design
-- **rauno.me** — personal site with exceptional craft
+These set the bar for *how well* things are executed — spacing discipline, interaction polish, typographic control. They do NOT set the look. Do not default to their minimalist aesthetic; bring their level of care to whatever idiom this month demands:
+- **stripe.com / linear.app / vercel.com** — interaction polish, systematic spacing
+- **pentagram.com** — conviction: every project fully commits to its own visual language
+- **rauno.me** — personal-site craft obsession
+- The true bar: the best *of the chosen idiom* — the finest teletext page, the sharpest zine spread, the most beautiful topographic map ever drawn.
 
 ## Vision Quality Gate
 

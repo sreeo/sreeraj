@@ -31,6 +31,7 @@ const TREND_SCHEMA = {
 export async function discoverTrend(
   designLog: DesignLog,
   previousTrend: string | null,
+  lens?: string,
 ): Promise<DiscoveredTrend> {
   const now = new Date();
   const monthLabel = `${now.toLocaleString('en', { month: 'long' })} ${now.getFullYear()}`;
@@ -45,11 +46,20 @@ export async function discoverTrend(
 
   console.error('Discovering current design trends via web search...');
 
-  const prompt = `You are selecting a design style for a personal tech blog (sreeraj.dev) for ${monthLabel}.
+  const researchFocus = lens
+    ? `Research focus for this month: **${lens}**`
+    : `Research current web design trends and award-winning site designs in ${now.getFullYear()} (Awwwards, CSS Design Awards, siteinspire, design blogs).`;
+
+  const prompt = `You are selecting a design style for a personal tech blog (sreeraj.dev) for ${monthLabel}. The site is rebuilt in a completely new visual idiom every month, and its readers expect each month to be a genuine surprise — new, old, or niche, never generic.
 
 ## Your Task
-1. Use the WebSearch tool to research current web design trends, CSS design trends, and award-winning website designs in ${now.getFullYear()} (e.g. Awwwards, CSS Design Awards, Dribbble, design blogs).
+1. Use the WebSearch tool to research. ${researchFocus}
 2. Based on your research AND the classic styles below, propose ONE specific design style for this month.
+
+## What we want
+- A style with a STRONG, specific identity — a movement, an era, a medium, a subculture. "Tasteful minimalism" and generic SaaS-landing aesthetics are explicitly unwanted.
+- It must be structurally translatable to a content blog (readable long-form posts) while transforming everything around the reading experience.
+- Bonus points for styles rarely attempted on the web: translated print/physical media, dead-platform UI languages, regional design traditions, scientific/technical document styles.
 
 ## Classic Styles Available (pick one or propose something new from your research):
 ${classicList}

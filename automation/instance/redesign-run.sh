@@ -183,6 +183,10 @@ PY
   # 3. Discover the design trend (Agent SDK web search; registry fallback).
   # pick-trend.ts is a real file (reliable relative-import resolution, unlike
   # `tsx -e`) and always prints a usable trend on stdout (progress -> stderr).
+  # It also writes the FULL style spec to automation/history/current-trend.json,
+  # which we inject into the rebuild prompt below. Clear any stale spec first so
+  # a manual REDESIGN_TREND override can't pick up last month's file.
+  rm -f automation/history/current-trend.json
   TREND="${REDESIGN_TREND:-}"
   if [ -z "$TREND" ]; then
     TREND="$(cd automation && npx tsx pick-trend.ts 2>>/tmp/pick-trend.err)" || TREND=""
@@ -197,18 +201,28 @@ PY
   # 4. Build the rebuild prompt from the template.
   cp automation/prompts/full-rebuild.md /tmp/rebuild-prompt.md
   TREND="$TREND" python3 - <<'PY'
-import os
+import os, json
 p = '/tmp/rebuild-prompt.md'
 s = open(p).read().replace('{{TREND}}', os.environ['TREND'])
 hist = 'No previous designs yet.'
 try:
-    import json
     d = json.load(open('automation/history/design-log.json'))
     rows = [f"- {x['month']}: {x['trendName']} ({x['status']})" for x in d.get('designs', [])[-6:]]
     if rows: hist = "\n".join(rows)
 except Exception:
     pass
 s = s.replace('{{DESIGN_HISTORY}}', hist)
+# Inject the full style spec written by pick-trend (structure/typography/
+# spacing/interactions/references). Without this the rebuild only ever saw a
+# one-line trend and the registry's rich specs were discarded.
+spec = 'No detailed specification available — interpret the style line above with conviction and research the idiom yourself.'
+try:
+    t = json.load(open('automation/history/current-trend.json'))
+    parts = [f"**{k.capitalize()}:** {t[k]}" for k in ('structure', 'typography', 'spacing', 'interactions', 'references') if t.get(k)]
+    if parts: spec = "\n\n".join(parts)
+except Exception:
+    pass
+s = s.replace('{{TREND_SPEC}}', spec)
 open(p, 'w').write(s)
 PY
 
@@ -289,9 +303,12 @@ try:
 except Exception:
     log = {'designs': []}
 now = datetime.datetime.now(datetime.timezone.utc)
+import re as _re
 log.setdefault('designs', []).append({
     'month': os.environ.get('NEW_MONTH') or now.strftime('%Y-%m'),
-    'trendId': 'full-rebuild',
+    # Slug of the trend name (not a constant) so registry recency-avoidance
+    # can match cron-produced entries.
+    'trendId': _re.sub(r'[^a-z0-9]+', '-', os.environ['TREND'].split(' — ')[0].lower()).strip('-'),
     'trendName': os.environ['TREND'],
     'status': 'success' if os.environ.get('QA_RC') == '0' else 'layout-qa-failed',
     'timestamp': now.isoformat(),

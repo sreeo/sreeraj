@@ -210,7 +210,201 @@ export const TRENDS: DesignTrend[] = [
     interactions: 'This IS the design. Staggered entrance animations with cubic-bezier easing. Scroll-triggered reveals with animation-timeline. Micro-interactions on every interactive element. Spring physics feel (overshoot and settle). View transitions between pages. Every hover, focus, and click is choreographed.',
     references: 'stripe.com animations, linear.app transitions, Apple product page scroll effects, Framer Motion showcase, Emil Kowalski\'s animations',
   },
+
+  // ── Historical eras ────────────────────────────────────────────────
+  {
+    id: 'art-nouveau',
+    name: 'Art Nouveau',
+    description: 'The whiplash-curve movement of 1890-1910. Organic, botanical ornament as structure — Alphonse Mucha posters, Hector Guimard Métro entrances, Vienna Secession. Nature-derived line-work framing every composition.',
+    structure: 'Content framed inside ornamental borders with curved corners drawn from vines and stems. Asymmetric flowing layouts where dividers are drawn tendrils (SVG), not straight rules. Cards as decorative panels with arched tops. A botanical/organic SVG motif system reused throughout.',
+    typography: 'Flowing display serif with character for headings (suggest a Google font like Cormorant or Playfair with swashy feel); readable serif body. Titles integrated into ornament. Hand-drawn-feeling drop caps. Curved or arced text accents where tasteful.',
+    spacing: 'Generous, garden-like breathing room inside ornamental frames. Margins shaped by the ornament. Vertical rhythm follows the artwork rather than a strict grid.',
+    interactions: 'Vines that draw themselves in on scroll (SVG stroke-dashoffset). Slow, organic easing (600ms, ease-in-out). Hover states that bloom — subtle ornament reveals. Nothing mechanical.',
+    references: 'Mucha posters, Paris Métro signage, Vienna Secession exhibition posters, William Morris patterns',
+  },
+  {
+    id: 'constructivism',
+    name: 'Russian Constructivism',
+    description: 'Agitprop graphic design of the 1920s — Rodchenko, El Lissitzky. Diagonal compositions, photomontage, bold red/black/cream, type as a shouting machine. Raw revolutionary energy with rigorous geometry.',
+    structure: 'Diagonal axis compositions — hero content rotated or clipped along angles (clip-path). Big geometric wedges and bars as structural elements. Asymmetric blocks colliding deliberately. Photos treated as high-contrast montage elements. Angled section dividers.',
+    typography: 'Condensed, heavy, uppercase display type at poster scale. Type set on angles for emphasis. Stark size jumps. Body text in clean sans, tight and functional. Cyrillic-poster energy without being illegible.',
+    spacing: 'Dense and dynamic — tension over comfort. Tight packing inside compositions, then dramatic empty zones. Spacing creates diagonal movement across the page.',
+    interactions: 'Hard entrance animations along diagonals. Elements that slide in on angled paths. High-contrast hover inversions (cream→red). Fast, mechanical timing (150-250ms).',
+    references: 'El Lissitzky "Beat the Whites with the Red Wedge", Rodchenko posters, Stenberg brothers film posters',
+  },
+  {
+    id: 'de-stijl',
+    name: 'De Stijl / Neoplasticism',
+    description: 'Mondrian and Rietveld\'s reduction of design to primary colors, black lines, and rectangles. The page as an abstract composition of pure horizontal/vertical relationships.',
+    structure: 'Visible thick black grid lines (4-8px) dividing the page into asymmetric rectangular zones. A few zones filled with primary red/blue/yellow; most white. Content lives inside the composition\'s cells. Navigation as one painted zone. No curves anywhere.',
+    typography: 'Geometric sans, lowercase-friendly, functional. Headlines placed like compositional elements within cells. Strong alignment to the visible grid. Modest sizes — the grid is the drama, not the type.',
+    spacing: 'Cells sized by golden-feeling asymmetric ratios, not equal columns. Padding inside cells is consistent and calm. The black lines ARE the spacing system.',
+    interactions: 'Cells that fill with primary color on hover. Grid lines that extend/draw on scroll. Instant or short transitions — mechanical purity. A composition that subtly rearranges between pages.',
+    references: 'Mondrian Composition series, Rietveld Schröder House, Theo van Doesburg typography',
+  },
+  {
+    id: 'psychedelic-poster',
+    name: 'Psychedelic Concert Poster',
+    description: '1960s Fillmore/Avalon ballroom posters — Wes Wilson, Victor Moscoso. Melting type, vibrating complementary colors, art-nouveau-on-acid. Maximalist, optical, unmistakable.',
+    structure: 'Poster-like hero where type and ornament merge into one artwork (SVG). Wavy, liquid section boundaries (border-radius abuse / SVG waves). Content panels shaped like poster frames. A kaleidoscopic or radial motif anchoring the homepage.',
+    typography: 'Display type that bends and flows — SVG text on paths, or heavily-styled variable font settings for the hero only. Body text stays clean and readable (the trip is in the display layer). Wide, groovy letterforms for labels.',
+    spacing: 'Full-bleed poster sections alternating with calm reading zones. The contrast between dense visual sections and quiet text sections is the rhythm.',
+    interactions: 'Slow hue-rotate ambient shifts (respecting reduced-motion). Liquid hover distortions on display elements. Colors that vibrate at boundaries by design. Scroll-driven warping of the hero artwork.',
+    references: 'Wes Wilson Fillmore posters, Victor Moscoso Neon Rose, Milton Glaser\'s Dylan poster, Yellow Submarine',
+  },
+  {
+    id: 'memphis-design',
+    name: 'Memphis / Postmodern',
+    description: 'The Memphis Group\'s 1980s rebellion — Sottsass, Nathalie du Pasquier. Squiggles, terrazzo, clashing pastels with brights, playful geometry stacked with intent. Anti-minimalism executed with total confidence.',
+    structure: 'Layered compositions — cards stacked at slight offsets with patterned drop-zones behind them. Terrazzo/confetti/squiggle pattern fills (CSS/SVG) on section backgrounds. Mixed shapes: circles, zigzags, columns. Playful but on a real grid underneath.',
+    typography: 'Chunky geometric display with personality; clean body. Heading colors rotate through the palette. Occasional outlined (stroke-only) display text. Labels in bold caps on colored chips.',
+    spacing: 'Generous enough for the patterns to read. Deliberate overlaps between elements. Sections separated by pattern-band dividers rather than rules.',
+    interactions: 'Bouncy, toy-like hovers (slight rotation, scale, shadow pop). Squiggles that wiggle on hover. Staggered confetti-like entrances. Springy cubic-bezier timing with overshoot.',
+    references: 'Ettore Sottsass Carlton bookcase, Nathalie du Pasquier patterns, 1980s MTV idents, Saved by the Bell titles (refined)',
+  },
+  {
+    id: 'victorian-print',
+    name: 'Victorian Almanac & Print Ephemera',
+    description: '19th-century almanacs, broadsides, and patent-medicine ads. Ornate rule-work, engraved illustrations, a dozen typefaces used with strange confidence, pointing-hand manicules. Antique but information-dense.',
+    structure: 'Centered, symmetric column composition framed by stacked ornamental rules. Section headers as engraved-style banners. Content organized like almanac entries — numbered, ruled, annotated. Manicules (☞) and fleurons (❦) as functional markers. Border-box frames everywhere.',
+    typography: 'Exuberant mixing: slab display, condensed caps, italic script accents, small caps — deliberately many styles, hierarchically organized. Body in a sturdy old-style serif. Ornamented drop caps. ALL-CAPS proclamation headers with decorative underlines.',
+    spacing: 'Dense like a printed page that cost money per inch. Tight leading in lists, generous ceremonial space around banners. Rules and ornaments carry the rhythm.',
+    interactions: 'Nearly none — dignified. Ink-spread hover on links (slight weight/letter-spacing shift). Sepia-toned transitions. A subtle paper-grain texture layer.',
+    references: 'Old Farmer\'s Almanac, Victorian broadsides, Barnum circus posters, patent medicine labels, engraved stock certificates',
+  },
+
+  // ── Non-web media, translated ──────────────────────────────────────
+  {
+    id: 'cartographic',
+    name: 'Cartographic / Field Atlas',
+    description: 'The design language of topographic maps and expedition atlases — contour lines, coordinates, legends, compass roses, survey annotations. A natural fit for a site that is half trek journal.',
+    structure: 'A faint contour-line or graticule background layer (generative SVG). Content panels as map insets with coordinate-labeled corners. A legend-style navigation box. Post listings as a gazetteer — grid-referenced entries. Scale bars and north arrows as functional decoration.',
+    typography: 'Classic map lettering hierarchy: small caps with wide tracking for regions/labels, italic serif for water-feature-style accents, compact sans for annotations. Coordinates and elevations in tabular monospace.',
+    spacing: 'Precise, surveyed spacing — hairline rules, small ticks, margin scales along the page edges. Dense annotation zones vs open "terrain" zones.',
+    interactions: 'Contour lines that draw on scroll. Panels that pin like map markers. Hover reveals annotation callouts (like map tooltips). Route lines animating between points on the trek pages.',
+    references: 'USGS topographic quads, Swisstopo maps, Ordnance Survey, National Geographic expedition maps, Tufte\'s cartography chapters',
+  },
+  {
+    id: 'blueprint-schematic',
+    name: 'Blueprint / Technical Schematic',
+    description: 'Cyanotype engineering drawings and drafting-room culture. White line-work on Prussian blue, dimension lines, title blocks, revision tables. The site as a set of construction documents.',
+    structure: 'Deep blueprint-blue ground with white/cyan line-work. Every section framed with a drafting title block (project, sheet number, date, revision). Dimension lines with arrowheads annotating real measurements of the layout. Cross-hatched zones. An exploded-diagram hero.',
+    typography: 'Drafting lettering: uppercase, evenly-spaced sans (or a drafting-style Google font) for labels; monospace for data. Sheet-number folios. Underlined section titles like drawing callouts.',
+    spacing: 'Grid-paper regularity — everything aligns to a fine visible grid. Margins ruled like a drawing border. Consistent annotation offsets.',
+    interactions: 'Lines that draft themselves in on scroll. Hover turns a panel from line-work to "rendered" (subtle fill). Measurement callouts appearing on hover. Crisp, instrument-like timing.',
+    references: 'Original cyanotype blueprints, NASA Apollo schematics, patent drawings, Leonardo\'s notebooks (inverted), drafting title blocks',
+  },
+  {
+    id: 'zine-punk',
+    name: 'Xerox Zine / Punk Collage',
+    description: 'Photocopied cut-and-paste zine culture — torn paper edges, tape, stamped and typewritten text, high-contrast halftone photos. DIY urgency crafted with modern precision.',
+    structure: 'Collage layouts: content blocks as taped-on paper scraps with slight rotations (1-3deg). Torn-edge clip-paths. Halftone-treated images. Rubber-stamp labels. Layouts that feel hand-assembled but grid-disciplined underneath.',
+    typography: 'Typewriter monospace body. Headlines as ransom-note mixed type or marker-scrawl display (one characterful Google font). Stamped/stenciled category labels. Underlines that look hand-drawn (SVG).',
+    spacing: 'Irregular by design — overlaps, crooked margins — but readable columns underneath. Dense flyers vs sparse manifesto pages.',
+    interactions: 'Paper-scrap hovers (lift + shadow + slight straighten). Stamps that thunk in on scroll. Instant, rough transitions. A photocopier-flash page transition would be a signature move.',
+    references: 'Sniffin\' Glue zine, Riot Grrrl zines, Jamie Reid\'s Sex Pistols art, David Carson\'s Ray Gun (the readable parts)',
+  },
+  {
+    id: 'risograph',
+    name: 'Risograph Print',
+    description: 'The riso duplicator aesthetic beloved by small-press studios: 2-3 fluorescent spot colors, visible grain, slight misregistration, overprint blends. Warm, tactile, imperfect-on-purpose.',
+    structure: 'Flat spot-color shapes composing the layout — no gradients except riso-style grain dithers. Overlapping color blocks producing a third blend color (multiply blend-mode). Misregistered outlines (offset 2-3px). Poster-like section compositions.',
+    typography: 'Friendly geometric or grotesque display in solid spot colors, sometimes overprinted. Body text in near-black riso "ink". Slight print-wobble acceptable on display only.',
+    spacing: 'Print-poster margins, generous gutters. Compositions breathe like a well-laid-out riso spread. Consistent bleed-like edge behavior.',
+    interactions: 'Layers that print-in on scroll (color separations arriving one at a time — a perfect signature animation). Hover shifts registration slightly. Grain texture overlay via SVG noise.',
+    references: 'Risotto Studio prints, People of Print riso zines, Lucky Riso, stack magazines\' riso covers',
+  },
+  {
+    id: 'transit-system',
+    name: 'Transit System / Timetable',
+    description: 'The information design of metro maps and railway timetables — Beck\'s tube map, Vignelli\'s subway diagram, Swiss rail departure boards. Lines, interchanges, and schedules as the entire visual language.',
+    structure: 'Posts as stations on colored metro lines (SVG diagram) — categories are lines, the homepage is the network map. 45-degree-angle route geometry. Timetable-style listings with departure-board rows. Station-signage headers with line-color chips and roundels.',
+    typography: 'Transit sans (Inter is fine) at signage weights. White-on-line-color station name bars. Tabular figures for all times/dates. Terse, wayfinding-style labels — no decorative copy.',
+    spacing: 'Signage spacing: bold, consistent padding in name bars; diagram whitespace like a well-set network map; timetable rows compact and scannable.',
+    interactions: 'Route lines drawing between stations on scroll. A "train" dot traveling the line as scroll progress. Departure-board flip animations (staggered letter flips) for headings. Interchange hover states.',
+    references: 'Harry Beck London Underground map, Vignelli NYC subway diagram, SBB departure boards and Helvetica signage, Tokyo Metro signage',
+  },
+
+  // ── Digital-native / subcultures ───────────────────────────────────
+  {
+    id: 'y2k-frutiger-aero',
+    name: 'Y2K / Frutiger Aero',
+    description: 'The techno-optimist gloss of 1999-2007: aqua bubbles, glossy buttons, lens flares, skeuomorphic sheen, nature-meets-technology imagery. The future as it looked before flat design.',
+    structure: 'Floating glossy panels with specular highlights over an airy sky/aqua gradient world. Bubble and orb motifs (pure CSS gradients). Pill-shaped glossy nav. Sections as rounded "device screens". A shimmering hero with layered translucency.',
+    typography: 'Humanist sans (Frutiger-adjacent — Inter works) with soft confidence. Slight gradients or sheen on display text. Friendly rounded labels. Clean body on light panels.',
+    spacing: 'Airy and floaty — panels hover with room around them. Rounded radii everywhere (12-24px). Comfortable, optimistic padding.',
+    interactions: 'Glossy hover glints (a moving specular sweep). Bubbles that drift ambiently. Soft springy transitions. Aurora/gradient background slowly shifting. Everything feels like 2004\'s dream of 2020.',
+    references: 'Windows Vista Aero, iMac G4-era Apple, Nokia N-series UI, mid-2000s Sony ads, frutiger-aero archives',
+  },
+  {
+    id: 'cassette-futurism',
+    name: 'Cassette Futurism',
+    description: 'The retro-future of the 1970s-80s: NASA punk, CRT phosphor, chunky bezels, tactile switches, Alien\'s Nostromo and 2001\'s consoles. Analog hardware imagining the digital future.',
+    structure: 'Interface as a hardware console: content panels inside bezeled frames with screws/vents (CSS detail). CRT-curved screen areas with scanline texture. Status-light strips. A boot-sequence hero. Chunky segmented controls as navigation.',
+    typography: 'Phosphor-glow monospace for data (amber or green on near-black), Eurostile-flavored wide display caps for panel labels (a wide Google font), small utilitarian sans for annotations.',
+    spacing: 'Panel-gasket spacing — consistent bezels between modules. Dense instrument clusters vs large single-purpose displays. Everything feels bolted down.',
+    interactions: 'CRT flicker-on for panels entering view. Typing/teletype reveals. Indicator LEDs that blink with status. Switch-flip hovers with instant mechanical response. Subtle scanline shimmer (reduced-motion safe).',
+    references: 'Nostromo interfaces (Alien), 2001\'s HAL readouts, Braun/Wega hi-fi hardware, Teenage Engineering products, NASA mission control 1969',
+  },
+  {
+    id: 'teletext',
+    name: 'Teletext / Ceefax',
+    description: 'The broadcast information pages of the 70s-90s: blocky mosaic graphics, eight colors on black, numbered pages, double-height headers. Charming constraint as a complete design system.',
+    structure: 'A character-grid layout (CSS grid locked to a cell size). Page-number header bar (P100-style) as navigation — sections are numbered pages. Mosaic-block dividers and illustrations built from grid cells. Double-height section headers. A "page rotation" concept for featured posts.',
+    typography: 'Monospace throughout, bitmap-flavored. Double-height/double-width display via transform for headers. The classic teletext palette (white/yellow/cyan/green/magenta/red/blue on black) used systematically for hierarchy.',
+    spacing: 'Strict character-cell rhythm — every gap is n cells. Dense, broadcast-information layout. No fractional spacing anywhere.',
+    interactions: 'Page-load "reveal" that paints in rows like a teletext refresh. Number-key navigation hints. Blinking cursor accents. Hover inverts cell colors. All timing stepped, not eased.',
+    references: 'BBC Ceefax, ORF Teletext (still live), Minitel screens, teletext art by Dan Farrimond',
+  },
+  {
+    id: 'demoscene-ascii',
+    name: 'Demoscene / ASCII Art',
+    description: 'The BBS and demoscene underground: ANSI/ASCII art, character-grid graphics, scrollers, cracktro energy. Code as the medium and the decoration at once.',
+    structure: 'ASCII-art masthead (generated, not an image). Content in character-bordered boxes (single/double box-drawing). An animated ASCII shader background at low opacity (canvas rendering characters). NFO-file styling for metadata blocks. Group-credits footer like a cracktro.',
+    typography: 'Monospace everything, multiple sizes allowed. Headers as figlet-style ASCII banners. Box-drawing characters as the border system. Syntax-highlight-inspired accent colors on dark.',
+    spacing: 'Character-grid spacing. Boxes padded in whole characters. Dense, terminal-like but composed with real hierarchy.',
+    interactions: 'A sine-wave text scroller somewhere (subtle, reduced-motion safe). ASCII fire/plasma/starfield background effect in canvas. Typing reveals. Hover fills box borders from single to double lines.',
+    references: 'ANSI art packs (ACiD, iCE), keygen/cracktro screens, asciimatics demos, textmode.art, 16colo.rs archive',
+  },
+  {
+    id: 'generative-art-first',
+    name: 'Generative Art-First',
+    description: 'The design built around a living generative system — flow fields, L-systems, reaction-diffusion, Perlin landscapes. The rest of the page is gallery-quiet so the algorithm is the identity.',
+    structure: 'A prominent living generative canvas as the hero and recurring motif (seeded per-page so each page has its own variation). Content in austere gallery panels — maximum restraint around the artwork. Plotter-style generative dividers between sections. Each post card carries a small unique generative thumbnail derived from its slug hash.',
+    typography: 'Neutral, refined sans at modest sizes — museum-label typography. Titles small and confident, not shouting. Monospace for the "seed" and algorithm annotations displayed as functional art credits.',
+    spacing: 'Gallery spacing: vast, deliberate, symmetric around artworks. The emptiness frames the algorithm.',
+    interactions: 'The generative system responds gently to pointer and scroll (attraction/repulsion in the field). Per-visit seed variation. Pause/play respect for reduced-motion. Everything else nearly static.',
+    references: 'Tyler Hobbs\' Fidenza, Vera Molnár plotter works, Zach Lieberman sketches, generated.space, Matt DesLauriers',
+  },
 ];
+
+// Category map — which creative territory each trend belongs to. Used by the
+// month rotation in pick-trend.ts so consecutive months pull from different
+// territories (new/current ↔ historical ↔ translated media ↔ digital-native).
+export type TrendCategory = 'contemporary' | 'era' | 'medium' | 'digital';
+
+const TREND_CATEGORY: Record<string, TrendCategory> = {
+  // contemporary / current-web
+  'apple-minimal': 'contemporary', 'glassmorphism': 'contemporary', 'neo-grotesque': 'contemporary',
+  'parallax-storytelling': 'contemporary', 'bento-grid': 'contemporary', 'neubrutalism': 'contemporary',
+  'scandinavian': 'contemporary', 'motion-first': 'contemporary', 'japanese-minimal': 'contemporary',
+  // historical eras & movements
+  'swiss-international': 'era', 'bauhaus': 'era', 'art-deco': 'era', 'mid-century-modern': 'era',
+  'art-nouveau': 'era', 'constructivism': 'era', 'de-stijl': 'era', 'psychedelic-poster': 'era',
+  'memphis-design': 'era', 'victorian-print': 'era',
+  // non-web media translated to the web
+  'editorial-magazine': 'medium', 'newspaper-classic': 'medium', 'dark-academia': 'medium',
+  'cartographic': 'medium', 'blueprint-schematic': 'medium', 'zine-punk': 'medium',
+  'risograph': 'medium', 'transit-system': 'medium',
+  // digital-native subcultures
+  'brutalist-web': 'digital', 'terminal-hacker': 'digital', 'dashboard-data': 'digital',
+  'retro-web': 'digital', 'y2k-frutiger-aero': 'digital', 'cassette-futurism': 'digital',
+  'teletext': 'digital', 'demoscene-ascii': 'digital', 'generative-art-first': 'digital',
+};
+
+export function categoryOf(trend: DesignTrend): TrendCategory {
+  return TREND_CATEGORY[trend.id] ?? 'contemporary';
+}
 
 export interface DesignLogEntry {
   month: string;
@@ -226,27 +420,40 @@ export interface DesignLog {
   designs: DesignLogEntry[];
 }
 
-export function selectTrend(designLog: DesignLog): DesignTrend {
+export function selectTrend(designLog: DesignLog, category?: TrendCategory): DesignTrend {
   const now = new Date();
   const twelveMonthsAgo = new Date(now);
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 
-  // Get trends used in the last 12 months
-  const recentlyUsed = new Set(
-    designLog.designs
-      .filter(d => d.status === 'success' && new Date(d.timestamp) > twelveMonthsAgo)
-      .map(d => d.trendId)
+  // Trends used in the last 12 months. Cron-produced log entries carry
+  // trendId 'full-rebuild', so match on trendName containment as well —
+  // otherwise recency-avoidance silently never applies to real runs.
+  const recent = designLog.designs.filter(
+    d => d.status === 'success' && new Date(d.timestamp) > twelveMonthsAgo,
   );
+  const recentIds = new Set(recent.map(d => d.trendId));
+  const recentNames = recent.map(d => (d.trendName || '').toLowerCase());
+  // Near-duplicate guard: sharing any significant word with a recent design
+  // counts as recently used ("Terminal / Hacker" vs "Cutting-Edge Terminal").
+  const STOP = new Set(['design', 'style', 'styles', 'modern', 'classic', 'contemporary', 'revival', 'international']);
+  const sigWords = (s: string) =>
+    s.toLowerCase().split(/[^a-z]+/).filter(w => w.length >= 5 && !STOP.has(w));
+  const recentWords = new Set(recentNames.flatMap(sigWords));
+  const usedRecently = (t: DesignTrend) =>
+    recentIds.has(t.id) ||
+    recentNames.some(n => n.includes(t.name.toLowerCase())) ||
+    sigWords(t.name).some(w => recentWords.has(w));
 
-  // Filter to available trends
-  const available = TRENDS.filter(t => !recentlyUsed.has(t.id));
+  // Progressive filtering: category + fresh → category → fresh → all.
+  const inCategory = category ? TRENDS.filter(t => categoryOf(t) === category) : TRENDS;
+  const pool =
+    inCategory.filter(t => !usedRecently(t)).length > 0
+      ? inCategory.filter(t => !usedRecently(t))
+      : TRENDS.filter(t => !usedRecently(t)).length > 0
+        ? TRENDS.filter(t => !usedRecently(t))
+        : TRENDS;
 
-  // If all trends used recently, reset and allow all
-  const pool = available.length > 0 ? available : TRENDS;
-
-  // Weighted random selection
-  const index = Math.floor(Math.random() * pool.length);
-  return pool[index];
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 export function getLastTrend(designLog: DesignLog): string | null {

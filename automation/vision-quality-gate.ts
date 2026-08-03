@@ -26,7 +26,7 @@ export interface VisionResult {
 
 // --- Scoring prompt ---
 
-const VISION_SCORING_PROMPT = `You are a senior design critic reviewing screenshots of a personal tech blog (sreeraj.dev). Score the design on a 1-10 scale across these dimensions:
+const VISION_SCORING_PROMPT = `You are a senior design critic reviewing screenshots of a personal tech blog (sreeraj.dev). IMPORTANT CONTEXT: this site is deliberately rebuilt in a different visual idiom every month — sometimes minimalist, sometimes brutalist, print-era, teletext, zine, generative. Judge the design ON ITS OWN IDIOM'S TERMS: score how well it commits to and executes its evident style, not how closely it matches contemporary minimalist taste. A flawlessly executed dense Victorian almanac deserves a 9; a tasteful-but-generic SaaS layout deserves a 5. Score on a 1-10 scale across these dimensions:
 
 ## Scoring Criteria
 
@@ -44,12 +44,12 @@ const VISION_SCORING_PROMPT = `You are a senior design critic reviewing screensh
 - Does the page breathe — or is it cluttered?
 - 1-3: random spacing, cramped. 4-6: adequate. 7-8: rhythmic and deliberate. 9-10: mathematical precision.
 
-**Color Harmony (1-10)**
-- Is the palette restrained (1 accent, neutral system)?
-- Do colors complement each other?
-- Is accent used purposefully (interactive elements only)?
-- Is contrast sufficient for all text?
-- 1-3: clashing or no-effort palette. 4-6: safe but unremarkable. 7-8: harmonious and intentional. 9-10: striking and refined.
+**Color Intent (1-10)**
+- Does the palette serve the idiom — restrained where the style is quiet, orchestrated-polychrome where the style is loud?
+- Does every color have a consistent, discernible role?
+- Is contrast sufficient for all body text?
+- Pure black-on-white, phosphor-on-black, or clashing brights are CORRECT when the idiom calls for them.
+- 1-3: accidental or muddled color. 4-6: safe but unremarkable. 7-8: intentional and role-driven. 9-10: the palette IS part of the idiom's argument.
 
 **Visual Hierarchy (1-10)**
 - Does the eye flow naturally through the page?
@@ -72,21 +72,15 @@ const VISION_SCORING_PROMPT = `You are a senior design critic reviewing screensh
 - 1-3: frankensteined. 4-6: mostly consistent. 7-8: unified system. 9-10: seamless identity.
 
 ## Failure Modes (auto-deduct points)
-- Pure black (#000) on pure white (#fff) → deduct 2 from colorHarmony
 - Generic "blog template" look → deduct 2 from visualHierarchy
+- Generic tasteful-SaaS-minimalism when the site evidently attempts a distinctive idiom (half-committed reskin) → deduct 2 from cohesion
 - Uniform card grid with no featured content → deduct 1 from visualHierarchy
 - Inconsistent element styles across pages → deduct 2 from cohesion
-- Cluttered layout with no whitespace → deduct 2 from spacing
-- Text that appears hard to read → deduct 3 from typography
+- DISORDERED layout — density is legitimate for dense idioms (terminal, almanac, dashboard), but disorder is not → deduct 2 from spacing
+- Body text that appears hard to read → deduct 3 from typography (this one is idiom-independent)
 
 ## Reference Quality Bar
-Think about these sites as 8-9/10 benchmarks:
-- stripe.com (typography, spacing, scroll design)
-- linear.app (minimal with perfect interactions)
-- vercel.com (clean layout, type hierarchy)
-- rauno.me (personal site with exceptional craft)
-
-A personal blog doesn't need to match these exactly, but should aspire to their level of care and intentionality.
+The 8-9/10 bar is "the best artifact of the design's own idiom": the sharpest zine spread, the most beautiful topographic map, the most polished terminal UI, stripe.com-level polish for contemporary styles. Ask: would a master OF THIS STYLE nod in approval?
 
 The "overall" score should be a weighted average emphasizing typography and visual hierarchy (they matter most for a blog). Set "recommendation" to "accept" if overall >= the stated threshold, "reject" if overall < threshold - 1, "marginal" if in between.`;
 
@@ -132,9 +126,24 @@ async function scoreScreenshots(
   const paths = screenshots.map(f => path.join(screenshotDir, f));
   const pages = screenshots.map(f => f.replace('.png', '').replace(/_/g, '/')).join(', ');
 
+  // Tell the judge what idiom this month's design declares, so fidelity is
+  // scored against the right target rather than generic taste.
+  let idiomContext = '';
+  try {
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(CONFIG.projectRoot, 'src/data/design-manifest.json'), 'utf-8'),
+    );
+    if (manifest?.trend) {
+      idiomContext = `\nDeclared idiom this month: **${manifest.trend}**${manifest.description ? ` — ${manifest.description}` : ''}\nJudge commitment and craft WITHIN this idiom.`;
+    }
+  } catch {
+    /* no manifest — judge from the screenshots alone */
+  }
+
   const prompt = `${VISION_SCORING_PROMPT}
 
 ---
+${idiomContext}
 
 Use the Read tool on EACH of these ${screenshots.length} screenshot files so you can see them, then score the design. Pages shown: ${pages}.
 Acceptance threshold: ${minScore}/10.${extraContext}
