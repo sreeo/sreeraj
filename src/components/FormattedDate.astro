@@ -1,19 +1,12 @@
 ---
 interface Props {
   date: Date;
-  mono?: boolean;
 }
 
-const { date, mono = false } = Astro.props;
+const { date } = Astro.props;
 
 const pad = (n: number) => String(n).padStart(2, '0');
-const monoLabel = `${date.getUTCFullYear()}.${pad(date.getUTCMonth() + 1)}.${pad(date.getUTCDate())}`;
-const longLabel = date.toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  timeZone: 'UTC',
-});
+const iso = `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
 ---
 
-<time datetime={date.toISOString()}>{mono ? monoLabel : longLabel}</time>
+<time datetime={date.toISOString()}>{iso}</time>

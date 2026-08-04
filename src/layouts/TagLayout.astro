@@ -1,7 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
-import FormattedDate from '../components/FormattedDate.astro';
 
 interface Post {
   data: {
@@ -9,111 +8,68 @@ interface Post {
     slug: string;
     description: string;
     pubDate: Date;
-    featureImage?: string;
-    tags?: string[];
-    readingTime?: number;
-    author?: string;
+    tags: string[];
+    readingTime: number;
+    featured: boolean;
   };
 }
 
 interface Props {
   title: string;
-  description?: string;
+  path: string;
   posts: Post[];
+  note?: string;
   theme?: 'tech' | 'trek';
-  kicker?: string;
 }
 
-const { title, description, posts, theme = 'tech', kicker = 'Section' } = Astro.props;
-const count = String(posts.length).padStart(2, '0');
-const lead = posts[0];
-const rest = posts.slice(1);
-
-const excerpt = (s: string, n = 190) => {
-  const t = (s || '').replace(/\s+/g, ' ').trim();
-  return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t;
-};
+const { title, path, posts, note, theme = 'tech' } = Astro.props;
+const total = posts.length;
+const pad = (n: number) => String(n).padStart(3, '0');
 ---
 
-<BaseLayout title={`${title} — sreeraj.dev`} description={description} theme={theme}>
-  <!-- Department masthead -->
-  <section class="container" style="padding-top: clamp(2.5rem, 6vw, 4rem); padding-bottom: clamp(1.5rem, 3vw, 2.25rem);">
-    <span class="eyebrow">{kicker}</span>
-    <div class="grid-12" style="align-items: end; row-gap: 1.25rem; margin-top: 1.2rem;">
-      <div style="grid-column: span 9;" class="max-md:!col-span-12">
-        <h1 class="page-title" style="font-family: var(--font-display); font-size: clamp(3rem, 9vw, 6rem); font-weight: 900; line-height: 0.9; letter-spacing: -0.04em; text-transform: capitalize; font-variation-settings: 'opsz' 144, 'wght' 900;">
-          {title}
-        </h1>
-        {description && (
-          <p class="deck page-description" style="font-size: var(--fs-md); max-width: 38rem; margin-top: 1.35rem;">
-            {description}
-          </p>
-        )}
-      </div>
-      <div style="grid-column: span 3;" class="max-md:!col-span-12 md:text-right">
-        <span class="folio" style="color: var(--color-accent);">Dispatches</span>
-        <div style="font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin-top: 0.25rem; font-variation-settings: 'opsz' 144, 'wght' 900;">{count}</div>
-      </div>
+<BaseLayout title={`${title} — sreeraj.dev`} description={note} theme={theme}>
+  <section class="wrap section-tight">
+    <nav class="crumbs" aria-label="Breadcrumb" style="margin-bottom: var(--s-5);">
+      <a href="/">~</a>
+      <span aria-hidden="true">/</span>
+      <span>{path}</span>
+    </nav>
+
+    <div class="slab">
+      <h1>INDEX OF /{path.toUpperCase()}</h1>
+      <span class="slab-note">{total} {total === 1 ? 'FILE' : 'FILES'} · NEWEST FIRST</span>
     </div>
-    <div class="rule-double" style="margin-top: 1.75rem;"></div>
+
+    {note && (
+      <p style="margin-top: var(--s-4); max-width: 62ch; font-size: var(--t-md); line-height: 1.65; color: var(--muted);">{note}</p>
+    )}
+
+    {total > 0 ? (
+      <div class="idx" style="margin-top: var(--s-5);">
+        <div class="idx-cols" aria-hidden="true">
+          <span>№</span>
+          <span class="only-wide">Date</span>
+          <span>Title</span>
+          <span class="only-wide">Tags</span>
+          <span style="text-align: right;">Min</span>
+        </div>
+        {posts.map((post, i) => (
+          <PostCard
+            title={post.data.title}
+            slug={post.data.slug}
+            description={post.data.description}
+            pubDate={post.data.pubDate}
+            tags={post.data.tags}
+            readingTime={post.data.readingTime}
+            featured={post.data.featured}
+            num={pad(total - i)}
+          />
+        ))}
+      </div>
+    ) : (
+      <div class="box" style="margin-top: var(--s-5); padding: var(--s-5); font-family: var(--font-mono); font-size: var(--t-sm);">
+        0 FILES. NOTHING HERE YET.
+      </div>
+    )}
   </section>
-
-  {posts.length === 0 ? (
-    <section class="container" style="padding-bottom: clamp(4rem, 9vw, 7rem);">
-      <p class="deck page-description" style="font-size: var(--fs-md);">No dispatches filed under this section yet.</p>
-    </section>
-  ) : (
-    <>
-      <!-- Lead spread -->
-      <section class="container" style="padding-bottom: clamp(2.5rem, 6vw, 4rem);">
-        <a href={`/${lead.data.slug}/`} class="group grid-12" style="row-gap: 1.75rem; align-items: center;">
-          {lead.data.featureImage && (
-            <div style="grid-column: span 6;" class="max-lg:!col-span-12">
-              <div class="feature-img-wrap" style="aspect-ratio: 16 / 11; border: 1px solid var(--color-tech-rule);">
-                <img src={lead.data.featureImage} alt={lead.data.title} class="feature-img w-full h-full object-cover" />
-              </div>
-            </div>
-          )}
-          <div class="max-lg:!col-span-12" style={`grid-column: ${lead.data.featureImage ? 'span 6 / -1' : 'span 9'};`}>
-            <span class="folio" style="color: var(--color-accent);">The Lead</span>
-            <h2 class="feature-title" style="font-size: var(--fs-2xl); margin-top: 0.7rem;">{lead.data.title}</h2>
-            {lead.data.description && (
-              <p style="font-family: var(--font-sans); font-size: var(--fs-base); line-height: 1.6; margin-top: 1rem; max-width: 34rem; color: var(--color-tech-text-muted);">{excerpt(lead.data.description)}</p>
-            )}
-            <div class="byline" style="margin-top: 1.1rem; color: var(--color-tech-text-muted);">
-              <FormattedDate date={lead.data.pubDate} mono />{lead.data.readingTime && <span> · {lead.data.readingTime} min</span>}
-            </div>
-          </div>
-        </a>
-      </section>
-
-      <!-- The rest -->
-      {rest.length > 0 && (
-        <section class="container" style="padding-bottom: clamp(4rem, 9vw, 7rem);">
-          <div class="flex items-baseline justify-between" style="margin-bottom: 1.75rem;">
-            <h2 class="section-title" style="font-size: var(--fs-lg);">More in this section</h2>
-            <span class="folio" style="color: var(--color-tech-text-muted);">{String(rest.length).padStart(2, '0')} more</span>
-          </div>
-          <div class="rule" style="margin-bottom: 2.25rem;"></div>
-          <div class="grid-12" style="row-gap: 2.5rem;">
-            {rest.map((post, i) => (
-              <div style="grid-column: span 4;" class="max-lg:!col-span-6 max-sm:!col-span-12 reveal">
-                <PostCard
-                  title={post.data.title}
-                  slug={post.data.slug}
-                  description={post.data.description}
-                  pubDate={post.data.pubDate}
-                  featureImage={post.data.featureImage}
-                  tags={post.data.tags}
-                  readingTime={post.data.readingTime}
-                  variant={theme}
-                  index={i + 2}
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-    </>
-  )}
 </BaseLayout>

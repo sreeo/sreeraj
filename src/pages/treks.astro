@@ -3,14 +3,14 @@ import { getCollection } from 'astro:content';
 import TagLayout from '../layouts/TagLayout.astro';
 
 const posts = (await getCollection('blog'))
-  .filter((p) => p.data.tags.some((t) => ['treks', 'trek'].includes(t)))
+  .filter((p) => p.data.tags.includes('treks') || p.data.tags.includes('trek'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <TagLayout
-  kicker="Department № 02"
   title="Treks"
-  description="Dispatches from the Himalaya — frozen lakes, summit pushes, and the trails between."
+  path="treks"
   posts={posts}
+  note="Himalayan trail logs — altitudes, distances, and what actually happened. Links are green up here."
   theme="trek"
 />

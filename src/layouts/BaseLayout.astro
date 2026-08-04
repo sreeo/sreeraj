@@ -20,39 +20,11 @@ const { title, description, image, theme = 'tech' } = Astro.props;
     <BaseHead title={title} description={description} image={image} />
   </head>
   <body class="min-h-screen flex flex-col">
-    <div class="scroll-progress" id="scroll-progress"></div>
+    <a href="#main" class="skip-link">Skip to content</a>
     <Header theme={theme} />
-    <main class="flex-1 w-full">
+    <main id="main" class="flex-1 w-full">
       <slot />
     </main>
-    <Footer theme={theme} />
-
-    <script>
-      // Scroll progress rule
-      const bar = document.getElementById('scroll-progress');
-      if (bar) {
-        const onScroll = () => {
-          const h = document.documentElement;
-          const max = h.scrollHeight - h.clientHeight;
-          bar.style.width = max > 0 ? `${(h.scrollTop / max) * 100}%` : '0%';
-        };
-        document.addEventListener('scroll', onScroll, { passive: true });
-        onScroll();
-      }
-
-      // Reveal-on-scroll — robust fallback so content never sticks at opacity:0
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const items = document.querySelectorAll('.reveal');
-      if (reduce || !('IntersectionObserver' in window)) {
-        items.forEach((el) => el.classList.add('in-view'));
-      } else {
-        const io = new IntersectionObserver((entries) => {
-          entries.forEach((e) => {
-            if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); }
-          });
-        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.04 });
-        items.forEach((el) => io.observe(el));
-      }
-    </script>
+    <Footer />
   </body>
 </html>

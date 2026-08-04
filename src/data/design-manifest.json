@@ -1,12 +1,10 @@
 {
-  "trend": "Editorial / Magazine Layout",
-  "month": "2026-07",
-  "description": "A broadsheet magazine — 'The Dispatch'. Stacked newspaper masthead with a Fraunces nameplate, a cover-story lead in high-contrast display serif, a full-width pull-quote band over a generative topographic-contour engraving, an asymmetric features well, and a department-grouped table of contents. Lora serif reading column with drop caps, folios, and double rules on warm ivory newsprint with a single claret accent.",
-  "primaryColor": "#9a2a24",
+  "trend": "Brutalist Web Design",
+  "description": "The Raw Index — the site as an honest document. Black ink on white paper, classic link blue, 2–3px rules, zero radius, instant inverted hover states. A terminal status bar with a live UTC clock, a left-aligned monospace masthead, a README manifest, a hard-shadowed featured record, and the whole blog as one dense INDEX OF / table. Signature: a generative ASCII dither field seeded by the date.",
+  "primaryColor": "#0000e6",
   "fonts": [
-    "Fraunces",
-    "Lora",
-    "Inter",
-    "JetBrains Mono"
-  ]
+    "JetBrains Mono",
+    "Inter"
+  ],
+  "month": "2026-08"
 }

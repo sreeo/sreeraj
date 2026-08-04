@@ -3,53 +3,30 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pages = await getCollection('pages');
-const contactPage = pages.find((p) => p.data.slug === 'contact');
-const { Content } = contactPage ? await render(contactPage) : { Content: null };
-
-const channels = [
-  { label: 'Email', value: 'contact [at] sreeraj [dot] dev', href: 'mailto:contact@sreeraj.dev' },
-  { label: 'Twitter', value: '@bot_sree', href: 'https://twitter.com/bot_sree' },
-  { label: 'RSS', value: '/rss.xml', href: '/rss.xml' },
-];
+const contact = pages.find((p) => p.data.slug === 'contact');
+if (!contact) throw new Error('contact page missing from pages collection');
+const { Content } = await render(contact);
 ---
 
-<BaseLayout title="Contact — sreeraj.dev" description="Get in touch." theme="tech">
-  <!-- Masthead -->
-  <section class="container" style="padding-top: clamp(2.5rem, 6vw, 4rem); padding-bottom: clamp(1.5rem, 3vw, 2.25rem);">
-    <span class="eyebrow">Correspondence</span>
-    <h1 class="page-title" style="font-family: var(--font-display); font-size: clamp(2.6rem, 7vw, 4.75rem); font-weight: 900; line-height: 0.92; letter-spacing: -0.04em; margin-top: 1.1rem; font-variation-settings: 'opsz' 144, 'wght' 900;">
-      Letters to the desk
-    </h1>
-    <p class="deck page-description" style="font-size: var(--fs-md); max-width: 38rem; margin-top: 1.35rem;">
-      Questions about infrastructure, Postgres, or a trail recommendation? The inbox is open.
-    </p>
-    <div class="rule-double" style="margin-top: 1.75rem;"></div>
-  </section>
+<BaseLayout title="Contact — sreeraj.dev" description="How to reach Sreeraj Rajan.">
+  <section class="wrap section-tight">
+    <nav class="crumbs" aria-label="Breadcrumb" style="margin-bottom: var(--s-5);">
+      <a href="/">~</a>
+      <span aria-hidden="true">/</span>
+      <span>contact</span>
+    </nav>
 
-  <section class="container" style="padding-bottom: clamp(4rem, 9vw, 7rem);">
-    <div class="grid-12" style="row-gap: 2.5rem; column-gap: clamp(2rem, 5vw, 4rem);">
-      <!-- Prose -->
-      <div style="grid-column: span 5;" class="max-lg:!col-span-12">
-        {Content ? (
-          <div class="prose" style="max-width: 30rem;"><Content /></div>
-        ) : (
-          <p class="deck page-description" style="font-size: var(--fs-md); max-width: 28rem;">
-            The fastest way to reach me is by email. I read everything, and reply to most.
-          </p>
-        )}
-      </div>
+    <div class="slab">
+      <h1>INDEX OF /CONTACT</h1>
+      <span class="slab-note">2 CHANNELS · NO FORMS</span>
+    </div>
 
-      <!-- Channels -->
-      <div style="grid-column: span 7 / -1;" class="max-lg:!col-span-12">
-        {channels.map((c, i) => (
-          <a href={c.href} class="toc-row group" style="grid-template-columns: 8rem 1fr auto;">
-            <span class="folio" style="color: var(--color-accent);">{c.label}</span>
-            <span class="toc-title" style="display: block;">{c.value}</span>
-            <span class="transition-transform group-hover:translate-x-1" style="color: var(--color-accent); align-self: center;">→</span>
-          </a>
-        ))}
-        <div class="rule"></div>
-      </div>
+    <div class="doc" style="margin-top: var(--s-6);">
+      <Content />
+      <p>
+        No contact form. Forms need spam protection, spam protection needs
+        JavaScript, and neither of us needs that.
+      </p>
     </div>
   </section>
 </BaseLayout>

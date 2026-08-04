@@ -3,13 +3,13 @@ import { getCollection } from 'astro:content';
 import TagLayout from '../layouts/TagLayout.astro';
 
 const posts = (await getCollection('blog'))
-  .filter((p) => p.data.tags.some((t) => ['postgres', 'pgbouncer'].includes(t)))
+  .filter((p) => p.data.tags.includes('postgres'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <TagLayout
-  kicker="Department № 04"
   title="Postgres"
-  description="Indexing, connection pooling, UUIDs versus ULIDs — notes from the database trenches."
+  path="postgres"
   posts={posts}
+  note="Indexes, connection pools, and identifier wars. The database gets its own directory."
 />

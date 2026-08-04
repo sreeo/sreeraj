@@ -2,16 +2,14 @@
 import { getCollection } from 'astro:content';
 import TagLayout from '../layouts/TagLayout.astro';
 
-const programmingTags = ['python', 'django', 'java', 'spring batch', 'kafka', 'faust'];
-
 const posts = (await getCollection('blog'))
-  .filter((p) => p.data.tags.some((t) => programmingTags.includes(t)))
+  .filter((p) => p.data.tags.includes('programming'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <TagLayout
-  kicker="Department № 03"
   title="Programming"
-  description="Python, Django, Java, and the occasional encounter with millions of records."
+  path="programming"
   posts={posts}
+  note="Code that shipped, and what it cost. Django, Java, and friends."
 />
