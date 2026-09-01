@@ -19,12 +19,14 @@ const { title, description, image, theme = 'tech' } = Astro.props;
   <head>
     <BaseHead title={title} description={description} image={image} />
   </head>
-  <body class="min-h-screen flex flex-col">
-    <a href="#main" class="skip-link">Skip to content</a>
-    <Header theme={theme} />
-    <main id="main" class="flex-1 w-full">
-      <slot />
-    </main>
-    <Footer />
+  <body>
+    <a href="#main" class="skip-link">skip to content</a>
+    <div class="frame">
+      <Header />
+      <main id="main">
+        <slot />
+      </main>
+      <Footer />
+    </div>
   </body>
 </html>

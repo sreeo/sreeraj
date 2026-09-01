@@ -4,9 +4,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const posts = await getCollection('blog');
 const tagCounts = new Map<string, number>();
-for (const p of posts) {
-  for (const t of p.data.tags) {
-    tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+for (const post of posts) {
+  for (const tag of post.data.tags) {
+    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
   }
 }
 const tags = [...tagCounts.entries()].sort(
@@ -14,30 +14,24 @@ const tags = [...tagCounts.entries()].sort(
 );
 ---
 
-<BaseLayout title="Tags — sreeraj.dev" description="Every tag on sreeraj.dev, with counts.">
-  <section class="wrap section-tight">
-    <nav class="crumbs" aria-label="Breadcrumb" style="margin-bottom: var(--s-5);">
-      <a href="/">~</a>
-      <span aria-hidden="true">/</span>
-      <span>tags</span>
-    </nav>
-
-    <div class="slab">
-      <h1>INDEX OF /TAGS</h1>
-      <span class="slab-note">{tags.length} TAGS · BY FREQUENCY</span>
+<BaseLayout title="tags — sreeraj.dev" description="Every tag on sreeraj.dev." theme="tech">
+  <div class="band">
+    <div class="cell label-cell cell--yellow c3">
+      <span>taxonomy /</span>
     </div>
-
-    <p style="margin-top: var(--s-4); max-width: 62ch; font-size: var(--t-md); line-height: 1.65; color: var(--muted);">
-      Every label ever attached to a post, counted honestly. One post can
-      carry many tags; the numbers below will not add up to {posts.length}.
-    </p>
-
-    <div class="chips" style="margin-top: var(--s-5); gap: var(--s-3);">
-      {tags.map(([tag, n]) => (
-        <a href={`/tags/${tag}/`} class="chip" style="font-size: var(--t-sm); padding: 6px 12px;">
-          [{tag}] <span class="chip-n">×{n}</span>
-        </a>
-      ))}
+    <div class="cell c7">
+      <h1 class="page-title">every tag</h1>
+      <p class="section-sub">{tags.length} tags across {posts.length} compositions</p>
     </div>
-  </section>
+    <div class="plane plane--blue c2" aria-hidden="true"></div>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: var(--line); background: var(--ink);">
+    {tags.map(([tag, count]) => (
+      <a href={`/tags/${tag}/`} class="tag-cell" style="flex: 1 1 180px;">
+        <span>{tag}</span>
+        <span class="n">{count} {count === 1 ? 'post' : 'posts'}</span>
+      </a>
+    ))}
+  </div>
 </BaseLayout>

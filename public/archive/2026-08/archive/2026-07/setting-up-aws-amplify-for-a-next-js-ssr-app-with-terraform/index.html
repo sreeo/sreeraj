@@ -1,0 +1,158 @@
+<!DOCTYPE html><html lang="en" data-theme="tech"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"><meta name="generator" content="Astro v5.17.3"><link rel="canonical" href="https://sreeraj.dev/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/"><title>Setting up AWS Amplify for a Next JS SSR app with Terraform — sreeraj.dev</title><meta name="description" content="Setting up Amplify for nextjs SSR via Terraform"><!-- Open Graph --><meta property="og:type" content="website"><meta property="og:url" content="https://sreeraj.dev/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/"><meta property="og:title" content="Setting up AWS Amplify for a Next JS SSR app with Terraform — sreeraj.dev"><meta property="og:description" content="Setting up Amplify for nextjs SSR via Terraform"><meta property="og:image" content="https://sreeraj.dev/images/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/IMG_20170917_144020.jpg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://sreeraj.dev/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/"><meta property="twitter:title" content="Setting up AWS Amplify for a Next JS SSR app with Terraform — sreeraj.dev"><meta property="twitter:description" content="Setting up Amplify for nextjs SSR via Terraform"><meta property="twitter:image" content="https://sreeraj.dev/images/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/IMG_20170917_144020.jpg"><link rel="sitemap" href="/archive/2026-07/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="sreeraj.dev" href="/archive/2026-07/rss.xml"><script defer src="https://cloud.umami.is/script.js" data-website-id="057ff310-3cdd-46d1-9862-aabd77ec1613"></script><link rel="stylesheet" href="/archive/2026-07/_astro/_slug_.oUVp6imf.css"></head> <body class="min-h-screen flex flex-col"><a href="/" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#000;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-family:system-ui,sans-serif;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.92;">
+  <span>You're viewing the <strong>August 2026</strong> archived design</span>
+  <span style="background:#fff;color:#000;padding:2px 10px;border-radius:4px;font-weight:600;">View Current Site &rarr;</span>
+</a>
+<div style="height:32px;"></div><a href="/archive/2026-08/" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#000;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-family:system-ui,sans-serif;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.92;">
+  <span>You're viewing the <strong>July 2026</strong> archived design</span>
+  <span style="background:#fff;color:#000;padding:2px 10px;border-radius:4px;font-weight:600;">View Current Site &rarr;</span>
+</a>
+<div style="height:32px;"></div> <div class="scroll-progress" id="scroll-progress"></div> <header class="nav-bar"> <!-- Folio line --> <div class="container"> <div class="folio-bar"> <span class="folio">Est. MMXXVI</span> <span class="folio center max-md:hidden">A Field Journal of Systems &amp; Summits</span> <span class="folio">AUGUST 2026 · N&ordm;&nbsp;08</span> </div> </div> <!-- Nameplate --> <div class="container" style="text-align: center; padding-block: clamp(1.1rem, 3vw, 1.9rem);"> <a href="/archive/2026-07/" class="nav-brand" style="font-size: clamp(2.4rem, 7vw, 4.25rem);">
+Sreeraj<span class="dot">.</span>dev
+</a> </div> <!-- Department navigation --> <div class="container"> <nav class="dept-nav" aria-label="Sections"> <a href="/archive/2026-07/" class="nav-link"> Index </a><a href="/archive/2026-07/devops/" class="nav-link"> DevOps </a><a href="/archive/2026-07/treks/" class="nav-link"> Treks </a><a href="/archive/2026-07/programming/" class="nav-link"> Programming </a><a href="/archive/2026-07/postgres/" class="nav-link"> Postgres </a><a href="/archive/2026-07/about/" class="nav-link"> About </a><a href="/archive/" class="nav-link"> Archive </a> </nav> </div> </header> <main class="flex-1 w-full">  <article class="container" style="padding-top: clamp(2.5rem, 6vw, 4.5rem); padding-bottom: clamp(3.5rem, 8vw, 6rem);"> <!-- Header --> <header style="max-width: 46rem; margin-inline: auto; text-align: center;"> <a href="/archive/2026-07/" class="eyebrow" style="justify-content: center;">devops</a> <h1 class="post-header-title" style="font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 900; line-height: 0.98; letter-spacing: -0.035em; margin-top: 1.25rem; font-variation-settings: 'opsz' 144, 'wght' 900;"> Setting up AWS Amplify for a Next JS SSR app with Terraform </h1> <p class="deck page-description" style="font-size: var(--fs-md); margin-top: 1.35rem; max-width: 34rem; margin-inline: auto;"> Setting up Amplify for nextjs SSR via Terraform </p> <div class="rule-double" style="margin-top: 2rem;"></div> <div class="post-header-meta byline flex flex-wrap items-center justify-center" style="gap: 0.85rem; padding: 0.95rem 0;"> <span>Sreeraj Rajan</span> <span aria-hidden="true">·</span> <time datetime="2022-01-21T08:57:54.000Z">January 21, 2022</time> <span aria-hidden="true">·</span><span>4 min read</span> <span aria-hidden="true">·</span><span>upd. <time datetime="2022-01-21T10:20:46.000Z">2022.01.21</time></span> </div> <div class="rule"></div> <div class="flex justify-center" style="margin-top: 1.25rem;"><div class="flex flex-wrap" style="gap: 0.5rem;"> <a href="/archive/2026-07/tags/devops/" class="tag-pill transition-colors" style="padding: 0.25rem 0.6rem; line-height: 1.4; display: inline-block;"> devops </a> </div></div>  </header> <!-- Hero image --> <figure class="trek-hero-wrap" style="max-width: 54rem; margin: clamp(2.25rem, 5vw, 3.25rem) auto 0;"> <img src="/images/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/IMG_20170917_144020.jpg" alt="Setting up AWS Amplify for a Next JS SSR app with Terraform" class="post-hero-image w-full" style="aspect-ratio: 16 / 9; object-fit: cover;"> </figure> <!-- Body --> <div class="prose article-body" style="margin: clamp(2.5rem, 6vw, 4rem) auto 0;">  <p>e.g github repo : <a href="https://github.com/proceduretech/terraform-amplify-nextjs-ssr?ref=sreeraj.dev">proceduretech/terraform-amplify-nextjs-ssr (github.com)</a></p>
+<p>I’d been trying to host a nextjs APP on Amplify via terraform and ran into some issues. It did not seem to be straightforward as I thought it’d be, so I wrote a tutorial on it.</p>
+<p>Start out with setting up a terraform repo, set your state etc.</p>
+<p>Amplify requires permissions of certain AWS resources like S3, Cloudfront, etc to deploy a SSR application. So, we setup an IAM role and attach required policies so that amplify can access those required policies. The following file contains all the policies required.</p>
+<p>[</p>
+<p>Amplify role policies</p>
+<p>amplify_role_policies.json</p>
+<p>16 KB</p>
+<p>.a{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5px;}download-circle</p>
+<p>](<a href="https://sreeraj.dev/content/files/2022/01/amplify_role_policies.json">https://sreeraj.dev/content/files/2022/01/amplify_role_policies.json</a> “Download”)</p>
+<p>Start out by creating a role that’d allow the amplify service to assume that particular role. We’d attach all policies that amplify requires.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="terraform"><code><span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_iam_role"</span><span style="color:#79B8FF"> "amplify_role"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  name</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "amplify_deploy_terraform_role"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">  # Terraform's "jsonencode" function converts a</span></span>
+<span class="line"><span style="color:#6A737D">  # Terraform expression result to valid JSON syntax.</span></span>
+<span class="line"><span style="color:#E1E4E8">  assume_role_policy</span><span style="color:#F97583"> =</span><span style="color:#F97583"> &#x3C;&#x3C;POLICY</span></span>
+<span class="line"><span style="color:#9ECBFF">{</span></span>
+<span class="line"><span style="color:#9ECBFF">  "Version": "2012-10-17",</span></span>
+<span class="line"><span style="color:#9ECBFF">  "Statement": [</span></span>
+<span class="line"><span style="color:#9ECBFF">    {</span></span>
+<span class="line"><span style="color:#9ECBFF">      "Effect": "Allow",</span></span>
+<span class="line"><span style="color:#9ECBFF">      "Principal": {</span></span>
+<span class="line"><span style="color:#9ECBFF">        "Service": "amplify.amazonaws.com"</span></span>
+<span class="line"><span style="color:#9ECBFF">      },</span></span>
+<span class="line"><span style="color:#9ECBFF">      "Action": "sts:AssumeRole"</span></span>
+<span class="line"><span style="color:#9ECBFF">    }</span></span>
+<span class="line"><span style="color:#9ECBFF">  ]</span></span>
+<span class="line"><span style="color:#9ECBFF">}</span></span>
+<span class="line"><span style="color:#F97583">POLICY</span></span>
+<span class="line"><span style="color:#E1E4E8">  </span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  tags</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    Environment </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> var.environment</span></span>
+<span class="line"><span style="color:#E1E4E8">    Project     </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> var.project_name</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="terraform"><code><span class="line"></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "aws_iam_role_policy"</span><span style="color:#79B8FF"> "amplify_role_policy"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  name</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "amplify_iam_role_policy"</span></span>
+<span class="line"><span style="color:#E1E4E8">  role</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> aws_iam_role</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">amplify_role</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">id</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  policy</span><span style="color:#F97583"> =</span><span style="color:#79B8FF"> file</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">path</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">cwd</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">/modules/frontend/amplify_role_policies.json"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>Download the file attached above or look up Amplify Administrator in the IAM dashboard to copy all the policies and write it to a file.</p>
+<p>Now add in the amplify_app config to create an Amplify App.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>resource "aws_amplify_app" "frontend" {</span></span>
+<span class="line"><span>  name = "${var.project_name}-${var.environment}"</span></span>
+<span class="line"><span>  repository = var.github_repository</span></span>
+<span class="line"><span>  access_token= var.github_token_for_frontend</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  build_spec = &#x3C;&#x3C;-EOT</span></span>
+<span class="line"><span>    version: 1</span></span>
+<span class="line"><span>    frontend:</span></span>
+<span class="line"><span>      phases:</span></span>
+<span class="line"><span>        preBuild:</span></span>
+<span class="line"><span>          commands:</span></span>
+<span class="line"><span>            - yarn install</span></span>
+<span class="line"><span>        build:</span></span>
+<span class="line"><span>          commands:</span></span>
+<span class="line"><span>            - yarn run build</span></span>
+<span class="line"><span>      artifacts:</span></span>
+<span class="line"><span>        baseDirectory: .next</span></span>
+<span class="line"><span>        files:</span></span>
+<span class="line"><span>          - '**/*'</span></span>
+<span class="line"><span>      cache:</span></span>
+<span class="line"><span>        paths:</span></span>
+<span class="line"><span>          - node_modules/**/*</span></span>
+<span class="line"><span>  EOT</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  enable_auto_branch_creation = true</span></span>
+<span class="line"><span>  enable_branch_auto_build = true</span></span>
+<span class="line"><span>  enable_branch_auto_deletion = true</span></span>
+<span class="line"><span>  platform = "WEB"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  auto_branch_creation_config {</span></span>
+<span class="line"><span>    enable_pull_request_preview = true</span></span>
+<span class="line"><span>    environment_variables = {</span></span>
+<span class="line"><span>      APP_ENVIRONMENT = "develop"</span></span>
+<span class="line"><span>    }</span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  iam_service_role_arn = aws_iam_role.amplify_role.arn</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  # Comment this on the first run, trigger a build of your branch, This will added automatically on the console after deployment. Add it here to ensure your subsequent terraform runs don't break your amplify deployment.</span></span>
+<span class="line"><span>  custom_rule {</span></span>
+<span class="line"><span>    source = "/&#x3C;*>"</span></span>
+<span class="line"><span>    status = "200"</span></span>
+<span class="line"><span>    target = "https://xxx.cloudfront.net/&#x3C;*>" </span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  custom_rule {</span></span>
+<span class="line"><span>    source = "/&#x3C;*>"</span></span>
+<span class="line"><span>    status = "404-200"</span></span>
+<span class="line"><span>    target = "/index.html"  </span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  tags = {</span></span>
+<span class="line"><span>    Environment = var.environment</span></span>
+<span class="line"><span>    Project     = var.project_name</span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>Comment out the first custom rule. After your first branch deployment, Amplify adds in a custom rule with the newly generated cloudfront endpoint. You’d get this value  in the Amplify dashboard in Rewrites and redirects. Replace the xxx in cloudfront with the new value you get when you run terraform apply. You could also run terraform plan, where terraform would detect the changes outside of its scope and notify you about the new value.</p>
+<p><img src="/images/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/image-7.png" alt=""></p>
+<p>We add in our branches to enable CI/CD whenever a change is pushed to the branch.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span># map git branches to amplify</span></span>
+<span class="line"><span>#- - - - - - - - - - - - - - -- - - -- - - - - -- - - - - - -</span></span>
+<span class="line"><span>resource "aws_amplify_branch" "develop" {</span></span>
+<span class="line"><span>  app_id      = aws_amplify_app.frontend.id</span></span>
+<span class="line"><span>  branch_name = "develop"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  enable_auto_build = true</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  framework = "Next.js - SSR"</span></span>
+<span class="line"><span>  stage     = "DEVELOPMENT"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  environment_variables = {</span></span>
+<span class="line"><span>    APP_ENVIRONMENT = "develop"</span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>Assuming you have configured your dns records on Route53, you can add in domain associations to your branches. For eg: you can add subdomains for each environment, and point those subdomains to a particular branch.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>resource "aws_amplify_domain_association" "develop" {</span></span>
+<span class="line"><span>  app_id      = aws_amplify_app.frontend.id</span></span>
+<span class="line"><span>  domain_name = "staging-xxx.xxx.co"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  # https://staging-xxx.xxx.co</span></span>
+<span class="line"><span>  sub_domain {</span></span>
+<span class="line"><span>    branch_name = aws_amplify_branch.develop.branch_name</span></span>
+<span class="line"><span>    prefix      = ""</span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  # https://www.staging-xxx.xxx.co</span></span>
+<span class="line"><span>  sub_domain {</span></span>
+<span class="line"><span>    branch_name = aws_amplify_branch.develop.branch_name</span></span>
+<span class="line"><span>    prefix      = "www"</span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>If you do not have your dns records on AWS, you can point your domain to the endpoint that amplify generates for each environment. You can get the amplify endpoint from the console.</p>
+<p>Modify the <strong>artifacts</strong> value in the baseDirectory in <strong>aws_amplify_app</strong> resource if your app outputs a production build to a different directory than <strong>.next/</strong> .</p>
+<p>Click on Run Build after provisioning. You’ll probably have to do this once for all the branches you add/commit. This will trigger a build and deploy.</p>
+<p><img src="/images/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/image-8.png" alt=""></p>
+<p>Amplify also offers logs for each step in the deployment process.</p>
+<p><img src="/images/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/image-9.png" alt=""></p>
+<p>Protip: If you configuring resources on terraform, and you hit a roadblock, try creating a working flow via the console, and see if you have missed configuring stuff. In my case, I hadn’t assigned a <strong>iam_service_role_arn</strong> to the <strong>aws_amplify_resource</strong>, but terraform/amplify did not raise any errors. Deployments on the amplify console also ran successfully, but we found that there were no cloudfront/s3 resources provisioned. Adding the role and attaching the amplify administrator policies fixed it.</p>  </div> <!-- Prev / Next --> <nav class="post-nav-border" style="max-width: 46rem; margin: clamp(3rem, 7vw, 5rem) auto 0; padding-top: 2rem; border-top: 2px solid; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;"> <div> <a href="/archive/2026-07/kedarkantha-trek/" class="post-nav-link group block"> <span class="folio" style="display: block; margin-bottom: 0.5rem; color: var(--color-accent);">← Previous</span> <span class="transition-colors" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 600; line-height: 1.15;">Kedarkantha Trek</span> </a> </div> <div style="text-align: right;"> <a href="/archive/2026-07/sidecar-containers/" class="post-nav-link group block"> <span class="folio" style="display: block; margin-bottom: 0.5rem; color: var(--color-accent);">Next →</span> <span class="transition-colors" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 600; line-height: 1.15;">Using sidecar containers in k8s</span> </a> </div> </nav> </article>  </main> <footer class="site-footer" style="margin-top: clamp(4rem, 10vw, 8rem);"> <div class="container" style="padding-block: clamp(3rem, 6vw, 4.5rem);"> <div class="grid-12" style="row-gap: 2.75rem;"> <!-- Imprint --> <div style="grid-column: span 5;" class="max-md:!col-span-12"> <div class="nav-brand" style="font-size: 2rem; line-height: 0.9;">
+Sreeraj<span class="dot">.</span>dev
+</div> <p style="font-family: var(--font-display); font-style: italic; font-size: var(--fs-md); line-height: 1.4; max-width: 24rem; margin-top: 1rem;">
+A field journal of distributed systems, databases, and high-altitude trails — reset in a new idiom every month.
+</p> </div> <!-- Sections --> <nav style="grid-column: span 3;" class="max-md:!col-span-6 flex flex-col"> <span class="folio" style="margin-bottom: 1rem;">Sections</span> <a href="/archive/2026-07/" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 500; padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">Index</a><a href="/archive/2026-07/devops/" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 500; padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">DevOps</a><a href="/archive/2026-07/treks/" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 500; padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">Treks</a><a href="/archive/2026-07/programming/" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 500; padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">Programming</a><a href="/archive/2026-07/postgres/" style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 500; padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">Postgres</a> </nav> <!-- Desk --> <nav style="grid-column: span 4;" class="max-md:!col-span-6 flex flex-col"> <span class="folio" style="margin-bottom: 1rem;">The Desk</span> <a href="/archive/2026-07/about/" style="font-size: var(--fs-sm); padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">About the author</a><a href="/archive/2026-07/contact/" style="font-size: var(--fs-sm); padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">Correspondence</a><a href="/archive/" style="font-size: var(--fs-sm); padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">The Archive</a><a href="/archive/2026-07/tags/" style="font-size: var(--fs-sm); padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">All topics</a><a href="/archive/2026-07/rss.xml" style="font-size: var(--fs-sm); padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">RSS feed</a> <a href="https://twitter.com/bot_sree" style="font-size: var(--fs-sm); padding: 0.28rem 0; width: fit-content; transition: color 0.2s;">Twitter &#8599;</a> </nav> </div> <div class="rule-double" style="margin-top: 3rem;"></div> <div class="flex items-center justify-between max-sm:flex-col max-sm:items-start" style="gap: 0.75rem; margin-top: 1.1rem;"> <span class="folio">&copy; 2026 Sreeraj Rajan</span> <span class="folio">Set in Fraunces &amp; Lora · Composed with Astro</span> </div> </div> </footer> <script type="module">const s=document.getElementById("scroll-progress");if(s){const e=()=>{const t=document.documentElement,o=t.scrollHeight-t.clientHeight;s.style.width=o>0?`${t.scrollTop/o*100}%`:"0%"};document.addEventListener("scroll",e,{passive:!0}),e()}const n=window.matchMedia("(prefers-reduced-motion: reduce)").matches,r=document.querySelectorAll(".reveal");if(n||!("IntersectionObserver"in window))r.forEach(e=>e.classList.add("in-view"));else{const e=new IntersectionObserver(t=>{t.forEach(o=>{o.isIntersecting&&(o.target.classList.add("in-view"),e.unobserve(o.target))})},{rootMargin:"0px 0px -8% 0px",threshold:.04});r.forEach(t=>e.observe(t))}</script> </body> </html>

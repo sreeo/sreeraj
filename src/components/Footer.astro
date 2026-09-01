@@ -1,61 +1,26 @@
 ---
-import DitherField from './DitherField.astro';
-
 const year = new Date().getFullYear();
-
-const navigate = [
-  { label: 'index/', href: '/' },
-  { label: 'devops/', href: '/devops/' },
-  { label: 'treks/', href: '/treks/' },
-  { label: 'programming/', href: '/programming/' },
-  { label: 'postgres/', href: '/postgres/' },
-  { label: 'tags/', href: '/tags/' },
-  { label: 'archive/', href: '/archive/' },
-];
-
-const elsewhere = [
-  { label: 'about/', href: '/about/' },
-  { label: 'contact/', href: '/contact/' },
-  { label: 'rss.xml', href: '/rss.xml' },
-  { label: 'twitter: @bot_sree', href: 'https://twitter.com/bot_sree' },
-];
 ---
 
-<footer class="footer">
-  <div class="wrap footer-grid">
-    <div>
-      <h2 class="footer-h">Navigate</h2>
-      <div class="footer-list">
-        {navigate.map((l) => <a href={l.href}>{l.label}</a>)}
-      </div>
-    </div>
-    <div>
-      <h2 class="footer-h">Elsewhere</h2>
-      <div class="footer-list">
-        {elsewhere.map((l) => <a href={l.href}>{l.label}</a>)}
-      </div>
-      <p class="colophon" style="margin-top: var(--s-4);">
-        Mail: contact [at] sreeraj [dot] dev
-      </p>
-    </div>
-    <div>
-      <h2 class="footer-h">Colophon</h2>
-      <p class="colophon">
-        Built with Astro. Set in JetBrains Mono and Inter. Black ink, white
-        paper, blue links, 3px borders, no border-radius. This site is
-        redesigned every month; previous editions live in
-        <a href="/archive/">the archive</a>. The texture below is generated
-        from today&rsquo;s date.
-      </p>
-    </div>
+<footer class="band site-footer">
+  <div class="cell footer-colophon c5">
+    <span class="who">sreeraj rajan</span>
+    <span>
+      backend engineer at medley learning. composed in horizontals &amp;
+      verticals with astro — set in space grotesk &amp; inter. &copy; {year}
+    </span>
   </div>
-
-  <DitherField />
-
-  <div class="footer-bottom">
-    <div class="wrap footer-bottom-in">
-      <span>&copy; 2021&ndash;{year} Sreeraj Rajan</span>
-      <span>HTML &amp; CSS, mostly &mdash; <a href="/rss.xml">subscribe via RSS</a></span>
-    </div>
+  <div class="cell footer-links c3">
+    <a href="/rss.xml">rss feed</a>
+    <a href="/tags/">all tags</a>
+    <a href="/archive/">past compositions</a>
+    <a href="/contact/">contact</a>
   </div>
+  <div class="cell cell--blue footer-edition c2">
+    <span>edition</span>
+    <span class="big">2026-09</span>
+    <span>de stijl</span>
+  </div>
+  <div class="plane plane--yellow c1" aria-hidden="true"></div>
+  <div class="plane plane--red c1" aria-hidden="true"></div>
 </footer>

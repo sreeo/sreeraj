@@ -1,0 +1,125 @@
+<!DOCTYPE html><html lang="en" data-theme="tech"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Setting up OpenTelemetry in Django gUnicorn ASGI — sreeraj.dev</title><meta name="description" content="Setup OpenTelemetry for Django running on gUnicorn ASGI."><meta name="generator" content="Astro v5.17.3"><link rel="canonical" href="https://sreeraj.dev/setting-up-signoz-opentelemetry-in-django-gunicorn-asgi/"><meta property="og:type" content="website"><meta property="og:title" content="Setting up OpenTelemetry in Django gUnicorn ASGI — sreeraj.dev"><meta property="og:description" content="Setup OpenTelemetry for Django running on gUnicorn ASGI."><meta property="og:url" content="https://sreeraj.dev/setting-up-signoz-opentelemetry-in-django-gunicorn-asgi/"><meta property="og:image" content="https://sreeraj.dev/images/setting-up-signoz-opentelemetry-in-django-gunicorn-asgi/PXL_20211106_065359710.jpeg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Setting up OpenTelemetry in Django gUnicorn ASGI — sreeraj.dev"><meta name="twitter:description" content="Setup OpenTelemetry for Django running on gUnicorn ASGI."><meta name="twitter:image" content="https://sreeraj.dev/images/setting-up-signoz-opentelemetry-in-django-gunicorn-asgi/PXL_20211106_065359710.jpeg"><script defer src="https://cloud.umami.is/script.js" data-website-id="057ff310-3cdd-46d1-9862-aabd77ec1613"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet"><link rel="alternate" type="application/rss+xml" title="sreeraj.dev" href="/archive/2026-08/rss.xml"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/archive/2026-08/_astro/_slug_.BQYolm1u.css"></head> <body class="min-h-screen flex flex-col"><a href="/" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#000;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-family:system-ui,sans-serif;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.92;">
+  <span>You're viewing the <strong>August 2026</strong> archived design</span>
+  <span style="background:#fff;color:#000;padding:2px 10px;border-radius:4px;font-weight:600;">View Current Site &rarr;</span>
+</a>
+<div style="height:32px;"></div> <a href="#main" class="skip-link">Skip to content</a> <header data-theme="tech"> <!-- Terminal status strip --> <div class="statusbar"> <div class="wrap statusbar-in"> <span>SREERAJ.DEV <span class="dim">// PERSONAL SITE</span></span> <span class="max-md:hidden dim">EDITION 2026-08 · BRUTALIST</span> <span><span id="sb-clock">--:--:-- UTC</span> <span class="dim" id="sb-scroll">SCR 000%</span></span> </div> </div> <!-- Masthead: plain, left-aligned, monospace --> <div class="wrap masthead"> <a href="/archive/2026-08/" class="masthead-title nav-brand">SREERAJ<span class="slash">.</span>DEV<span class="slash">/</span><span class="cursor-blink" aria-hidden="true"></span></a> <p class="masthead-sub">Backend engineering &amp; Himalayan treks — plain HTML, served statically</p> </div> <!-- Nav: a strip of bordered cells --> <nav class="mainnav" aria-label="Site"> <div class="wrap mainnav-in"> <a href="/archive/2026-08/">Index</a><a href="/archive/2026-08/devops/">DevOps</a><a href="/archive/2026-08/treks/">Treks</a><a href="/archive/2026-08/programming/">Programming</a><a href="/archive/2026-08/postgres/">Postgres</a><a href="/archive/2026-08/about/">About</a><a href="/archive/">Archive</a> <span class="spacer" aria-hidden="true"></span> <a href="/archive/2026-08/rss.xml" class="aux">RSS</a> </div> </nav> </header> <script type="module">const c=document.getElementById("sb-clock"),o=document.getElementById("sb-scroll");if(c){const t=()=>{c.textContent=new Date().toISOString().slice(11,19)+" UTC"};t(),setInterval(t,1e3)}if(o){const t=()=>{const e=document.documentElement,n=e.scrollHeight-e.clientHeight,s=n>0?Math.round(e.scrollTop/n*100):0;o.textContent="SCR "+String(s).padStart(3,"0")+"%"};t(),document.addEventListener("scroll",t,{passive:!0}),window.addEventListener("resize",t,{passive:!0})}</script> <main id="main" class="flex-1 w-full">  <article class="wrap section-tight"> <!-- Path --> <nav class="crumbs" aria-label="Breadcrumb"> <a href="/archive/2026-08/">~</a> <span aria-hidden="true">/</span>  <a href="/archive/2026-08/devops/">devops</a> <span aria-hidden="true">/</span>  <span>setting-up-signoz-opentelemetry-in-django-gunicorn-asgi</span> </nav> <!-- Title block --> <header> <h1 class="post-title">Setting up OpenTelemetry in Django gUnicorn ASGI</h1> <p class="post-lead">Setup OpenTelemetry for Django running on gUnicorn ASGI.</p> <!-- Spec sheet --> <dl class="spec" style="margin-top: var(--s-5); max-width: 680px;">  <dt>date</dt> <dd>2022-01-29</dd>  <dt>updated</dt> <dd>2022-01-29</dd>  <dt>author</dt> <dd>Sreeraj Rajan</dd>  <dt>read time</dt> <dd>3 min</dd>   <dt>tags</dt> <dd><span class="chips"> <a href="/archive/2026-08/tags/devops/" class="chip">[devops]</a><a href="/archive/2026-08/tags/django/" class="chip">[django]</a> </span></dd>  </dl> </header> <!-- Figure --> <figure class="fig" style="margin-top: var(--s-6); max-width: 820px;"> <img src="/images/setting-up-signoz-opentelemetry-in-django-gunicorn-asgi/PXL_20211106_065359710.jpeg" alt="Setting up OpenTelemetry in Django gUnicorn ASGI"> <figcaption>FIG. 01 — Setting up OpenTelemetry in Django gUnicorn ASGI</figcaption> </figure> <!-- Document body --> <div class="doc" style="margin-top: var(--s-7);">  <p>I was working on integrating Signoz APM in one of the k8s clusters that we run for one of our products. We also added a <a href="https://proceduretech.github.io/signoz-helm/?ref=sreeraj.dev">helm chart repository</a> for <a href="https://signoz.io/?ref=sreeraj.dev">Signoz</a> to facilitate terraform deployments. To send metrics to Signoz, we need to add OpenTelemetry to instrument and send it to a otel-consumer which comes out of the box with Signoz.</p>
+<ol>
+<li>Start by adding these dependencies to your Django App.</li>
+</ol>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>opentelemetry-api==1.5.0</span></span>
+<span class="line"><span>opentelemetry-exporter-otlp==1.5.0</span></span>
+<span class="line"><span>opentelemetry-instrumentation==0.24b0</span></span>
+<span class="line"><span>opentelemetry-instrumentation-asgi==0.24b0</span></span>
+<span class="line"><span>opentelemetry-sdk==1.5.0</span></span></code></pre>
+<ol start="2">
+<li>We add a new file named <strong>gunicorn.config.py</strong>.<br>
+<a href="https://opentelemetry-python.readthedocs.io/en/latest/examples/fork-process-model/README.html?ref=sreeraj.dev#working-with-fork-process-models">OpenTelemetry has an issue of getting into a deadlock with fork process models</a>.<br>
+To bypass this, we use the post fork hook to initialise a <strong>BatchSpanProcessor</strong> which would spawn a thread in the background to send spans to the telemetry backend.</li>
+</ol>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D"># Copyright The OpenTelemetry Authors</span></span>
+<span class="line"><span style="color:#6A737D">#</span></span>
+<span class="line"><span style="color:#6A737D"># Licensed under the Apache License, Version 2.0 (the "License");</span></span>
+<span class="line"><span style="color:#6A737D"># you may not use this file except in compliance with the License.</span></span>
+<span class="line"><span style="color:#6A737D"># You may obtain a copy of the License at</span></span>
+<span class="line"><span style="color:#6A737D">#</span></span>
+<span class="line"><span style="color:#6A737D">#     http://www.apache.org/licenses/LICENSE-2.0</span></span>
+<span class="line"><span style="color:#6A737D">#</span></span>
+<span class="line"><span style="color:#6A737D"># Unless required by applicable law or agreed to in writing, software</span></span>
+<span class="line"><span style="color:#6A737D"># distributed under the License is distributed on an "AS IS" BASIS,</span></span>
+<span class="line"><span style="color:#6A737D"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></span>
+<span class="line"><span style="color:#6A737D"># See the License for the specific language governing permissions and</span></span>
+<span class="line"><span style="color:#6A737D"># limitations under the License.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> opentelemetry </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> trace</span></span>
+<span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> opentelemetry.exporter.otlp.proto.grpc.trace_exporter </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#E1E4E8">    OTLPSpanExporter,</span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> opentelemetry.sdk.resources </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> Resource</span></span>
+<span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> opentelemetry.sdk.trace </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> TracerProvider</span></span>
+<span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> opentelemetry.sdk.trace.export </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> BatchSpanProcessor</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">bind </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "0.0.0.0:5000"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Sample Worker processes</span></span>
+<span class="line"><span style="color:#E1E4E8">workers </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 4</span></span>
+<span class="line"><span style="color:#E1E4E8">worker_class </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "uvicorn.workers.UvicornWorker"</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> post_fork</span><span style="color:#E1E4E8">(server, worker):</span></span>
+<span class="line"><span style="color:#E1E4E8">    server.log.info(</span><span style="color:#9ECBFF">"Worker spawned (pid: </span><span style="color:#79B8FF">%s</span><span style="color:#9ECBFF">)"</span><span style="color:#E1E4E8">, worker.pid)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    resource </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> Resource.create(</span><span style="color:#FFAB70">attributes</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{</span><span style="color:#9ECBFF">"service.name"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"emr-backend-service"</span><span style="color:#E1E4E8">})</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    trace.set_tracer_provider(TracerProvider(</span><span style="color:#FFAB70">resource</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">resource))</span></span>
+<span class="line"><span style="color:#6A737D">    # This uses insecure connection for the purpose of example. Please see the</span></span>
+<span class="line"><span style="color:#6A737D">    # OTLP Exporter documentation for other options.</span></span>
+<span class="line"><span style="color:#E1E4E8">    span_processor </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> BatchSpanProcessor(</span></span>
+<span class="line"><span style="color:#E1E4E8">        OTLPSpanExporter(</span><span style="color:#FFAB70">endpoint</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"http://otel-collector:4317"</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">insecure</span><span style="color:#F97583">=</span><span style="color:#79B8FF">True</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#E1E4E8">    trace.get_tracer_provider().add_span_processor(span_processor)</span></span></code></pre>
+<p><strong>gunicorn.config.py</strong></p>
+<ol start="3">
+<li>We initialise the OpenTelemetryMiddleware in asgi config to enable automatic telemetry logging.</li>
+</ol>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#9ECBFF">"""</span></span>
+<span class="line"><span style="color:#9ECBFF">ASGI config for EMR API project.</span></span>
+<span class="line"><span style="color:#9ECBFF">It exposes the ASGI callable as a module-level variable named ``application``.</span></span>
+<span class="line"><span style="color:#9ECBFF">For more information on this file, see</span></span>
+<span class="line"><span style="color:#9ECBFF">https://docs.djangoproject.com/en/dev/howto/deployment/asgi/</span></span>
+<span class="line"><span style="color:#9ECBFF">"""</span></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> os</span></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> sys</span></span>
+<span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> pathlib </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> Path</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> django.core.asgi </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> get_asgi_application</span></span>
+<span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> opentelemetry.instrumentation.asgi </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> OpenTelemetryMiddleware</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># This allows easy placement of apps within the interior</span></span>
+<span class="line"><span style="color:#6A737D"># emr_api directory.</span></span>
+<span class="line"><span style="color:#79B8FF">ROOT_DIR</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> Path(</span><span style="color:#79B8FF">__file__</span><span style="color:#E1E4E8">).resolve(</span><span style="color:#FFAB70">strict</span><span style="color:#F97583">=</span><span style="color:#79B8FF">True</span><span style="color:#E1E4E8">).parent.parent</span></span>
+<span class="line"><span style="color:#E1E4E8">sys.path.append(</span><span style="color:#79B8FF">str</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">ROOT_DIR</span><span style="color:#F97583"> /</span><span style="color:#9ECBFF"> "emr_api"</span><span style="color:#E1E4E8">))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># If DJANGO_SETTINGS_MODULE is unset, default to the local settings</span></span>
+<span class="line"><span style="color:#E1E4E8">os.environ.setdefault(</span><span style="color:#9ECBFF">"DJANGO_SETTINGS_MODULE"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"config.settings.local"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># This application object is used by any ASGI server configured to use this file.</span></span>
+<span class="line"><span style="color:#E1E4E8">django_application </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> get_asgi_application()</span></span>
+<span class="line"><span style="color:#E1E4E8">django_application </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> OpenTelemetryMiddleware(django_application)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Apply ASGI middleware here.</span></span>
+<span class="line"><span style="color:#6A737D"># from helloworld.asgi import HelloWorldApplication</span></span>
+<span class="line"><span style="color:#6A737D"># application = HelloWorldApplication(application)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Import websocket application here, so apps from django_application are loaded first</span></span>
+<span class="line"><span style="color:#F97583">from</span><span style="color:#E1E4E8"> config.websocket </span><span style="color:#F97583">import</span><span style="color:#E1E4E8"> websocket_application  </span><span style="color:#6A737D"># noqa isort:skip</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">async</span><span style="color:#F97583"> def</span><span style="color:#B392F0"> application</span><span style="color:#E1E4E8">(scope, receive, send):</span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> scope[</span><span style="color:#9ECBFF">"type"</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">==</span><span style="color:#9ECBFF"> "http"</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">        await</span><span style="color:#E1E4E8"> django_application(scope, receive, send)</span></span>
+<span class="line"><span style="color:#F97583">    elif</span><span style="color:#E1E4E8"> scope[</span><span style="color:#9ECBFF">"type"</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">==</span><span style="color:#9ECBFF"> "websocket"</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">        await</span><span style="color:#E1E4E8"> websocket_application(scope, receive, send)</span></span>
+<span class="line"><span style="color:#F97583">    else</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">        raise</span><span style="color:#79B8FF"> NotImplementedError</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"Unknown scope type </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">scope[</span><span style="color:#9ECBFF">'type'</span><span style="color:#E1E4E8">]</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span></code></pre>
+<p>asgi.py</p>
+<ol start="4">
+<li>Finally, we modify the start command. Replace the <strong>OTEL_EXPORTER_OTLP_ENDPOINT</strong> value to the one depending on your infra/services are setup.</li>
+</ol>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>/usr/local/bin/gunicorn config.asgi --bind 0.0.0.0:5000 --chdir=/app -w 4 -k uvicorn.workers.UvicornWorker</span></span></code></pre>
+<p>Old</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>DJANGO_SETTINGS_MODULE=config.settings.production OTEL_RESOURCE_ATTRIBUTES=service.name=emr-backend-service OTEL_EXPORTER_OTLP_ENDPOINT="http://otel-collector:4317" opentelemetry-instrument /usr/local/bin/gunicorn config.asgi  -c config/gunicorn.config.py</span></span></code></pre>
+<p>New</p>
+<p>This should start sending spans to your collector.</p>
+<p><strong>References</strong>:<br>
+<a href="https://github.com/open-telemetry/opentelemetry-python/issues/2038?ref=sreeraj.dev">Django gunicorn auto instrumentation · Issue #2038 · open-telemetry/opentelemetry-python (github.com)</a><br>
+<a href="https://opentelemetry-python.readthedocs.io/en/latest/examples/fork-process-model/README.html?highlight=gunicorn&#x26;ref=sreeraj.dev#working-with-fork-process-models">Working With Fork Process Models — OpenTelemetry Python documentation (opentelemetry-python.readthedocs.io)</a></p>  </div> <!-- Prev / next --> <nav class="pager" style="margin-top: var(--s-8); max-width: 820px;" aria-label="Adjacent posts"> <a href="/archive/2026-08/sidecar-containers/" class="pager-cell"> <span class="pager-label">&larr; Older</span> <span class="pager-title">Using sidecar containers in k8s</span> </a> <a href="/archive/2026-08/routing-stuff-using-traefik-nginx/" class="pager-cell" style="text-align: right;"> <span class="pager-label">Newer &rarr;</span> <span class="pager-title">Routing stuff using traefik/nginx</span> </a> </nav> </article>  </main> <footer class="footer"> <div class="wrap footer-grid"> <div> <h2 class="footer-h">Navigate</h2> <div class="footer-list"> <a href="/archive/2026-08/">index/</a><a href="/archive/2026-08/devops/">devops/</a><a href="/archive/2026-08/treks/">treks/</a><a href="/archive/2026-08/programming/">programming/</a><a href="/archive/2026-08/postgres/">postgres/</a><a href="/archive/2026-08/tags/">tags/</a><a href="/archive/">archive/</a> </div> </div> <div> <h2 class="footer-h">Elsewhere</h2> <div class="footer-list"> <a href="/archive/2026-08/about/">about/</a><a href="/archive/2026-08/contact/">contact/</a><a href="/archive/2026-08/rss.xml">rss.xml</a><a href="https://twitter.com/bot_sree">twitter: @bot_sree</a> </div> <p class="colophon" style="margin-top: var(--s-4);">
+Mail: contact [at] sreeraj [dot] dev
+</p> </div> <div> <h2 class="footer-h">Colophon</h2> <p class="colophon">
+Built with Astro. Set in JetBrains Mono and Inter. Black ink, white
+        paper, blue links, 3px borders, no border-radius. This site is
+        redesigned every month; previous editions live in
+<a href="/archive/">the archive</a>. The texture below is generated
+        from today&rsquo;s date.
+</p> </div> </div> <div class="dither" aria-hidden="true"> <pre class="dither-pre wrap"></pre> </div> <script type="module">const r=document.querySelector(".dither-pre");if(r){const M=[" ","░","▒","▓","█"],c=new Date,w=c.getUTCFullYear()*416+(c.getUTCMonth()+1)*32+c.getUTCDate(),s=(e,o)=>{let t=Math.imul(e,374761393)^Math.imul(o,668265263)^Math.imul(w,974634321);return t=Math.imul(t^t>>>13,1274126177),((t^t>>>16)>>>0)/4294967295},d=e=>e*e*(3-2*e),l=(e,o,t)=>e+(o-e)*t,h=(e,o)=>{const t=Math.floor(e),n=Math.floor(o),i=d(e-t),v=d(o-n);return l(l(s(t,n),s(t+1,n),i),l(s(t,n+1),s(t+1,n+1),i),v)};let u=80;const m=()=>{const e=document.createElement("span");e.textContent="█".repeat(50),e.style.cssText="position:absolute;visibility:hidden;white-space:pre;",r.appendChild(e);const o=e.getBoundingClientRect().width/50||7.2;e.remove(),u=Math.max(20,Math.floor((r.clientWidth-2)/o))},a=e=>{let o="";for(let t=0;t<7;t++){for(let n=0;n<u;n++){const i=.65*h(n*.055+e*.18,t*.24)+.35*h(n*.16-e*.11,t*.5+e*.05);o+=M[Math.min(4,Math.floor(i*5))]}o+=`
+`}r.textContent=o};let p=0;const C=window.matchMedia("(prefers-reduced-motion: reduce)").matches,f=()=>{m(),a(0),C||setInterval(()=>a(++p),280)};"requestIdleCallback"in window?requestIdleCallback(f):setTimeout(f,1),window.addEventListener("resize",()=>{m(),a(p)},{passive:!0})}</script> <div class="footer-bottom"> <div class="wrap footer-bottom-in"> <span>&copy; 2021&ndash;2026 Sreeraj Rajan</span> <span>HTML &amp; CSS, mostly &mdash; <a href="/archive/2026-08/rss.xml">subscribe via RSS</a></span> </div> </div> </footer> </body></html>

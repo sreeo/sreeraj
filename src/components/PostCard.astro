@@ -8,29 +8,48 @@ interface Props {
   pubDate: Date;
   tags?: string[];
   readingTime?: number;
-  featured?: boolean;
-  num: string;
+  num?: string;
+  span?: string;
+  lead?: boolean;
 }
 
 const {
-  title, slug, description = '', pubDate,
-  tags = [], readingTime = 1, featured = false, num,
+  title,
+  slug,
+  description = '',
+  pubDate,
+  tags = [],
+  readingTime = 1,
+  num,
+  span = 'c4',
+  lead = false,
 } = Astro.props;
 
-const shownTags = tags.slice(0, 2);
-const moreTags = tags.length - shownTags.length;
+const PAINTS: Array<{ cat: string; paint: string; match: string[] }> = [
+  { cat: 'devops', paint: 'red', match: ['devops'] },
+  { cat: 'postgres', paint: 'blue', match: ['postgres'] },
+  { cat: 'programming', paint: 'yellow', match: ['programming'] },
+  { cat: 'treks', paint: 'ink', match: ['treks', 'trek'] },
+];
+
+const found = PAINTS.find((p) => p.match.some((m) => tags.includes(m)));
+const cat = found?.cat ?? tags[0] ?? 'notes';
+const paint = found?.paint ?? 'ink';
 ---
 
-<a href={`/${slug}/`} class="idx-row">
-  <span class="idx-num" aria-hidden="true">{num}</span>
-  <span class="idx-date"><FormattedDate date={pubDate} /></span>
-  <span>
-    <span class="idx-title">
-      {featured && <span class="idx-star" aria-label="featured">★ </span>}{title}
+<a href={`/${slug}/`} class:list={['post-card', span, lead && 'post-card--lead']} data-paint={paint}>
+  <div class="post-card-head">
+    <span class="post-card-cat">
+      <span class="post-card-mark" aria-hidden="true"></span>
+      {cat}
     </span>
-    {description && <span class="idx-desc">{description}</span>}
-    <span class="idx-date-inline"><FormattedDate date={pubDate} /></span>
-  </span>
-  <span class="idx-tags">{shownTags.map((t) => `[${t}]`).join(' ')}{moreTags > 0 ? ` +${moreTags}` : ''}</span>
-  <span class="idx-min">{readingTime}′</span>
+    {num && <span class="post-card-no">no. {num}</span>}
+  </div>
+  <h3 class="post-card-title">{title}</h3>
+  {description && <p class="post-card-description">{description}</p>}
+  <div class="post-card-meta">
+    <FormattedDate date={pubDate} />
+    <span aria-hidden="true">/</span>
+    <span>{readingTime} min</span>
+  </div>
 </a>

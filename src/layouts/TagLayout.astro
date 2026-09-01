@@ -1,75 +1,66 @@
 ---
+import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
-
-interface Post {
-  data: {
-    title: string;
-    slug: string;
-    description: string;
-    pubDate: Date;
-    tags: string[];
-    readingTime: number;
-    featured: boolean;
-  };
-}
+import { spanFor } from '../utils/spans';
 
 interface Props {
   title: string;
-  path: string;
-  posts: Post[];
-  note?: string;
+  description?: string;
+  paint?: 'red' | 'blue' | 'yellow' | 'ink';
   theme?: 'tech' | 'trek';
+  posts: CollectionEntry<'blog'>[];
 }
 
-const { title, path, posts, note, theme = 'tech' } = Astro.props;
-const total = posts.length;
-const pad = (n: number) => String(n).padStart(3, '0');
+const { title, description, paint = 'red', theme = 'tech', posts } = Astro.props;
+
+const paintCell = {
+  red: 'cell--red',
+  blue: 'cell--blue',
+  yellow: 'cell--yellow',
+  ink: 'cell--ink',
+}[paint];
 ---
 
-<BaseLayout title={`${title} — sreeraj.dev`} description={note} theme={theme}>
-  <section class="wrap section-tight">
-    <nav class="crumbs" aria-label="Breadcrumb" style="margin-bottom: var(--s-5);">
-      <a href="/">~</a>
-      <span aria-hidden="true">/</span>
-      <span>{path}</span>
-    </nav>
-
-    <div class="slab">
-      <h1>INDEX OF /{path.toUpperCase()}</h1>
-      <span class="slab-note">{total} {total === 1 ? 'FILE' : 'FILES'} · NEWEST FIRST</span>
+<BaseLayout title={`${title} — sreeraj.dev`} description={description} theme={theme}>
+  <!-- title register -->
+  <div class="band">
+    <div class:list={['cell', 'label-cell', paintCell, 'c3']}>
+      <span>section /</span>
     </div>
+    <div class="cell c7">
+      <h1 class="page-title">{title}</h1>
+      <p class="section-sub">
+        {posts.length} {posts.length === 1 ? 'composition' : 'compositions'}, newest first
+        {description && ` — ${description}`}
+      </p>
+    </div>
+    <div class="plane plane--yellow c2" aria-hidden="true"></div>
+  </div>
 
-    {note && (
-      <p style="margin-top: var(--s-4); max-width: 62ch; font-size: var(--t-md); line-height: 1.65; color: var(--muted);">{note}</p>
-    )}
-
-    {total > 0 ? (
-      <div class="idx" style="margin-top: var(--s-5);">
-        <div class="idx-cols" aria-hidden="true">
-          <span>№</span>
-          <span class="only-wide">Date</span>
-          <span>Title</span>
-          <span class="only-wide">Tags</span>
-          <span style="text-align: right;">Min</span>
-        </div>
-        {posts.map((post, i) => (
-          <PostCard
-            title={post.data.title}
-            slug={post.data.slug}
-            description={post.data.description}
-            pubDate={post.data.pubDate}
-            tags={post.data.tags}
-            readingTime={post.data.readingTime}
-            featured={post.data.featured}
-            num={pad(total - i)}
-          />
-        ))}
+  <!-- post composition -->
+  {posts.length > 0 ? (
+    <div class="band">
+      {posts.map((post, i) => (
+        <PostCard
+          title={post.data.title}
+          slug={post.data.slug}
+          description={post.data.description}
+          pubDate={post.data.pubDate}
+          tags={post.data.tags}
+          readingTime={post.data.readingTime}
+          num={String(posts.length - i).padStart(3, '0')}
+          span={spanFor(i)}
+          lead={i === 0}
+        />
+      ))}
+    </div>
+  ) : (
+    <div class="band">
+      <div class="cell c8">
+        <p style="color: var(--muted); margin: 0;">nothing composed here yet.</p>
       </div>
-    ) : (
-      <div class="box" style="margin-top: var(--s-5); padding: var(--s-5); font-family: var(--font-mono); font-size: var(--t-sm);">
-        0 FILES. NOTHING HERE YET.
-      </div>
-    )}
-  </section>
+      <div class="plane plane--red c4" aria-hidden="true"></div>
+    </div>
+  )}
 </BaseLayout>

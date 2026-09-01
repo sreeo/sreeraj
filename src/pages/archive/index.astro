@@ -2,46 +2,49 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import registryData from '../../../public/archive/registry.json';
 
-const archives = (registryData.archives || []).slice().sort((a, b) => (a.month < b.month ? 1 : -1));
+const archives = registryData.archives || [];
 
-const iso = (s: string) => (s ? s.slice(0, 10) : '—');
+const spans = ['c7', 'c5', 'c5', 'c7'];
+const fmt = (iso: string) => iso.slice(0, 10);
 ---
 
-<BaseLayout title="Archive — sreeraj.dev" description="Every monthly redesign of sreeraj.dev, preserved as deployed.">
-  <section class="wrap section-tight">
-    <nav class="crumbs" aria-label="Breadcrumb" style="margin-bottom: var(--s-5);">
-      <a href="/">~</a>
-      <span aria-hidden="true">/</span>
-      <span>archive</span>
-    </nav>
-
-    <div class="slab">
-      <h1>INDEX OF /ARCHIVE</h1>
-      <span class="slab-note">{archives.length} EDITIONS · ONE PER MONTH</span>
+<BaseLayout
+  title="archive — sreeraj.dev"
+  description="Every past monthly redesign of sreeraj.dev, preserved."
+  theme="tech"
+>
+  <div class="band">
+    <div class="cell label-cell cell--red c3">
+      <span>museum /</span>
     </div>
-
-    <p style="margin-top: var(--s-4); max-width: 62ch; font-size: var(--t-md); line-height: 1.65; color: var(--muted);">
-      This site is torn down and redesigned every month in a different style.
-      Old editions are not deleted — they are archived exactly as deployed,
-      dead pixels and all. You are currently reading the Brutalist edition.
-    </p>
-
-    <div style="margin-top: var(--s-5); border-bottom: var(--rule-3);">
-      {archives.map((a) => (
-        <a href={`/archive/${a.month}/`} class="arch-row">
-          <span class="arch-month">{a.month}</span>
-          <span>
-            <span class="arch-trend">{a.trend}</span>
-            {a.description && <span class="arch-desc">{a.description}</span>}
-          </span>
-          <span class="arch-color">
-            <span class="swatch" style={`background: ${a.primaryColor};`}></span>
-            <span>{a.primaryColor}</span>
-            <span aria-hidden="true">·</span>
-            <span>{iso(a.deployedAt)}</span>
-          </span>
-        </a>
-      ))}
+    <div class="cell c7">
+      <h1 class="page-title">past compositions</h1>
+      <p class="section-sub">
+        this site is repainted monthly — {archives.length}
+        {archives.length === 1 ? 'edition is' : 'editions are'} preserved exactly as deployed
+      </p>
     </div>
-  </section>
+    <div class="plane plane--yellow c2" aria-hidden="true"></div>
+  </div>
+
+  <div class="band">
+    {archives.map((edition, i) => (
+      <a href={`/archive/${edition.month}/`} class:list={['edition-cell', spans[i % spans.length]]}>
+        <span class="edition-month">
+          <span class="edition-swatch" style={`background: ${edition.primaryColor};`} aria-hidden="true"></span>
+          {edition.month}
+        </span>
+        <span class="edition-trend">{edition.trend}</span>
+        <span class="edition-desc">{edition.description}</span>
+        <span class="edition-date">deployed {fmt(edition.deployedAt)} &middot; view &rarr;</span>
+      </a>
+    ))}
+    <div class="plane plane--blue c5" aria-hidden="true"></div>
+    <div class="cell c7" style="display: flex; align-items: center;">
+      <p style="margin: 0; color: var(--muted); font-size: var(--t-sm);">
+        the current de stijl edition will join the museum when october's
+        composition replaces it.
+      </p>
+    </div>
+  </div>
 </BaseLayout>

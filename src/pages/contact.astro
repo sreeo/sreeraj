@@ -8,25 +8,31 @@ if (!contact) throw new Error('contact page missing from pages collection');
 const { Content } = await render(contact);
 ---
 
-<BaseLayout title="Contact — sreeraj.dev" description="How to reach Sreeraj Rajan.">
-  <section class="wrap section-tight">
-    <nav class="crumbs" aria-label="Breadcrumb" style="margin-bottom: var(--s-5);">
-      <a href="/">~</a>
-      <span aria-hidden="true">/</span>
-      <span>contact</span>
-    </nav>
-
-    <div class="slab">
-      <h1>INDEX OF /CONTACT</h1>
-      <span class="slab-note">2 CHANNELS · NO FORMS</span>
+<BaseLayout title="contact — sreeraj.dev" description="How to reach Sreeraj Rajan." theme="tech">
+  <div class="band" style="grid-auto-rows: minmax(72px, auto);">
+    <div class="cell label-cell cell--blue c2">
+      <span>letters /</span>
     </div>
-
-    <div class="doc" style="margin-top: var(--s-6);">
-      <Content />
-      <p>
-        No contact form. Forms need spam protection, spam protection needs
-        JavaScript, and neither of us needs that.
-      </p>
+    <div class="cell c7" style="display: flex; flex-direction: column; justify-content: center;">
+      <h1 class="page-title">get in touch</h1>
+      <p class="section-sub">letters, corrections &amp; trek plans all welcome</p>
     </div>
-  </section>
+    {contact.data.featureImage ? (
+      <div class="page-portrait c3" style="grid-row: span 2;">
+        <img src={contact.data.featureImage} alt="A view from one of Sreeraj's treks" />
+      </div>
+    ) : (
+      <div class="plane plane--yellow c3" aria-hidden="true"></div>
+    )}
+    <div class="plane plane--yellow c2" aria-hidden="true"></div>
+    <div class="plane plane--white c7" aria-hidden="true"></div>
+  </div>
+
+  <div class="band prose-band">
+    <div class="cell prose-cell c12">
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+  </div>
 </BaseLayout>

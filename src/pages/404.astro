@@ -2,19 +2,30 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="404 — sreeraj.dev" description="File not found.">
-  <section class="wrap section-tight">
-    <div class="err-block">
-      <p class="err-code" aria-hidden="true">404</p>
-      <h1 class="err-msg">ERR — FILE NOT FOUND</h1>
-      <p class="mono" style="margin-top: var(--s-4); font-size: var(--t-sm); max-width: 60ch; line-height: 1.7;">
-        The requested path does not exist on this server. It may have been
-        renamed, removed, or never written. That is all the information
-        there is.
-      </p>
-      <p class="mono" style="margin-top: var(--s-5); font-size: var(--t-sm);">
-        <a href="/">RETURN TO INDEX OF /</a>
+<BaseLayout title="404 — sreeraj.dev" description="This plane of the composition is empty." theme="tech">
+  <div class="band" style="grid-auto-rows: minmax(96px, auto);">
+    <div class="plane plane--red c3" style="grid-row: span 2;" aria-hidden="true"></div>
+    <div class="cell c6" style="display: flex; align-items: center;">
+      <h1 class="lost-code">404</h1>
+    </div>
+    <div class="plane plane--yellow c3" aria-hidden="true"></div>
+    <div class="cell cell--ink c3" style="display: flex; align-items: center;">
+      <p style="margin: 0; font-family: var(--font-grot); font-size: var(--t-sm); letter-spacing: 0.08em;">
+        an empty plane
       </p>
     </div>
-  </section>
+    <div class="cell c6">
+      <p style="margin: 0; color: var(--muted);">
+        this rectangle holds nothing — the page you wanted was painted over,
+        moved, or never composed.
+      </p>
+      <p style="margin: var(--s-4) 0 0;">
+        <a href="/" class="feat-go">return to the composition <span aria-hidden="true">&rarr;</span></a>
+      </p>
+    </div>
+    <div class="plane plane--blue c3" aria-hidden="true"></div>
+    <div class="plane plane--white c4" aria-hidden="true"></div>
+    <div class="plane plane--yellow c2" aria-hidden="true"></div>
+    <div class="plane plane--white c6" aria-hidden="true"></div>
+  </div>
 </BaseLayout>

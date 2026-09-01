@@ -4,22 +4,25 @@ import PostLayout from '../layouts/PostLayout.astro';
 import { getThemeForTags } from '../utils/theme';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
-  return posts.map((post) => ({
+  const posts = (await getCollection('blog'))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  return posts.map((post, i) => ({
     params: { slug: post.data.slug },
-    props: { post },
+    props: {
+      post,
+      prevPost:
+        i < posts.length - 1
+          ? { slug: posts[i + 1].data.slug, title: posts[i + 1].data.title }
+          : null,
+      nextPost:
+        i > 0 ? { slug: posts[i - 1].data.slug, title: posts[i - 1].data.title } : null,
+    },
   }));
 }
 
-const { post } = Astro.props;
+const { post, prevPost, nextPost } = Astro.props;
 const { Content } = await render(post);
-
-const all = (await getCollection('blog'))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const i = all.findIndex((p) => p.data.slug === post.data.slug);
-// all[] is newest-first: prev = older entry, next = newer entry
-const prevPost = i < all.length - 1 ? { slug: all[i + 1].data.slug, title: all[i + 1].data.title } : null;
-const nextPost = i > 0 ? { slug: all[i - 1].data.slug, title: all[i - 1].data.title } : null;
+const theme = getThemeForTags(post.data.tags);
 ---
 
 <PostLayout
@@ -32,7 +35,7 @@ const nextPost = i > 0 ? { slug: all[i - 1].data.slug, title: all[i - 1].data.ti
   tags={post.data.tags}
   author={post.data.author}
   readingTime={post.data.readingTime}
-  theme={getThemeForTags(post.data.tags)}
+  theme={theme}
   prevPost={prevPost}
   nextPost={nextPost}
   trekStats={post.data.trekStats}
