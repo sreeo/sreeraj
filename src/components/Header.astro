@@ -1,18 +1,12 @@
 ---
-interface Props {
-  theme?: 'tech' | 'trek';
-}
-
-const { theme = 'tech' } = Astro.props;
-
 const navItems = [
-  { label: 'Index', href: '/' },
-  { label: 'DevOps', href: '/devops/' },
-  { label: 'Treks', href: '/treks/' },
-  { label: 'Programming', href: '/programming/' },
-  { label: 'Postgres', href: '/postgres/' },
-  { label: 'About', href: '/about/' },
-  { label: 'Archive', href: '/archive/' },
+  { label: 'home', href: '/' },
+  { label: 'about', href: '/about/' },
+  { label: 'devops', href: '/devops/' },
+  { label: 'treks', href: '/treks/' },
+  { label: 'programming', href: '/programming/' },
+  { label: 'postgres', href: '/postgres/' },
+  { label: 'archive', href: '/archive/' },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -20,55 +14,17 @@ const isActive = (href: string) =>
   href === '/' ? currentPath === '/' : currentPath.startsWith(href);
 ---
 
-<header data-theme={theme}>
-  <!-- Terminal status strip -->
-  <div class="statusbar">
-    <div class="wrap statusbar-in">
-      <span>SREERAJ.DEV <span class="dim">// PERSONAL SITE</span></span>
-      <span class="max-md:hidden dim">EDITION 2026-08 · BRUTALIST</span>
-      <span><span id="sb-clock">--:--:-- UTC</span> <span class="dim" id="sb-scroll">SCR 000%</span></span>
-    </div>
-  </div>
-
-  <!-- Masthead: plain, left-aligned, monospace -->
-  <div class="wrap masthead">
-    <a href="/" class="masthead-title nav-brand">SREERAJ<span class="slash">.</span>DEV<span class="slash">/</span><span class="cursor-blink" aria-hidden="true"></span></a>
-    <p class="masthead-sub">Backend engineering &amp; Himalayan treks — plain HTML, served statically</p>
-  </div>
-
-  <!-- Nav: a strip of bordered cells -->
-  <nav class="mainnav" aria-label="Site">
-    <div class="wrap mainnav-in">
-      {navItems.map((item) => (
-        <a href={item.href} class:list={[isActive(item.href) && 'active']}>{item.label}</a>
-      ))}
-      <span class="spacer" aria-hidden="true"></span>
-      <a href="/rss.xml" class="aux">RSS</a>
-    </div>
+<header class="nav-bar">
+  <a href="/" class="nav-brand">sreeraj<span class="dot">.</span>dev</a>
+  <nav style="display: contents;" aria-label="Site">
+    {navItems.map((item) => (
+      <a
+        href={item.href}
+        class="nav-link"
+        aria-current={isActive(item.href) ? 'page' : undefined}
+      >{item.label}</a>
+    ))}
   </nav>
+  <span class="nav-void" aria-hidden="true"></span>
+  <a href="/rss.xml" class="nav-rss">rss</a>
 </header>
-
-<script>
-  // Live UTC clock + scroll percentage in the status bar. Instant text
-  // swaps only — no animation, nothing to ease.
-  const clock = document.getElementById('sb-clock');
-  const scr = document.getElementById('sb-scroll');
-  if (clock) {
-    const tick = () => {
-      clock.textContent = new Date().toISOString().slice(11, 19) + ' UTC';
-    };
-    tick();
-    setInterval(tick, 1000);
-  }
-  if (scr) {
-    const onScroll = () => {
-      const h = document.documentElement;
-      const max = h.scrollHeight - h.clientHeight;
-      const pct = max > 0 ? Math.round((h.scrollTop / max) * 100) : 0;
-      scr.textContent = 'SCR ' + String(pct).padStart(3, '0') + '%';
-    };
-    onScroll();
-    document.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-  }
-</script>

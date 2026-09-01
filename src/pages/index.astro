@@ -2,148 +2,100 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
+import Composition from '../components/Composition.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import registryData from '../../public/archive/registry.json';
+import { spanFor } from '../utils/spans';
 
 const posts = (await getCollection('blog'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const feat = posts.filter((p) => p.data.featured)[0] ?? posts[0];
-
+const rest = posts;
 const total = posts.length;
-const pad = (n: number) => String(n).padStart(3, '0');
 
 const has = (p: (typeof posts)[number], ...names: string[]) =>
   names.some((n) => p.data.tags.includes(n));
 
-const counts = {
-  devops: posts.filter((p) => has(p, 'devops')).length,
-  postgres: posts.filter((p) => has(p, 'postgres')).length,
-  programming: posts.filter((p) => has(p, 'programming')).length,
-  treks: posts.filter((p) => has(p, 'treks', 'trek')).length,
-};
-const tagCount = new Set(posts.flatMap((p) => p.data.tags)).size;
-const archiveCount = (registryData.archives || []).length;
-
-const contents = [
-  { name: 'devops/', href: '/devops/', n: `${counts.devops} posts` },
-  { name: 'postgres/', href: '/postgres/', n: `${counts.postgres} posts` },
-  { name: 'programming/', href: '/programming/', n: `${counts.programming} posts` },
-  { name: 'treks/', href: '/treks/', n: `${counts.treks} posts` },
-  { name: 'tags/', href: '/tags/', n: `${tagCount} tags` },
-  { name: 'archive/', href: '/archive/', n: `${archiveCount} editions` },
-  { name: 'about/', href: '/about/', n: '1 page' },
-  { name: 'contact/', href: '/contact/', n: '1 page' },
+const cats = [
+  { name: 'devops', href: '/devops/', paint: 'red', n: posts.filter((p) => has(p, 'devops')).length },
+  { name: 'postgres', href: '/postgres/', paint: 'blue', n: posts.filter((p) => has(p, 'postgres')).length },
+  { name: 'programming', href: '/programming/', paint: 'yellow', n: posts.filter((p) => has(p, 'programming')).length },
+  { name: 'treks', href: '/treks/', paint: 'ink', n: posts.filter((p) => has(p, 'treks', 'trek')).length },
 ];
 
-const featSection = has(feat, 'treks', 'trek')
-  ? 'treks'
-  : has(feat, 'devops')
-    ? 'devops'
-    : has(feat, 'postgres')
-      ? 'postgres'
-      : 'programming';
-
-const builtAt = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+const featNo = String(total - posts.indexOf(feat)).padStart(3, '0');
+const firstYear = Math.min(...posts.map((p) => p.data.pubDate.getUTCFullYear()));
 ---
 
-<BaseLayout title="sreeraj.dev — index of /" theme="tech">
-  <h1 class="sr-only">sreeraj.dev — index of /</h1>
+<BaseLayout title="sreeraj.dev — devops, postgres, programming & treks" theme="tech">
+  <h1 class="sr-only">sreeraj.dev — devops, postgres, programming and himalayan treks</h1>
 
-  <!-- ==================== 00 / README ==================== -->
-  <section class="wrap section-tight">
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]" style="align-items: start;">
-      <div class="box manifest">
-        <div class="box-head">
-          <span>README.TXT</span>
-          <span class="dim">PLAIN TEXT · UTF-8</span>
-        </div>
-        <div class="box-body">
-          <p>
-            This is a website. It belongs to <strong>Sreeraj Rajan</strong>,
-            a backend engineer at Medley Learning, and it contains {total}
-            documents about DevOps, Postgres, programming, and Himalayan treks.
-          </p>
-          <p>
-            There is no hero image. There are no cookie banners, popups, or
-            newsletters. Text is black, links are blue, and every page is
-            static HTML. If you want updates, <a href="/rss.xml">RSS</a> still
-            works — it never stopped working.
-          </p>
-          <p class="stamp">Generated {builtAt} · No build errors</p>
-        </div>
-      </div>
+  <!-- ============ the master composition ============ -->
+  <section class="hero-band" aria-label="Featured">
+    <div class="hero-plr plane plane--red" aria-hidden="true"></div>
 
-      <div class="box">
-        <div class="box-head">
-          <span>CONTENTS</span>
-          <span class="dim">8 DIRS</span>
-        </div>
-        <div class="cat-grid" style="border-top: var(--rule-2);">
-          {contents.map((c) => (
-            <a href={c.href} class="cat-cell">
-              <span class="cat-name">{c.name}</span>
-              <span class="cat-n">{c.n}</span>
-            </a>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== 01 / FEATURED RECORD ==================== -->
-  <section class="wrap" style="padding-block: var(--s-5) var(--s-7);">
-    <div class="box shadow-hard" style="margin-right: 10px;">
-      <div class="box-head">
-        <span>★ FEATURED RECORD</span>
-        <span class="dim">/{featSection}/</span>
-      </div>
-      <div class="box-body" style="padding-block: var(--s-6);">
-        <a href={`/${feat.data.slug}/`}>
-          <h2 class="feat-title">{feat.data.title}</h2>
-        </a>
+    <div class="cell hero-feat">
+      <div>
+        <p class="feat-label">featured composition — no. {featNo}</p>
+        <h2 class="feat-title">
+          <a href={`/${feat.data.slug}/`}>{feat.data.title}</a>
+        </h2>
         {feat.data.description && <p class="feat-desc">{feat.data.description}</p>}
-        <div class="metaline" style="margin-top: var(--s-5);">
-          <FormattedDate date={feat.data.pubDate} />
-          <span aria-hidden="true">·</span>
-          <span>{feat.data.readingTime} min read</span>
-          <span aria-hidden="true">·</span>
-          <span>{feat.data.tags.map((t) => `[${t}]`).join(' ')}</span>
-        </div>
       </div>
+      <a href={`/${feat.data.slug}/`} class="feat-go">
+        read the piece
+        <span aria-hidden="true">&rarr;</span>
+      </a>
     </div>
+
+    <div class="hero-stmt">
+      <p class="stmt-kicker">composition 2026 &middot; 09</p>
+      <p class="stmt-text">
+        devops, postgres, programming &amp; the himalaya — a blog arranged in
+        pure horizontals and verticals.
+      </p>
+      <p class="stmt-counts">{total} posts &middot; 4 sections &middot; since {firstYear}</p>
+    </div>
+
+    <Composition />
+
+    <nav class="hero-cats" aria-label="Sections">
+      {cats.map((c) => (
+        <a href={c.href} class="cat-cell" data-paint={c.paint}>
+          <span class="cat-mark" aria-hidden="true"></span>
+          <span class="cat-name">{c.name}</span>
+          <span class="cat-n">{c.n} posts</span>
+        </a>
+      ))}
+    </nav>
+
+    <div class="hero-plb plane plane--blue" aria-hidden="true"></div>
   </section>
 
-  <!-- ==================== 02 / INDEX OF / ==================== -->
-  <section class="wrap" style="padding-block: 0 var(--s-8);">
-    <div class="slab">
-      <h2>INDEX OF /</h2>
-      <span class="slab-note">{total} FILES · NEWEST FIRST</span>
+  <!-- ============ the index ============ -->
+  <section class="band" aria-label="All posts">
+    <div class="cell c8">
+      <h2 class="section-title">the index</h2>
+      <p class="section-sub">
+        all {total} compositions, newest first — last published
+        <FormattedDate date={posts[0].data.pubDate} />
+      </p>
     </div>
-    <div class="idx">
-      <div class="idx-cols" aria-hidden="true">
-        <span>№</span>
-        <span class="only-wide">Date</span>
-        <span>Title</span>
-        <span class="only-wide">Tags</span>
-        <span style="text-align: right;">Min</span>
-      </div>
-      {posts.map((post, i) => (
-        <PostCard
-          title={post.data.title}
-          slug={post.data.slug}
-          description={post.data.description}
-          pubDate={post.data.pubDate}
-          tags={post.data.tags}
-          readingTime={post.data.readingTime}
-          featured={post.data.featured}
-          num={pad(total - i)}
-        />
-      ))}
-    </div>
-    <p class="metaline" style="margin-top: var(--s-4); justify-content: space-between;">
-      <span>EOF — {total} of {total} entries listed. Nothing is paginated.</span>
-      <a href="/rss.xml" style="color: var(--link); text-decoration: underline; text-decoration-thickness: 2px;">SUBSCRIBE →</a>
-    </p>
+    <div class="plane plane--yellow c1" aria-hidden="true"></div>
+    <div class="plane plane--white c2" aria-hidden="true"></div>
+    <div class="plane plane--red c1" aria-hidden="true"></div>
+
+    {rest.map((post, i) => (
+      <PostCard
+        title={post.data.title}
+        slug={post.data.slug}
+        description={post.data.description}
+        pubDate={post.data.pubDate}
+        tags={post.data.tags}
+        readingTime={post.data.readingTime}
+        num={String(total - i).padStart(3, '0')}
+        span={spanFor(i)}
+      />
+    ))}
   </section>
 </BaseLayout>

@@ -1,10 +1,11 @@
 {
-  "trend": "Brutalist Web Design",
-  "description": "The Raw Index — the site as an honest document. Black ink on white paper, classic link blue, 2–3px rules, zero radius, instant inverted hover states. A terminal status bar with a live UTC clock, a left-aligned monospace masthead, a README manifest, a hard-shadowed featured record, and the whole blog as one dense INDEX OF / table. Signature: a generative ASCII dither field seeded by the date.",
-  "primaryColor": "#0000e6",
+  "trend": "De Stijl / Neoplasticism",
+  "description": "The Composition — the whole page as one Mondrian canvas. Thick black grid lines divide every band into asymmetric cells; a few planes painted primary red, blue, and yellow, the rest broken white. A painted navigation band with a black counterweight void, a featured plane beside a generative date-seeded De Stijl composition (click to re-compose), posts as cells that flood with their section's primary on hover, and a red reading rule that extends across the top as you scroll. Space Grotesk lowercase structure, Inter reading plane. No curves anywhere.",
+  "primaryColor": "#d21f0f",
   "fonts": [
-    "JetBrains Mono",
-    "Inter"
+    "Space Grotesk",
+    "Inter",
+    "JetBrains Mono"
   ],
-  "month": "2026-08"
+  "month": "2026-09"
 }

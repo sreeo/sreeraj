@@ -42,6 +42,14 @@
       "status": "success",
       "timestamp": "2026-08-03T18:34:49.054573+00:00",
       "description": "Brutalist Web Design — Raw, honest, no-nonsense web design that celebrates the medium. Visible structure, system fonts aesthetic, monospace layouts. Not ugly-on-purpose — intentionally raw and functional, like early web but with modern craft."
+    },
+    {
+      "month": "2026-09",
+      "trendId": "de-stijl-neoplasticism",
+      "trendName": "De Stijl / Neoplasticism — Mondrian and Rietveld's reduction of design to primary colors, black lines, and rectangles. The page as an abstract composition of pure horizontal/vertical relationships.",
+      "status": "success",
+      "timestamp": "2026-09-01T03:35:48.650332+00:00",
+      "description": "De Stijl / Neoplasticism — Mondrian and Rietveld's reduction of design to primary colors, black lines, and rectangles. The page as an abstract composition of pure horizontal/vertical relationships."
     }
   ]
 }

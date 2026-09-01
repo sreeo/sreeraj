@@ -6,8 +6,8 @@ interface Props {
 const { tags } = Astro.props;
 ---
 
-<span class="chips">
+<div class="tag-list">
   {tags.map((tag) => (
-    <a href={`/tags/${tag}/`} class="chip">[{tag}]</a>
+    <a href={`/tags/${tag}/`} class="tag-pill">{tag}</a>
   ))}
-</span>
+</div>

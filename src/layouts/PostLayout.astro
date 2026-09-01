@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import FormattedDate from '../components/FormattedDate.astro';
 import TagList from '../components/TagList.astro';
 
 interface TrekStatsData {
@@ -35,9 +36,6 @@ const {
   prevPost = null, nextPost = null, trekStats,
 } = Astro.props;
 
-const pad = (n: number) => String(n).padStart(2, '0');
-const iso = (d: Date) => `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
-
 const SECTIONS: Array<{ label: string; href: string; match: string[] }> = [
   { label: 'treks', href: '/treks/', match: ['treks', 'trek'] },
   { label: 'devops', href: '/devops/', match: ['devops'] },
@@ -46,94 +44,136 @@ const SECTIONS: Array<{ label: string; href: string; match: string[] }> = [
 ];
 const section = SECTIONS.find((s) => s.match.some((m) => tags.includes(m)));
 
-const specRows: Array<[string, string]> = [
-  ['date', iso(pubDate)],
-  ...(updatedDate && updatedDate.getTime() !== pubDate.getTime()
-    ? [['updated', iso(updatedDate)] as [string, string]]
-    : []),
-  ['author', author],
-  ['read time', `${readingTime} min`],
-  ...(trekStats
-    ? ([
-        ['elevation', trekStats.elevation],
-        ['distance', trekStats.distance],
-        ['duration', trekStats.duration],
-        ['difficulty', trekStats.difficulty],
-        ['basecamp', trekStats.basecamp],
-        ['season', trekStats.season],
-      ].filter(([, v]) => v) as Array<[string, string]>)
-    : []),
-];
+const showUpdated = updatedDate && updatedDate.getTime() !== pubDate.getTime();
+
+const statRows: Array<[string, string]> = trekStats
+  ? ([
+      ['elevation', trekStats.elevation],
+      ['distance', trekStats.distance],
+      ['duration', trekStats.duration],
+      ['difficulty', trekStats.difficulty],
+      ['basecamp', trekStats.basecamp],
+      ['season', trekStats.season],
+    ].filter(([, v]) => v) as Array<[string, string]>)
+  : [];
 ---
 
 <BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage} theme={theme}>
-  <article class="wrap section-tight">
-    <!-- Path -->
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="/">~</a>
-      <span aria-hidden="true">/</span>
-      {section && (
-        <>
-          <a href={section.href}>{section.label}</a>
+  <div class="scroll-rule" id="scroll-rule" aria-hidden="true"></div>
+
+  <article style="display: contents;">
+    <!-- title register -->
+    <header class="post-header-band">
+      <div class="post-header-plane plane" aria-hidden="true"></div>
+      <div class="post-header-plane2 plane" aria-hidden="true"></div>
+      <div class="cell post-header-cell">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <a href="/">home</a>
           <span aria-hidden="true">/</span>
-        </>
-      )}
-      <span>{slug}</span>
-    </nav>
-
-    <!-- Title block -->
-    <header>
-      <h1 class="post-title">{title}</h1>
-      {description && <p class="post-lead">{description}</p>}
-
-      <!-- Spec sheet -->
-      <dl class="spec" style="margin-top: var(--s-5); max-width: 680px;">
-        {specRows.map(([k, v]) => (
-          <>
-            <dt>{k}</dt>
-            <dd>{v}</dd>
-          </>
-        ))}
-        {tags.length > 0 && (
-          <>
-            <dt>tags</dt>
-            <dd><TagList tags={tags} /></dd>
-          </>
+          {section && (
+            <>
+              <a href={section.href}>{section.label}</a>
+              <span aria-hidden="true">/</span>
+            </>
+          )}
+          <span>{slug}</span>
+        </nav>
+        <h1 class="post-header-title">{title}</h1>
+        {description && <p class="page-description">{description}</p>}
+      </div>
+      <div class="cell post-header-meta-cell post-header-meta">
+        <div class="row">
+          <span class="k">published</span>
+          <span class="v"><FormattedDate date={pubDate} /></span>
+        </div>
+        {showUpdated && (
+          <div class="row">
+            <span class="k">revised</span>
+            <span class="v"><FormattedDate date={updatedDate} /></span>
+          </div>
         )}
-      </dl>
+        <div class="row">
+          <span class="k">author</span>
+          <span class="v">{author}</span>
+        </div>
+        <div class="row">
+          <span class="k">reading</span>
+          <span class="v">{readingTime} min</span>
+        </div>
+        {tags.length > 0 && (
+          <div style="margin-top: var(--s-3);">
+            <TagList tags={tags} />
+          </div>
+        )}
+      </div>
     </header>
 
-    <!-- Figure -->
-    {featureImage && (
-      <figure class="fig" style="margin-top: var(--s-6); max-width: 820px;">
-        <img src={featureImage} alt={title} />
-        <figcaption>FIG. 01 — {title}</figcaption>
-      </figure>
+    <!-- trek journal register -->
+    {statRows.length > 0 && (
+      <div class="trek-journal">
+        {statRows.map(([k, v]) => (
+          <div class="trek-stat">
+            <span class="k">{k}</span>
+            <span class="v">{v}</span>
+          </div>
+        ))}
+      </div>
     )}
 
-    <!-- Document body -->
-    <div class="doc" style="margin-top: var(--s-7);">
-      <slot />
+    <!-- feature plane -->
+    {featureImage && (
+      <div class="band">
+        <div class:list={['cell', 'trek-hero-wrap', 'c9']}>
+          <img src={featureImage} alt={title} loading="eager" />
+        </div>
+        <div class="plane plane--accent c2" aria-hidden="true"></div>
+        <div class="plane plane--yellow c1" aria-hidden="true"></div>
+      </div>
+    )}
+
+    <!-- reading plane -->
+    <div class="band prose-band">
+      <div class="cell prose-cell c12">
+        <div class:list={['prose', theme === 'trek' && 'trek-prose']}>
+          <slot />
+        </div>
+      </div>
     </div>
 
-    <!-- Prev / next -->
-    <nav class="pager" style="margin-top: var(--s-8); max-width: 820px;" aria-label="Adjacent posts">
+    <!-- prev / next register -->
+    <nav class="band" aria-label="Adjacent posts">
       {prevPost ? (
-        <a href={`/${prevPost.slug}/`} class="pager-cell">
-          <span class="pager-label">&larr; Older</span>
-          <span class="pager-title">{prevPost.title}</span>
+        <a href={`/${prevPost.slug}/`} class="post-nav-link c6">
+          <span class="post-nav-border">&larr; older composition</span>
+          <span class="post-nav-title">{prevPost.title}</span>
         </a>
       ) : (
-        <div><span class="end">— start of log —</span></div>
+        <div class="post-nav-empty c6">— the first composition —</div>
       )}
       {nextPost ? (
-        <a href={`/${nextPost.slug}/`} class="pager-cell" style="text-align: right;">
-          <span class="pager-label">Newer &rarr;</span>
-          <span class="pager-title">{nextPost.title}</span>
+        <a href={`/${nextPost.slug}/`} class="post-nav-link c6" style="text-align: right; align-items: flex-end;">
+          <span class="post-nav-border">newer composition &rarr;</span>
+          <span class="post-nav-title">{nextPost.title}</span>
         </a>
       ) : (
-        <div style="text-align: right;"><span class="end">— end of log —</span></div>
+        <div class="post-nav-empty c6" style="justify-content: flex-end;">— the latest composition —</div>
       )}
     </nav>
   </article>
+
+  <script>
+    // The reading line: a grid rule that extends across the top of the
+    // viewport as you move through the composition.
+    const rule = document.getElementById('scroll-rule');
+    if (rule) {
+      const draw = () => {
+        const h = document.documentElement;
+        const max = h.scrollHeight - h.clientHeight;
+        rule.style.transform = `scaleX(${max > 0 ? h.scrollTop / max : 0})`;
+      };
+      draw();
+      document.addEventListener('scroll', draw, { passive: true });
+      window.addEventListener('resize', draw, { passive: true });
+    }
+  </script>
 </BaseLayout>
