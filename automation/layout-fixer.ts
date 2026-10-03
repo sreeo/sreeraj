@@ -8,6 +8,7 @@
  * module performs one focused fix pass and reports what it changed.
  */
 import { query } from '@anthropic-ai/claude-agent-sdk';
+import { agentEnv } from './agent-query.js';
 import { CONFIG } from './config.js';
 import type { Violation } from './layout-geometry.js';
 
@@ -85,6 +86,7 @@ Do NOT run \`npm run build\` or the geometry analyzer — the orchestrator rebui
       maxTurns: CONFIG.layoutQa.fixerMaxTurns,
       allowedTools: ['Read', 'Edit', 'Bash', 'Glob', 'Grep', 'Skill'],
       permissionMode: 'acceptEdits',
+      env: agentEnv(),
       settingSources: ['project'],
       skills: ['layout-qa'],
       outputFormat: {
