@@ -1,0 +1,345 @@
+{
+  "id": "rdPrReviewLearn1",
+  "name": "Redesign · PR review learner",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC"
+  },
+  "nodes": [
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000011",
+      "name": "POST /redesign-reviews/sync",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        400
+      ],
+      "webhookId": "9a1d3e77-2b4c-4d6e-8f10-1a2b3c4d0a04",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "redesign-reviews/sync",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000001",
+      "name": "Every hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000002",
+      "name": "Run now",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000003",
+      "name": "List closed PRs (gh)",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        240,
+        100
+      ],
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "gh pr list -R sreeo/sreeraj --state closed --limit 100 --json number,title,headRefName,url,mergedAt,closedAt,createdAt,additions,deletions,changedFiles"
+      },
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "rdHostSshKey0001",
+          "name": "Redesign host (gh CLI)"
+        }
+      }
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000004",
+      "name": "Keep redesign PRs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        100
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Turn `gh pr list` output into one item per closed redesign PR.\n// Adds structured state the decider can use: whether a later PR with the same title replaced this one.\nconst prs = JSON.parse($input.first().json.stdout || '[]');\nconst redesignBranch = /^(redesign|rebuild|preview\\/redesign)\\//;\nconst redesign = prs.filter(p => redesignBranch.test(p.headRefName));\n\nconst styleOf = title => title.replace(/^(Monthly redesign|Full rebuild|Preview: Monthly redesign)\\s*[:—-]\\s*/i, '').split(' — ')[0].trim();\n\nreturn redesign.map(p => {\n  const later = redesign\n    .filter(o => o.number !== p.number && styleOf(o.title) === styleOf(p.title) && o.createdAt > p.createdAt)\n    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];\n  return {\n    json: {\n      pr_number: p.number,\n      title: p.title,\n      style_name: styleOf(p.title),\n      branch: p.headRefName,\n      url: p.url,\n      outcome: p.mergedAt ? 'merged' : 'rejected',\n      closed_at: p.closedAt,\n      changed_files: p.changedFiles,\n      additions: p.additions,\n      deletions: p.deletions,\n      later_pr_same_style: later ? { number: later.number, outcome: later.mergedAt ? 'merged' : 'closed without merge' } : null,\n    },\n  };\n});\n"
+      }
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000005",
+      "name": "Only new PRs",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        100
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "redesign_reviews"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "pr_number",
+              "condition": "eq",
+              "keyValue": "={{ $json.pr_number }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000006",
+      "name": "Fetch review comments (gh)",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        960,
+        100
+      ],
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "=gh pr view {{ $json.pr_number }} -R sreeo/sreeraj --json comments,reviews,files --jq '{comments: [.comments[] | {author: .author.login, body: .body}], reviews: [.reviews[] | {author: .author.login, state: .state, body: .body}], files: ([.files[].path] | .[:15])}'"
+      },
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "rdHostSshKey0001",
+          "name": "Redesign host (gh CLI)"
+        }
+      }
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000007",
+      "name": "Build typed questions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        100
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForEachItem",
+        "jsCode": "// State in, typed questions out. The decider answers; the next node decides.\nconst pr = $('Only new PRs').item.json;\nconst fetched = JSON.parse($json.stdout || '{}');\n\n// Feedback from the site owner only. Deploy bots (Cloudflare preview) comment on every PR\n// and add nothing but input tokens, which cost about a minute per 1k on this CPU.\nconst REVIEWERS = ['sreeo'];\nconst feedback = [...(fetched.reviews || []), ...(fetched.comments || [])]\n  .filter(c => REVIEWERS.includes(c.author) && c.body && c.body.trim())\n  .map(c => ({ author: c.author, body: c.body.slice(0, 1500) }))\n  .slice(0, 10);\n\nconst state = {\n  pr: {\n    number: pr.pr_number,\n    title: pr.title,\n    outcome: pr.outcome === 'merged' ? 'merged' : 'closed without merge',\n    changed_files: pr.changed_files,\n    additions: pr.additions,\n    deletions: pr.deletions,\n    files: fetched.files || [],\n  },\n  review_comments: feedback,\n  later_pr_same_style: pr.later_pr_same_style,\n};\n\nconst questions = pr.outcome === 'merged'\n  ? {\n      reception: {\n        type: 'score',\n        instructions: 'How positive was the reviewer about this redesign?',\n        criteria: ['negative', 'mixed', 'positive'],\n      },\n    }\n  : {\n      reason: {\n        type: 'choice',\n        instructions: 'Why was this redesign pull request closed without merging?',\n        criteria: {\n          'pipeline-failure': 'The automation produced an empty or bogus change, not a real redesign',\n          'superseded': 'A newer pull request replaced it',\n          'test-run': 'A rehearsal or test run of the automation, never meant to merge',\n          'broken-layout': 'Pages render broken: overlap, overflow, missing content',\n          'unreadable': 'Text is hard to read: contrast, size, typography',\n          'style-disliked': 'The reviewer did not want this visual style',\n          'too-similar': 'Too close to an earlier design',\n          'no-reason': 'Nothing in the state explains it',\n        },\n      },\n      // One choice keeps only the main reason. A comment can give several, so every signal\n      // the pipeline acts on gets its own yes/no question.\n      says_too_similar: { type: 'noul', instructions: 'Does the review say the design was too close to, or a reskin of, an earlier design?' },\n      says_quality_problem: { type: 'noul', instructions: 'Does the review say text was hard to read or pages rendered broken?' },\n      avoid_style: { type: 'noul', instructions: 'Should future redesigns avoid this visual style?' },\n    };\n\nreturn {\n  json: {\n    ...pr,\n    review_text: feedback.map(c => `${c.author}: ${c.body}`).join('\\n---\\n').slice(0, 4000),\n    request: { state, questions },\n  },\n};\n"
+      }
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000008",
+      "name": "Ask decider",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://decider:8000/v1/systemone",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.request) }}",
+        "options": {
+          "timeout": 600000,
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000009",
+      "name": "Decide (code rules)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        100
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForEachItem",
+        "jsCode": "// The model gives probabilities. Code makes the call, with explicit thresholds.\nconst pr = $('Build typed questions').item.json;\nconst a = $json.answers || {};\n\n// Style-level signals mean \"don't pick this style again\".\n// Quality signals (unreadable, broken) become lessons for the implementer instead.\nconst MIN_P = 0.5;       // main reason must be at least this likely to count as known\nconst MIN_SIGNAL = 0.6;  // a yes/no signal must be at least this likely to act on it\nconst MIN_AVOID = 0.5;   // and the model must lean towards avoiding the style\n\nconst row = {\n  pr_number: pr.pr_number,\n  title: pr.title,\n  style_name: pr.style_name,\n  branch: pr.branch,\n  url: pr.url,\n  outcome: pr.outcome,\n  closed_at: pr.closed_at,\n  review_text: pr.review_text,\n  reason: null,\n  reason_confidence: null,\n  reason_probs: null,\n  avoid_prob: null,\n  too_similar_prob: null,\n  quality_problem_prob: null,\n  reception: null,\n  avoid: false,\n  lesson: false,\n  needs_review: false,\n  model: $json.model || $json.x_model || null,\n  latency_ms: $json.x_latency_ms ?? null,\n  decided_at: new Date().toISOString(),\n};\n\nif (pr.outcome === 'merged') {\n  row.reason = 'accepted';\n  row.reception = a.reception?.score ?? null;\n} else {\n  const r = a.reason || {};\n  row.reason = r.choice ?? null;\n  row.reason_confidence = r.x_p_max ?? null;\n  row.reason_probs = r.probabilities ? JSON.stringify(r.probabilities) : null;\n  row.avoid_prob = a.avoid_style?.noul ?? null;\n  row.too_similar_prob = a.says_too_similar?.noul ?? null;\n  row.quality_problem_prob = a.says_quality_problem?.noul ?? null;\n  const sure = (r.x_p_max ?? 0) >= MIN_P;\n  const styleSignal = (row.too_similar_prob ?? 0) >= MIN_SIGNAL || (sure && row.reason === 'style-disliked');\n  row.avoid = styleSignal && (row.avoid_prob ?? 0) >= MIN_AVOID;\n  row.lesson = (row.quality_problem_prob ?? 0) >= MIN_SIGNAL;\n  row.needs_review = !sure;\n}\n\nreturn { json: row };\n"
+      }
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000010",
+      "name": "Save to redesign_reviews",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        100
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "redesign_reviews"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "pr_number",
+              "condition": "eq",
+              "keyValue": "={{ $json.pr_number }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Every hour": {
+      "main": [
+        [
+          {
+            "node": "List closed PRs (gh)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run now": {
+      "main": [
+        [
+          {
+            "node": "List closed PRs (gh)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List closed PRs (gh)": {
+      "main": [
+        [
+          {
+            "node": "Keep redesign PRs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep redesign PRs": {
+      "main": [
+        [
+          {
+            "node": "Only new PRs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only new PRs": {
+      "main": [
+        [
+          {
+            "node": "Fetch review comments (gh)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch review comments (gh)": {
+      "main": [
+        [
+          {
+            "node": "Build typed questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build typed questions": {
+      "main": [
+        [
+          {
+            "node": "Ask decider",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask decider": {
+      "main": [
+        [
+          {
+            "node": "Decide (code rules)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide (code rules)": {
+      "main": [
+        [
+          {
+            "node": "Save to redesign_reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST /redesign-reviews/sync": {
+      "main": [
+        [
+          {
+            "node": "List closed PRs (gh)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

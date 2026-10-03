@@ -1,0 +1,237 @@
+{
+  "id": "rdSetupTables001",
+  "name": "Redesign · setup data tables",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "nodes": [
+    {
+      "id": "c1a0e0b1-0000-4a1a-9a01-000000000009",
+      "name": "POST /setup-redesign-tables",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        200
+      ],
+      "webhookId": "0b6f2d55-3c1e-4f0a-a2a1-8c9d0e1f0a03",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "setup-redesign-tables",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "c1a0e0b1-0000-4a1a-9a01-000000000001",
+      "name": "Run once",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c1a0e0b1-0000-4a1a-9a01-000000000002",
+      "name": "Create redesign_reviews",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "redesign_reviews",
+        "columns": {
+          "column": [
+            {
+              "name": "pr_number",
+              "type": "number"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "style_name",
+              "type": "string"
+            },
+            {
+              "name": "branch",
+              "type": "string"
+            },
+            {
+              "name": "url",
+              "type": "string"
+            },
+            {
+              "name": "outcome",
+              "type": "string"
+            },
+            {
+              "name": "closed_at",
+              "type": "string"
+            },
+            {
+              "name": "review_text",
+              "type": "string"
+            },
+            {
+              "name": "reason",
+              "type": "string"
+            },
+            {
+              "name": "reason_confidence",
+              "type": "number"
+            },
+            {
+              "name": "reason_probs",
+              "type": "string"
+            },
+            {
+              "name": "avoid_prob",
+              "type": "number"
+            },
+            {
+              "name": "too_similar_prob",
+              "type": "number"
+            },
+            {
+              "name": "quality_problem_prob",
+              "type": "number"
+            },
+            {
+              "name": "reception",
+              "type": "number"
+            },
+            {
+              "name": "avoid",
+              "type": "boolean"
+            },
+            {
+              "name": "lesson",
+              "type": "boolean"
+            },
+            {
+              "name": "needs_review",
+              "type": "boolean"
+            },
+            {
+              "name": "model",
+              "type": "string"
+            },
+            {
+              "name": "latency_ms",
+              "type": "number"
+            },
+            {
+              "name": "decided_at",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    },
+    {
+      "id": "c1a0e0b1-0000-4a1a-9a01-000000000003",
+      "name": "Create decisions",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "decisions",
+        "columns": {
+          "column": [
+            {
+              "name": "decided_at",
+              "type": "string"
+            },
+            {
+              "name": "requested_by",
+              "type": "string"
+            },
+            {
+              "name": "question_keys",
+              "type": "string"
+            },
+            {
+              "name": "request",
+              "type": "string"
+            },
+            {
+              "name": "answers",
+              "type": "string"
+            },
+            {
+              "name": "model",
+              "type": "string"
+            },
+            {
+              "name": "runs",
+              "type": "number"
+            },
+            {
+              "name": "latency_ms",
+              "type": "number"
+            },
+            {
+              "name": "outcome",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run once": {
+      "main": [
+        [
+          {
+            "node": "Create redesign_reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create redesign_reviews": {
+      "main": [
+        [
+          {
+            "node": "Create decisions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST /setup-redesign-tables": {
+      "main": [
+        [
+          {
+            "node": "Create redesign_reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

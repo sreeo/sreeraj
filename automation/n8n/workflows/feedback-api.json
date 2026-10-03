@@ -1,0 +1,114 @@
+{
+  "id": "rdFeedbackApi001",
+  "name": "Redesign · feedback API",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC"
+  },
+  "nodes": [
+    {
+      "id": "c1a0e0b1-0002-4a1a-9a01-000000000001",
+      "name": "GET /redesign-feedback",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "5d0c3c1e-9a43-4a8e-9c7e-2f3b8f6a0a01",
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "redesign-feedback",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "c1a0e0b1-0002-4a1a-9a01-000000000002",
+      "name": "Read redesign_reviews",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        0
+      ],
+      "alwaysOutputData": true,
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "redesign_reviews"
+        },
+        "returnAll": true
+      }
+    },
+    {
+      "id": "c1a0e0b1-0002-4a1a-9a01-000000000003",
+      "name": "Shape for the runner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForAllItems",
+        "jsCode": "// What the redesign runner needs before it picks next month's style.\nconst rows = $input.all().map(i => i.json).filter(r => r.pr_number);\nconst byNewest = (a, b) => String(b.closed_at).localeCompare(String(a.closed_at));\n\nreturn [{\n  json: {\n    generated_at: new Date().toISOString(),\n    reviewed_prs: rows.length,\n    // Researchers must not propose these styles again.\n    avoid_styles: rows.filter(r => r.avoid).sort(byNewest)\n      .map(r => ({ style: r.style_name, reason: r.reason, pr: r.pr_number, evidence: r.review_text })),\n    // The implementer must respect these, whatever the style.\n    lessons: rows.filter(r => r.lesson).sort(byNewest)\n      .map(r => ({ reason: r.reason, pr: r.pr_number, style: r.style_name, evidence: r.review_text })),\n    // Every closed-without-merge PR with the model's reading, for audit.\n    rejected: rows.filter(r => r.outcome === 'rejected').sort(byNewest)\n      .map(r => ({ pr: r.pr_number, style: r.style_name, reason: r.reason, confidence: r.reason_confidence, too_similar: r.too_similar_prob, quality_problem: r.quality_problem_prob, avoid_prob: r.avoid_prob })),\n    accepted: rows.filter(r => r.outcome === 'merged').sort(byNewest)\n      .map(r => ({ style: r.style_name, pr: r.pr_number, reception: r.reception })),\n    // Low-confidence calls, kept out of the lists above.\n    needs_review: rows.filter(r => r.needs_review).sort(byNewest)\n      .map(r => ({ pr: r.pr_number, style: r.style_name, best_guess: r.reason, confidence: r.reason_confidence })),\n  },\n}];\n"
+      }
+    },
+    {
+      "id": "c1a0e0b1-0002-4a1a-9a01-000000000004",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "GET /redesign-feedback": {
+      "main": [
+        [
+          {
+            "node": "Read redesign_reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read redesign_reviews": {
+      "main": [
+        [
+          {
+            "node": "Shape for the runner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shape for the runner": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
