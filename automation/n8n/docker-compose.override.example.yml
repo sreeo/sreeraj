@@ -1,0 +1,8 @@
+# Copy to docker-compose.override.yml on the host to reach n8n over Tailscale.
+services:
+  n8n:
+    ports:
+      - "100.104.153.63:5678:5678"          # the host's Tailscale IP
+    environment:
+      - N8N_HOST=code-instance.tail5d3b6b.ts.net
+      - WEBHOOK_URL=http://code-instance.tail5d3b6b.ts.net:5678/

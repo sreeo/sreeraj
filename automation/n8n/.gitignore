@@ -1,0 +1,3 @@
+# Host-specific: Tailscale address and hostname.
+docker-compose.override.yml
+secrets/
