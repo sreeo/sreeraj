@@ -1,0 +1,52 @@
+name: E2E
+
+# Every PR (including the monthly redesign PRs) must keep the site's invariants:
+# routes, content, the data-qa markup contract, navigation, layout overflow,
+# critical accessibility and the archive. See automation/e2e/site.spec.ts.
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install site dependencies
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      - name: Install automation dependencies
+        working-directory: automation
+        run: npm ci
+
+      - name: Install Chromium
+        working-directory: automation
+        run: npx playwright install --with-deps chromium
+
+      - name: Unit tests
+        working-directory: automation
+        run: npm run test:unit
+
+      - name: E2E (blocking checks)
+        working-directory: automation
+        env:
+          E2E_WORKERS: 2
+        run: npm run test:e2e:hard
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: automation/test-output/e2e-report.json
+          if-no-files-found: ignore

@@ -42,7 +42,7 @@ const count = posts.length;
 
   <section class="wrap sec" aria-label={`${title} dispatches`}>
     {count > 0 ? (
-      <ul class="poster-grid-3">
+      <ul class="poster-grid-3" data-qa="post-list">
         {posts.map((post, i) => (
           <li class:list={[i === 0 && 'is-lead']} style={`--stagger:${staggerFor(i)}`} data-reveal>
             <PostCard

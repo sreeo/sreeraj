@@ -12,7 +12,10 @@
     "layout:qa": "tsx layout-qa-stage.ts",
     "probe": "tsx pipeline/probe.ts",
     "typecheck": "tsc --noEmit -p .",
-    "test:unit": "node --import tsx --test pipeline/*.test.ts"
+    "test:unit": "node --import tsx --test pipeline/*.test.ts",
+    "build:site": "cd .. && npm run build",
+    "test:e2e": "playwright test -c e2e/playwright.config.ts",
+    "test:e2e:hard": "playwright test -c e2e/playwright.config.ts --grep @hard"
   },
   "dependencies": {
     "@axe-core/playwright": "^4.10.0",
@@ -22,6 +25,7 @@
   },
   "devDependencies": {
     "typescript": "^5.9.3",
-    "@types/node": "^24.0.0"
+    "@types/node": "^24.0.0",
+    "@playwright/test": "1.58.2"
   }
 }

@@ -71,7 +71,7 @@ const statRows: Array<[string, string]> = trekStats
             )}
             <span>{num ? `Dispatch Nº ${num}` : slug}</span>
           </nav>
-          <h1 class="post-header-title">{title}</h1>
+          <h1 class="post-header-title" data-qa="post-title">{title}</h1>
           {description && <p class="page-description">{description}</p>}
         </div>
 
@@ -115,7 +115,7 @@ const statRows: Array<[string, string]> = trekStats
     )}
 
     <div class="wrap">
-      <div class:list={['prose', theme === 'trek' && 'trek-prose']}>
+      <div class:list={['prose', theme === 'trek' && 'trek-prose']} data-qa="post-body">
         <slot />
       </div>
     </div>

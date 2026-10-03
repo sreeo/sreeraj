@@ -22,7 +22,7 @@ const isActive = (href: string) =>
       <a href="/" class="nav-brand">sreeraj.dev</a>
       <p class="nav-slogan">Dispatches on DevOps, Postgres, programming &amp; treks</p>
     </div>
-    <nav class="nav-index" aria-label="Site">
+    <nav class="nav-index" aria-label="Site" data-qa="site-nav">
       {navItems.map((item, i) => (
         <a
           href={item.href}
