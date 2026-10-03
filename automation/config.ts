@@ -14,8 +14,8 @@ export const CONFIG = {
   promptsDir: path.resolve(__dirname, 'prompts'),
 
   // Claude API
-  // Aliases resolve to the newest model of that line on the Claude Code session.
-  model: 'fable' as const,
+  // Pinned to Opus 5.5 by choice. Full IDs, not aliases, so an upgrade is a deliberate edit.
+  model: 'claude-opus-5-5' as const,
   maxTokens: 16384,
   temperature: 0.8,
 
@@ -32,7 +32,7 @@ export const CONFIG = {
   maxRetries: 2,
 
   // Vision quality gate
-  visionModel: 'fable' as const,
+  visionModel: 'claude-opus-5-5' as const,
   visionThreshold: 6.0,
   visionMaxScreenshots: 4,
   visionEnabled: true,
@@ -46,9 +46,8 @@ export const CONFIG = {
 
   // Layout QA & fix stage
   layoutQa: {
-    // Model every Agent SDK call runs as (fixer, trend discovery, vision gate). An alias,
-    // so it follows the newest model of the line without code changes.
-    fixerModel: 'fable' as const,
+    // Model every Agent SDK call runs as (fixer, trend discovery, vision gate).
+    fixerModel: 'claude-opus-5-5' as const,
     maxFixPasses: 3,
     // Per-pass turn budget for the SDK agent. The orchestrator drives the
     // build + re-analyze loop between passes, so the agent should spend turns
@@ -57,8 +56,7 @@ export const CONFIG = {
     // Webwright agentic visual review (the "vision" half). Non-blocking:
     // if webwright isn't installed or errors, the stage continues on geometry.
     webwrightEnabled: true,
-    // Webwright calls the raw API, which needs a full model ID, not an alias.
-    webwrightModel: 'claude-fable-5-1' as const,
+    webwrightModel: 'claude-opus-5-5' as const,
     // Pages the webwright reviewer inspects (a subset — it's slower than geometry).
     webwrightPages: ['/', '/treks/'],
   },
