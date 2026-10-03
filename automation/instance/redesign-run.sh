@@ -193,7 +193,8 @@ PY
   # to automation/history/current-trend.json plus test-output/decision*.{json,md}.
   # pick-trend.ts (the style registry) is the fallback. Clear stale outputs first so
   # a manual REDESIGN_TREND override can't pick up last month's files.
-  rm -f automation/history/current-trend.json automation/test-output/decision.json automation/test-output/decision-summary.md
+  rm -f automation/history/current-trend.json automation/test-output/decision.json automation/test-output/decision-summary.md \
+        automation/test-output/e2e-summary.md automation/test-output/agent-calls.jsonl
   TREND="${REDESIGN_TREND:-}"
   if [ -z "$TREND" ]; then
     TREND="$(cd automation && timeout 3600 npx tsx pipeline/ideation.ts 2>>/tmp/ideation.err)" || TREND=""
@@ -244,7 +245,9 @@ PY
   # Runs on the implementer role's provider order (Claude, then Codex) — see pipeline/roles.json.
   ( cd automation && npx tsx pipeline/rebuild.ts /tmp/rebuild-prompt.md ) \
     || REBUILD_RC=$?
-  [ "$REBUILD_RC" -ne 0 ] && log "claude rebuild exited $REBUILD_RC"
+  [ "$REBUILD_RC" -ne 0 ] && log "rebuild exited $REBUILD_RC"
+  # The tests, prompts and pipeline that judge the design are off limits to the agent.
+  log "$(cd automation && npx tsx pipeline/guard.ts 2>&1 | tail -1)"
 
   # HARD GATE: the rebuild must actually have changed the presentation layer.
   # Without this, a failed rebuild (e.g. expired OAuth) still produced a PR
@@ -306,7 +309,13 @@ PY
   log "Checkpoint saved (generation) -> $PATCH_FILE"
 fi
 
-# --- 7. Layout QA & Fix stage (deterministic geometry + Agent SDK + webwright) ---
+# --- 6b. E2E stage: blocking invariants (routes, content, data-qa contract, nav, overflow,
+# archive) with an agent fix loop. A design that still fails becomes a DRAFT PR.
+E2E_RC=0
+( cd automation && npx tsx pipeline/e2e-stage.ts ) || E2E_RC=$?
+log "e2e exit: $E2E_RC"
+
+# --- 7. Layout QA & Fix stage (deterministic geometry + agent fixer + webwright) ---
 QA_RC=0
 ( cd automation && npx tsx layout-qa-stage.ts ) || QA_RC=$?
 log "layout-qa exit: $QA_RC"
@@ -358,12 +367,19 @@ else
   git add -A
   git commit -m "Monthly redesign: ${TREND:0:60}"
   git push -u origin "$BRANCH"
+  E2E_SUMMARY="automation/test-output/e2e-summary.md"
+  [ -f "$E2E_SUMMARY" ] && BODY="$(printf '%b\n\n---\n\n' "$BODY"; cat "$E2E_SUMMARY")"
   SUMMARY="automation/test-output/layout-qa-summary.md"
   BODY="Automated monthly redesign on $(hostname).\n\n**Trend:** ${TREND}"
   DECISION="automation/test-output/decision-summary.md"
   [ -f "$DECISION" ] && BODY="$(printf '%b\n\n---\n\n' "$BODY"; cat "$DECISION")"
   [ -f "$SUMMARY" ] && BODY="$(printf '%b\n\n---\n\n' "$BODY"; cat "$SUMMARY")"
-  gh pr create --title "Monthly redesign: ${TREND:0:60}" \
+  DRAFT=()
+  if [ "$E2E_RC" -ne 0 ]; then
+    DRAFT=(--draft)
+    log "Blocking e2e checks still fail — opening a DRAFT PR for manual finishing."
+  fi
+  gh pr create "${DRAFT[@]}" --title "Monthly redesign: ${TREND:0:60}" \
     --body "$BODY" --head "$BRANCH" --base "$BASE_BRANCH" \
     || log "PR creation failed (push succeeded; open the PR manually)"
 fi
