@@ -14,7 +14,8 @@ export const CONFIG = {
   promptsDir: path.resolve(__dirname, 'prompts'),
 
   // Claude API
-  model: 'claude-sonnet-4-20250514' as const,
+  // Aliases resolve to the newest model of that line on the Claude Code session.
+  model: 'fable' as const,
   maxTokens: 16384,
   temperature: 0.8,
 
@@ -31,7 +32,7 @@ export const CONFIG = {
   maxRetries: 2,
 
   // Vision quality gate
-  visionModel: 'claude-sonnet-4-20250514' as const,
+  visionModel: 'fable' as const,
   visionThreshold: 6.0,
   visionMaxScreenshots: 4,
   visionEnabled: true,
@@ -45,8 +46,9 @@ export const CONFIG = {
 
   // Layout QA & fix stage
   layoutQa: {
-    // Model the Agent SDK fixer runs as. Current IDs (not the dated legacy ones).
-    fixerModel: 'claude-sonnet-4-6' as const,
+    // Model every Agent SDK call runs as (fixer, trend discovery, vision gate). An alias,
+    // so it follows the newest model of the line without code changes.
+    fixerModel: 'fable' as const,
     maxFixPasses: 3,
     // Per-pass turn budget for the SDK agent. The orchestrator drives the
     // build + re-analyze loop between passes, so the agent should spend turns
@@ -55,7 +57,8 @@ export const CONFIG = {
     // Webwright agentic visual review (the "vision" half). Non-blocking:
     // if webwright isn't installed or errors, the stage continues on geometry.
     webwrightEnabled: true,
-    webwrightModel: 'claude-sonnet-4-6' as const,
+    // Webwright calls the raw API, which needs a full model ID, not an alias.
+    webwrightModel: 'claude-fable-5-1' as const,
     // Pages the webwright reviewer inspects (a subset — it's slower than geometry).
     webwrightPages: ['/', '/treks/'],
   },
