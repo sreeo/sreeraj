@@ -69,4 +69,5 @@ curl -s http://127.0.0.1:5678/webhook/redesign-feedback
 - A CLI `n8n execute` run cannot use Data Tables ("the module is disabled"). Trigger setup through a webhook on the running server instead.
 - Workflows activated with `n8n publish:workflow` register their triggers only after a restart.
 - n8n's expression sandbox blocks any property named `caller`. Use another name.
+- A `lastNode` webhook answers HTTP 500 "No item to return was found" when the run ends with no items (for example, no PR needs re-classifying). The execution still succeeds; callers of `/redesign-reviews/sync` ignore the status and only wait for it to finish.
 - The HTTP Request node sends all items at once by default. The decider scores one request at a time, so the node uses batching with a batch size of 1. Otherwise the queue outlasts the timeout.

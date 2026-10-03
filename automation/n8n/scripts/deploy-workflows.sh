@@ -6,6 +6,10 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 CONTAINER="${N8N_CONTAINER:-redesign-n8n-n8n-1}"
 BASE="${N8N_LOCAL_URL:-http://127.0.0.1:5678}"
+# Webhooks require the shared secret (see create-webhook-token.sh).
+TOKEN_FILE="${SECRETS_DIR:-$HOME/n8n/secrets}/webhook-token"
+AUTH=()
+[ -s "$TOKEN_FILE" ] && AUTH=(-H "x-redesign-token: $(cat "$TOKEN_FILE")")
 
 docker exec "$CONTAINER" rm -rf /tmp/workflows
 docker cp "$HERE/workflows" "$CONTAINER:/tmp/workflows"
@@ -23,6 +27,6 @@ since="$(date -u +%FT%TZ)"
 ( cd "$HERE" && docker compose restart n8n >/dev/null )
 until docker logs --since "$since" "$CONTAINER" 2>&1 | grep -q "Finished building workflow dependency index"; do sleep 2; done
 
-curl -fsS -X POST "$BASE/webhook/setup-redesign-tables" >/dev/null
+curl -fsS "${AUTH[@]}" -X POST "$BASE/webhook/setup-redesign-tables" >/dev/null
 echo "data tables ready"
-curl -fsS "$BASE/webhook/redesign-feedback" | head -c 300; echo
+curl -fsS "${AUTH[@]}" "$BASE/webhook/redesign-feedback" | head -c 300; echo
