@@ -31,6 +31,9 @@ BASE_BRANCH="${REDESIGN_BASE_BRANCH:-main}"
 STATE_DIR="${REDESIGN_STATE_DIR:-$HOME/.local/share/sreeraj-redesign/state}"
 HC_URL="${HEALTHCHECK_URL:-}"
 DRY_RUN="${REDESIGN_DRY_RUN:-0}"
+# Claude model for the preflight and the creative rebuild. Pinned on purpose: a full ID,
+# not an alias, so the model only changes when this line does.
+CLAUDE_MODEL="${REDESIGN_CLAUDE_MODEL:-claude-opus-5-5}"
 export PLAYWRIGHT_CHROME_CHANNEL="${PLAYWRIGHT_CHROME_CHANNEL:-chrome}"
 # Ubuntu 26.04 can't download Playwright's bundled browsers — we use system
 # Chrome via the channel above. Make any stray `playwright install` a no-op so
@@ -103,7 +106,7 @@ fi
 # expired session let the run continue and produce a bogus "redesign" PR that
 # only bumped the month (2026-08). Fail fast and loudly instead.
 if [ "$MODE" != "check" ]; then
-  AUTH_OUT="$(timeout 120 claude -p 'Reply with exactly: AUTHOK' --print 2>&1 || true)"
+  AUTH_OUT="$(timeout 120 claude -p 'Reply with exactly: AUTHOK' --model "$CLAUDE_MODEL" --print 2>&1 || true)"
   if ! printf '%s' "$AUTH_OUT" | grep -q 'AUTHOK'; then
     log "FATAL: Claude Code auth preflight failed — no redesign attempted."
     log "       Response: $(printf '%s' "$AUTH_OUT" | head -c 300)"
@@ -111,7 +114,7 @@ if [ "$MODE" != "check" ]; then
     log "       systemctl --user start sreeraj-redesign.service"
     exit 4
   fi
-  log "Auth preflight OK."
+  log "Auth preflight OK (model: $CLAUDE_MODEL)."
 fi
 
 STAGE_FILE="$STATE_DIR/stage"
@@ -230,7 +233,7 @@ PY
   # A non-zero exit may still mean useful work (e.g. hit max-turns), so don't
   # abort on it alone — the substantive check is the src/ diff below.
   REBUILD_RC=0
-  claude -p "$(cat /tmp/rebuild-prompt.md)" --print --dangerously-skip-permissions --max-turns 50 \
+  claude -p "$(cat /tmp/rebuild-prompt.md)" --model "$CLAUDE_MODEL" --print --dangerously-skip-permissions --max-turns 50 \
     || REBUILD_RC=$?
   [ "$REBUILD_RC" -ne 0 ] && log "claude rebuild exited $REBUILD_RC"
 
