@@ -2,6 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import TagList from '../components/TagList.astro';
+import { sectionFor } from '../utils/sections';
 
 interface TrekStatsData {
   elevation?: string;
@@ -25,6 +26,7 @@ interface Props {
   author?: string;
   readingTime?: number;
   theme?: 'tech' | 'trek';
+  num?: string;
   prevPost?: { slug: string; title: string } | null;
   nextPost?: { slug: string; title: string } | null;
   trekStats?: TrekStatsData;
@@ -33,147 +35,128 @@ interface Props {
 const {
   title, slug, description, pubDate, updatedDate, featureImage,
   tags = [], author = 'Sreeraj', readingTime = 1, theme = 'tech',
-  prevPost = null, nextPost = null, trekStats,
+  num, prevPost = null, nextPost = null, trekStats,
 } = Astro.props;
 
-const SECTIONS: Array<{ label: string; href: string; match: string[] }> = [
-  { label: 'treks', href: '/treks/', match: ['treks', 'trek'] },
-  { label: 'devops', href: '/devops/', match: ['devops'] },
-  { label: 'postgres', href: '/postgres/', match: ['postgres'] },
-  { label: 'programming', href: '/programming/', match: ['programming'] },
-];
-const section = SECTIONS.find((s) => s.match.some((m) => tags.includes(m)));
-
+const section = sectionFor(tags);
 const showUpdated = updatedDate && updatedDate.getTime() !== pubDate.getTime();
 
 const statRows: Array<[string, string]> = trekStats
   ? ([
-      ['elevation', trekStats.elevation],
-      ['distance', trekStats.distance],
-      ['duration', trekStats.duration],
-      ['difficulty', trekStats.difficulty],
-      ['basecamp', trekStats.basecamp],
-      ['season', trekStats.season],
+      ['Elevation', trekStats.elevation],
+      ['Distance', trekStats.distance],
+      ['Duration', trekStats.duration],
+      ['Difficulty', trekStats.difficulty],
+      ['Basecamp', trekStats.basecamp],
+      ['Season', trekStats.season],
     ].filter(([, v]) => v) as Array<[string, string]>)
   : [];
 ---
 
 <BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage} theme={theme}>
-  <div class="scroll-rule" id="scroll-rule" aria-hidden="true"></div>
+  <div class="read-wedge" id="read-wedge" aria-hidden="true"></div>
 
-  <article style="display: contents;">
-    <!-- title register -->
-    <header class="post-header-band">
-      <div class="post-header-plane plane" aria-hidden="true"></div>
-      <div class="post-header-plane2 plane" aria-hidden="true"></div>
-      <div class="cell post-header-cell">
-        <nav class="crumbs" aria-label="Breadcrumb">
-          <a href="/">home</a>
-          <span aria-hidden="true">/</span>
-          {section && (
-            <>
-              <a href={section.href}>{section.label}</a>
-              <span aria-hidden="true">/</span>
-            </>
-          )}
-          <span>{slug}</span>
-        </nav>
-        <h1 class="post-header-title">{title}</h1>
-        {description && <p class="page-description">{description}</p>}
-      </div>
-      <div class="cell post-header-meta-cell post-header-meta">
-        <div class="row">
-          <span class="k">published</span>
-          <span class="v"><FormattedDate date={pubDate} /></span>
+  <article class="post">
+    <header class="post-header">
+      <div class="wrap post-header-grid">
+        <div class="post-header-main">
+          <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/">Home</a>
+            <span class="sep" aria-hidden="true">/</span>
+            {section && (
+              <>
+                <a href={section.href}>{section.label}</a>
+                <span class="sep" aria-hidden="true">/</span>
+              </>
+            )}
+            <span>{num ? `Dispatch Nº ${num}` : slug}</span>
+          </nav>
+          <h1 class="post-header-title">{title}</h1>
+          {description && <p class="page-description">{description}</p>}
         </div>
-        {showUpdated && (
-          <div class="row">
-            <span class="k">revised</span>
-            <span class="v"><FormattedDate date={updatedDate} /></span>
-          </div>
-        )}
-        <div class="row">
-          <span class="k">author</span>
-          <span class="v">{author}</span>
-        </div>
-        <div class="row">
-          <span class="k">reading</span>
-          <span class="v">{readingTime} min</span>
-        </div>
-        {tags.length > 0 && (
-          <div style="margin-top: var(--s-3);">
-            <TagList tags={tags} />
-          </div>
-        )}
+
+        <aside class="post-header-meta" aria-label="Post details">
+          <dl>
+            <dt>Printed</dt>
+            <dd><FormattedDate date={pubDate} /></dd>
+            {showUpdated && (
+              <>
+                <dt>Revised</dt>
+                <dd><FormattedDate date={updatedDate} /></dd>
+              </>
+            )}
+            <dt>By</dt>
+            <dd>{author}</dd>
+            <dt>Reading</dt>
+            <dd>{readingTime} min</dd>
+          </dl>
+          {tags.length > 0 && <TagList tags={tags} />}
+        </aside>
       </div>
     </header>
 
-    <!-- trek journal register -->
     {statRows.length > 0 && (
-      <div class="trek-journal">
-        {statRows.map(([k, v]) => (
-          <div class="trek-stat">
-            <span class="k">{k}</span>
-            <span class="v">{v}</span>
-          </div>
-        ))}
-      </div>
+      <section class="trek-journal" aria-label="Expedition data">
+        <div class="wrap trek-stats">
+          {statRows.map(([k, v]) => (
+            <div class="trek-stat">
+              <span class="k">{k}</span>
+              <span class="v">{v}</span>
+            </div>
+          ))}
+        </div>
+      </section>
     )}
 
-    <!-- feature plane -->
     {featureImage && (
-      <div class="band">
-        <div class:list={['cell', 'trek-hero-wrap', 'c9']}>
-          <img src={featureImage} alt={title} loading="eager" />
-        </div>
-        <div class="plane plane--accent c2" aria-hidden="true"></div>
-        <div class="plane plane--yellow c1" aria-hidden="true"></div>
-      </div>
+      <figure class="trek-hero-wrap montage montage--split" style={`--img:url('${featureImage}')`}>
+        <img class="trek-hero post-hero-image" src={featureImage} alt="" loading="eager" decoding="async" />
+      </figure>
     )}
 
-    <!-- reading plane -->
-    <div class="band prose-band">
-      <div class="cell prose-cell c12">
-        <div class:list={['prose', theme === 'trek' && 'trek-prose']}>
-          <slot />
-        </div>
+    <div class="wrap">
+      <div class:list={['prose', theme === 'trek' && 'trek-prose']}>
+        <slot />
       </div>
     </div>
 
-    <!-- prev / next register -->
-    <nav class="band" aria-label="Adjacent posts">
+    <nav class="post-nav" aria-label="Adjacent dispatches">
       {prevPost ? (
-        <a href={`/${prevPost.slug}/`} class="post-nav-link c6">
-          <span class="post-nav-border">&larr; older composition</span>
+        <a href={`/${prevPost.slug}/`} class="post-nav-link">
+          <span class="post-nav-border">&larr; Older dispatch</span>
           <span class="post-nav-title">{prevPost.title}</span>
         </a>
       ) : (
-        <div class="post-nav-empty c6">— the first composition —</div>
+        <div class="post-nav-empty">The first dispatch</div>
       )}
       {nextPost ? (
-        <a href={`/${nextPost.slug}/`} class="post-nav-link c6" style="text-align: right; align-items: flex-end;">
-          <span class="post-nav-border">newer composition &rarr;</span>
+        <a href={`/${nextPost.slug}/`} class="post-nav-link">
+          <span class="post-nav-border">Newer dispatch &rarr;</span>
           <span class="post-nav-title">{nextPost.title}</span>
         </a>
       ) : (
-        <div class="post-nav-empty c6" style="justify-content: flex-end;">— the latest composition —</div>
+        <div class="post-nav-empty">The latest dispatch</div>
       )}
     </nav>
   </article>
 
   <script>
-    // The reading line: a grid rule that extends across the top of the
-    // viewport as you move through the composition.
-    const rule = document.getElementById('scroll-rule');
-    if (rule) {
+    // The reading wedge: a red bar that drives across the top as you read.
+    const wedge = document.getElementById('read-wedge');
+    if (wedge) {
+      let ticking = false;
       const draw = () => {
         const h = document.documentElement;
         const max = h.scrollHeight - h.clientHeight;
-        rule.style.transform = `scaleX(${max > 0 ? h.scrollTop / max : 0})`;
+        wedge.style.setProperty('--p', String(max > 0 ? Math.min(1, h.scrollTop / max) : 0));
+        ticking = false;
+      };
+      const onScroll = () => {
+        if (!ticking) { ticking = true; requestAnimationFrame(draw); }
       };
       draw();
-      document.addEventListener('scroll', draw, { passive: true });
-      window.addEventListener('resize', draw, { passive: true });
+      document.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
     }
   </script>
 </BaseLayout>

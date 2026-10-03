@@ -1,0 +1,92 @@
+---
+// Beat the whites with the red wedge. A Lissitzky composition behind the
+// hero: the wedge and the circle are fixed; a field of diagonal shards is
+// regenerated client-side from a date-derived seed, and the whole thing
+// advances along its own diagonal as you scroll.
+---
+
+<div class="poster-art" aria-hidden="true">
+  <svg id="wedge-svg" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid slice" fill="none" focusable="false">
+    <circle cx="880" cy="330" r="250" stroke="#161412" stroke-width="12" />
+    <circle cx="880" cy="330" r="176" stroke="#161412" stroke-width="3" />
+    <g id="wedge-main">
+      <polygon points="-80,-40 -80,190 640,250" fill="#c4201a" />
+    </g>
+    <g id="wedge-shards">
+      <g transform="rotate(-45 780 60)"><rect x="780" y="60" width="200" height="8" fill="#161412" /></g>
+      <g transform="rotate(30 1000 110)"><rect x="1000" y="110" width="130" height="6" fill="#c4201a" /></g>
+      <g transform="rotate(-30 700 660)"><rect x="700" y="660" width="260" height="10" fill="#161412" /></g>
+    </g>
+  </svg>
+</div>
+
+<script>
+  // Date-seeded shard field + scroll-advancing wedge. Vanilla, ~60 lines.
+  const shards = document.getElementById('wedge-shards');
+  const wedge = document.getElementById('wedge-main');
+  if (shards && wedge) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const d = new Date();
+    let seed = d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate();
+    const rand = () => {
+      seed |= 0;
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const NS = 'http://www.w3.org/2000/svg';
+    const ANGLES = [-62, -45, -30, 30, 48];
+    const ZONES = [
+      [700, 1150, 10, 150],
+      [620, 1150, 590, 710],
+    ];
+    const pick = (zone: number[]) => [
+      zone[0] + rand() * (zone[1] - zone[0]),
+      zone[2] + rand() * (zone[3] - zone[2]),
+    ];
+    const place = (shape: SVGElement, x: number, y: number, delay: number) => {
+      const g = document.createElementNS(NS, 'g');
+      const a = ANGLES[Math.floor(rand() * ANGLES.length)];
+      g.setAttribute('transform', `rotate(${a} ${x.toFixed(1)} ${y.toFixed(1)})`);
+      shape.setAttribute('class', 'wedge-shard');
+      shape.style.setProperty('--d', `${delay}ms`);
+      g.appendChild(shape);
+      return g;
+    };
+    const frag = document.createDocumentFragment();
+    const bars = 10 + Math.floor(rand() * 5);
+    for (let i = 0; i < bars; i++) {
+      const [x, y] = pick(ZONES[i % 2]);
+      const r = document.createElementNS(NS, 'rect');
+      r.setAttribute('x', x.toFixed(1));
+      r.setAttribute('y', y.toFixed(1));
+      r.setAttribute('width', (60 + rand() * 180).toFixed(1));
+      r.setAttribute('height', (4 + rand() * 7).toFixed(1));
+      r.setAttribute('fill', rand() < 0.25 ? '#c4201a' : '#161412');
+      frag.appendChild(place(r, x, y, 160 + i * 35));
+    }
+    for (let i = 0; i < 3; i++) {
+      const [x, y] = pick(ZONES[i % 2]);
+      const s = 14 + rand() * 26;
+      const tri = document.createElementNS(NS, 'polygon');
+      tri.setAttribute('points', `${x},${y} ${x + s},${y + s / 2} ${x},${y + s}`);
+      tri.setAttribute('fill', i === 0 ? '#161412' : '#c4201a');
+      frag.appendChild(place(tri, x, y, 520 + i * 60));
+    }
+    shards.replaceChildren(frag);
+
+    if (!reduced) {
+      let ticking = false;
+      const advance = () => {
+        const y = Math.min(window.scrollY, 900);
+        wedge.style.transform = `translate(${(y * 0.16).toFixed(1)}px, ${(y * 0.05).toFixed(1)}px)`;
+        shards.style.transform = `translate(${(-y * 0.06).toFixed(1)}px, ${(y * 0.1).toFixed(1)}px)`;
+        ticking = false;
+      };
+      window.addEventListener('scroll', () => {
+        if (!ticking) { ticking = true; requestAnimationFrame(advance); }
+      }, { passive: true });
+    }
+  }
+</script>

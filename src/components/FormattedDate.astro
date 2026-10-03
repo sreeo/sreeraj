@@ -1,12 +1,21 @@
 ---
+// Dates set the way Soviet presses set them: day · roman month · year.
 interface Props {
   date: Date;
 }
 
 const { date } = Astro.props;
 
-const pad = (n: number) => String(n).padStart(2, '0');
-const iso = `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+const day = String(date.getUTCDate()).padStart(2, '0');
+const month = ROMAN[date.getUTCMonth()];
+const year = date.getUTCFullYear();
+const spoken = date.toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
 ---
 
-<time datetime={date.toISOString()}>{iso}</time>
+<time datetime={date.toISOString()} aria-label={spoken} title={spoken}>{day}·{month}·{year}</time>

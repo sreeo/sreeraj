@@ -1,26 +1,42 @@
 ---
 const year = new Date().getFullYear();
+const links = [
+  { label: 'RSS feed', href: '/rss.xml' },
+  { label: 'All tags', href: '/tags/' },
+  { label: 'Past editions', href: '/archive/' },
+  { label: 'Contact', href: '/contact/' },
+  { label: 'Twitter', href: 'https://twitter.com/bot_sree', external: true },
+];
 ---
 
-<footer class="band site-footer">
-  <div class="cell footer-colophon c5">
-    <span class="who">sreeraj rajan</span>
-    <span>
-      backend engineer at medley learning. composed in horizontals &amp;
-      verticals with astro — set in space grotesk &amp; inter. &copy; {year}
-    </span>
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-mast">
+      <p class="footer-word">sreeraj<span>.dev</span></p>
+      <p class="footer-colophon">
+        Sreeraj Rajan — backend engineer at Medley Learning. Set in Anton,
+        Oswald &amp; Inter; printed with Astro in red, black and cream.
+        &copy; {year}.
+      </p>
+    </div>
+
+    <nav class="footer-links" aria-label="Footer">
+      {links.map((l, i) => (
+        <a href={l.href} rel={l.external ? 'me noopener' : undefined}>
+          <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <span>{l.label}</span>
+        </a>
+      ))}
+    </nav>
+
+    <div class="footer-stamp">
+      <span>Edition</span>
+      <strong>2026 · X</strong>
+      <span>Constructivism</span>
+    </div>
   </div>
-  <div class="cell footer-links c3">
-    <a href="/rss.xml">rss feed</a>
-    <a href="/tags/">all tags</a>
-    <a href="/archive/">past compositions</a>
-    <a href="/contact/">contact</a>
+
+  <div class="wrap">
+    <p class="footer-slogan">All power to the pipelines</p>
   </div>
-  <div class="cell cell--blue footer-edition c2">
-    <span>edition</span>
-    <span class="big">2026-09</span>
-    <span>de stijl</span>
-  </div>
-  <div class="plane plane--yellow c1" aria-hidden="true"></div>
-  <div class="plane plane--red c1" aria-hidden="true"></div>
 </footer>

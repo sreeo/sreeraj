@@ -2,30 +2,16 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="404 — sreeraj.dev" description="This plane of the composition is empty." theme="tech">
-  <div class="band" style="grid-auto-rows: minmax(96px, auto);">
-    <div class="plane plane--red c3" style="grid-row: span 2;" aria-hidden="true"></div>
-    <div class="cell c6" style="display: flex; align-items: center;">
+<BaseLayout title="404 — sreeraj.dev" description="This page was never printed." theme="tech">
+  <section class="wrap lost">
+    <span class="stamp">Never printed</span>
+    <div>
       <h1 class="lost-code">404</h1>
     </div>
-    <div class="plane plane--yellow c3" aria-hidden="true"></div>
-    <div class="cell cell--ink c3" style="display: flex; align-items: center;">
-      <p style="margin: 0; font-family: var(--font-grot); font-size: var(--t-sm); letter-spacing: 0.08em;">
-        an empty plane
-      </p>
-    </div>
-    <div class="cell c6">
-      <p style="margin: 0; color: var(--muted);">
-        this rectangle holds nothing — the page you wanted was painted over,
-        moved, or never composed.
-      </p>
-      <p style="margin: var(--s-4) 0 0;">
-        <a href="/" class="feat-go">return to the composition <span aria-hidden="true">&rarr;</span></a>
-      </p>
-    </div>
-    <div class="plane plane--blue c3" aria-hidden="true"></div>
-    <div class="plane plane--white c4" aria-hidden="true"></div>
-    <div class="plane plane--yellow c2" aria-hidden="true"></div>
-    <div class="plane plane--white c6" aria-hidden="true"></div>
-  </div>
+    <p class="lost-text">
+      The page you were sent to was pulled from the press, moved to another
+      run, or never set in type at all.
+    </p>
+    <a href="/" class="cta">Back to the poster</a>
+  </section>
 </BaseLayout>

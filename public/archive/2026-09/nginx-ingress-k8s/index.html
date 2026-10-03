@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="en" data-theme="tech"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Moving from AWS Loadbalancers to Nginx — sreeraj.dev</title><meta name="description" content="We run a k8s cluster for our healthcare EMR application. At the time, we only had one public facing service, so we used a Kubernetes Service of Type LoadBalancer.
+resource &#34;kubernetes_service&#34; &#34;django&#34; {
+metadata { name      = &#34;django&#34; namespace = kubernetes_namespace.app_namespace.metadata[0].name annotations = tomap( { &#34;service.beta.kubernetes.io/aws-load-balancer-ssl-cert&#34;         = var.django_acm_arn, &#34;service.beta.kubernetes.io/aws-load-balancer-ssl-por"><meta name="generator" content="Astro v5.17.3"><link rel="canonical" href="https://sreeraj.dev/nginx-ingress-k8s/"><meta property="og:type" content="website"><meta property="og:title" content="Moving from AWS Loadbalancers to Nginx — sreeraj.dev"><meta property="og:description" content="We run a k8s cluster for our healthcare EMR application. At the time, we only had one public facing service, so we used a Kubernetes Service of Type LoadBalancer.
+resource &#34;kubernetes_service&#34; &#34;django&#34; {
+metadata { name      = &#34;django&#34; namespace = kubernetes_namespace.app_namespace.metadata[0].name annotations = tomap( { &#34;service.beta.kubernetes.io/aws-load-balancer-ssl-cert&#34;         = var.django_acm_arn, &#34;service.beta.kubernetes.io/aws-load-balancer-ssl-por"><meta property="og:url" content="https://sreeraj.dev/nginx-ingress-k8s/"><meta property="og:image" content="https://sreeraj.dev/images/nginx-ingress-k8s/IMG_20211031_101043.jpeg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Moving from AWS Loadbalancers to Nginx — sreeraj.dev"><meta name="twitter:description" content="We run a k8s cluster for our healthcare EMR application. At the time, we only had one public facing service, so we used a Kubernetes Service of Type LoadBalancer.
+resource &#34;kubernetes_service&#34; &#34;django&#34; {
+metadata { name      = &#34;django&#34; namespace = kubernetes_namespace.app_namespace.metadata[0].name annotations = tomap( { &#34;service.beta.kubernetes.io/aws-load-balancer-ssl-cert&#34;         = var.django_acm_arn, &#34;service.beta.kubernetes.io/aws-load-balancer-ssl-por"><meta name="twitter:image" content="https://sreeraj.dev/images/nginx-ingress-k8s/IMG_20211031_101043.jpeg"><script defer src="https://cloud.umami.is/script.js" data-website-id="057ff310-3cdd-46d1-9862-aabd77ec1613"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"><link rel="alternate" type="application/rss+xml" title="sreeraj.dev" href="/archive/2026-09/rss.xml"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/archive/2026-09/_astro/_slug_.BqqVJemX.css"></head> <body><a href="/" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#000;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-family:system-ui,sans-serif;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.92;">
+  <span>You're viewing the <strong>September 2026</strong> archived design</span>
+  <span style="background:#fff;color:#000;padding:2px 10px;border-radius:4px;font-weight:600;">View Current Site &rarr;</span>
+</a>
+<div style="height:32px;"></div> <a href="#main" class="skip-link">skip to content</a> <div class="frame"> <header class="nav-bar"> <a href="/archive/2026-09/" class="nav-brand">sreeraj<span class="dot">.</span>dev</a> <nav style="display: contents;" aria-label="Site"> <a href="/archive/2026-09/" class="nav-link">home</a><a href="/archive/2026-09/about/" class="nav-link">about</a><a href="/archive/2026-09/devops/" class="nav-link">devops</a><a href="/archive/2026-09/treks/" class="nav-link">treks</a><a href="/archive/2026-09/programming/" class="nav-link">programming</a><a href="/archive/2026-09/postgres/" class="nav-link">postgres</a><a href="/archive/" class="nav-link">archive</a> </nav> <span class="nav-void" aria-hidden="true"></span> <a href="/archive/2026-09/rss.xml" class="nav-rss">rss</a> </header> <main id="main">  <div class="scroll-rule" id="scroll-rule" aria-hidden="true"></div> <article style="display: contents;"> <!-- title register --> <header class="post-header-band"> <div class="post-header-plane plane" aria-hidden="true"></div> <div class="post-header-plane2 plane" aria-hidden="true"></div> <div class="cell post-header-cell"> <nav class="crumbs" aria-label="Breadcrumb"> <a href="/archive/2026-09/">home</a> <span aria-hidden="true">/</span>  <a href="/archive/2026-09/devops/">devops</a> <span aria-hidden="true">/</span>  <span>nginx-ingress-k8s</span> </nav> <h1 class="post-header-title">Moving from AWS Loadbalancers to Nginx</h1> <p class="page-description">We run a k8s cluster for our healthcare EMR application. At the time, we only had one public facing service, so we used a Kubernetes Service of Type LoadBalancer.
+resource &quot;kubernetes_service&quot; &quot;django&quot; {
+metadata { name      = &quot;django&quot; namespace = kubernetes_namespace.app_namespace.metadata[0].name annotations = tomap( { &quot;service.beta.kubernetes.io/aws-load-balancer-ssl-cert&quot;         = var.django_acm_arn, &quot;service.beta.kubernetes.io/aws-load-balancer-ssl-por</p> </div> <div class="cell post-header-meta-cell post-header-meta"> <div class="row"> <span class="k">published</span> <span class="v"><time datetime="2021-12-18T11:18:35.000Z">2021-12-18</time></span> </div> <div class="row"> <span class="k">revised</span> <span class="v"><time datetime="2021-12-18T16:24:31.000Z">2021-12-18</time></span> </div> <div class="row"> <span class="k">author</span> <span class="v">Sreeraj Rajan</span> </div> <div class="row"> <span class="k">reading</span> <span class="v">2 min</span> </div> <div style="margin-top: var(--s-3);"> <div class="tag-list"> <a href="/archive/2026-09/tags/devops/" class="tag-pill">devops</a><a href="/archive/2026-09/tags/aws/" class="tag-pill">aws</a><a href="/archive/2026-09/tags/django/" class="tag-pill">django</a><a href="/archive/2026-09/tags/kubernetes/" class="tag-pill">kubernetes</a><a href="/archive/2026-09/tags/nginx/" class="tag-pill">nginx</a><a href="/archive/2026-09/tags/k8s/" class="tag-pill">k8s</a> </div> </div> </div> </header> <!-- trek journal register -->  <!-- feature plane --> <div class="band"> <div class="cell trek-hero-wrap c9"> <img src="/images/nginx-ingress-k8s/IMG_20211031_101043.jpeg" alt="Moving from AWS Loadbalancers to Nginx" loading="eager"> </div> <div class="plane plane--accent c2" aria-hidden="true"></div> <div class="plane plane--yellow c1" aria-hidden="true"></div> </div> <!-- reading plane --> <div class="band prose-band"> <div class="cell prose-cell c12"> <div class="prose">  <p>We run a k8s cluster for our healthcare EMR application. At the time, we only had one public facing service, so we used a Kubernetes Service of Type LoadBalancer.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="terraform"><code><span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "kubernetes_service"</span><span style="color:#79B8FF"> "django"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">  metadata</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    name</span><span style="color:#F97583">      =</span><span style="color:#9ECBFF"> "django"</span></span>
+<span class="line"><span style="color:#E1E4E8">    namespace</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> kubernetes_namespace</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">app_namespace</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">metadata[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span></span>
+<span class="line"><span style="color:#E1E4E8">    annotations</span><span style="color:#F97583"> =</span><span style="color:#79B8FF"> tomap</span><span style="color:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#E1E4E8">      {</span></span>
+<span class="line"><span style="color:#9ECBFF">        "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"</span><span style="color:#E1E4E8">         = var.django_acm_arn,</span></span>
+<span class="line"><span style="color:#9ECBFF">        "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"</span><span style="color:#E1E4E8">        = </span><span style="color:#9ECBFF">"443"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">        "service.beta.kubernetes.io/aws-load-balancer-backend-protocol"</span><span style="color:#E1E4E8"> = </span><span style="color:#9ECBFF">"http"</span></span>
+<span class="line"><span style="color:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">  spec</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    type</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "LoadBalancer"</span></span>
+<span class="line"><span style="color:#B392F0">    port</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">      port</span><span style="color:#F97583">        =</span><span style="color:#79B8FF"> 443</span></span>
+<span class="line"><span style="color:#E1E4E8">      target_port</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> var</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">django_port</span></span>
+<span class="line"><span style="color:#E1E4E8">      protocol</span><span style="color:#F97583">    =</span><span style="color:#9ECBFF"> "TCP"</span></span>
+<span class="line"><span style="color:#E1E4E8">      name</span><span style="color:#F97583">        =</span><span style="color:#9ECBFF"> "https"</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">    selector</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">      app </span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> "django"</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>As time went on, we added more public facing services to the cluster each with their own loadbalancer. We also added a ELK stack with an exposed Kibana dashboard.  So we decided to add an NGINX ingress controller that’d allow access to services.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="terraform"><code><span class="line"></span>
+<span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "helm_release"</span><span style="color:#79B8FF"> "ingress-nginx"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">  name</span><span style="color:#F97583">       =</span><span style="color:#9ECBFF"> "ingress-nginx"</span></span>
+<span class="line"><span style="color:#E1E4E8">  repository</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "https://kubernetes.github.io/ingress-nginx/"</span></span>
+<span class="line"><span style="color:#E1E4E8">  chart</span><span style="color:#F97583">      =</span><span style="color:#9ECBFF"> "ingress-nginx"</span></span>
+<span class="line"><span style="color:#E1E4E8">  namespace</span><span style="color:#F97583">  =</span><span style="color:#E1E4E8"> kubernetes_namespace</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">namespace</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">metadata[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">  values</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> [</span></span>
+<span class="line"><span style="color:#9ECBFF">    "</span><span style="color:#F97583">${</span><span style="color:#79B8FF">file</span><span style="color:#9ECBFF">("./ingress-nginx.yaml")</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#E1E4E8">  ]</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>This will create a load balancer. Add/Modify A records to all services that you’ll route through your NGINX ingress and point it to the newly created loadbalancer.</p>
+<p>You’d also want to ensure that the endpoints run on HTTPS. For this we added a clusterissuer that’d issue SSL certificates to resources in the cluster. <a href="https://registry.terraform.io/modules/terraform-iaac/cert-manager/kubernetes/latest?ref=sreeraj.dev">We used this module</a> to add the cert-manager in our cluster.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span></span></span>
+<span class="line"><span>module "cert-manager" {</span></span>
+<span class="line"><span>  source  = "terraform-iaac/cert-manager/kubernetes"</span></span>
+<span class="line"><span>  version = "2.2.2"</span></span>
+<span class="line"><span>  cluster_issuer_email = "xxx@xxx.in"</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>We add a kubernetes_ingress resource that’d route all requests for a particular domain to a particular service. We add an ingress resource for each resource since we generate a SSL certificate for each service with the domain. You could keep a common ingress resource with a wildcard domain SSL certificate and route all requests to difference services.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="terraform"><code><span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "kubernetes_ingress"</span><span style="color:#79B8FF"> "django_ingress"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#B392F0">  metadata</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    name</span><span style="color:#F97583">      =</span><span style="color:#9ECBFF"> "xxx-django-ingress"</span></span>
+<span class="line"><span style="color:#E1E4E8">    namespace</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "production"</span></span>
+<span class="line"><span style="color:#E1E4E8">    annotations</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#9ECBFF">      "kubernetes.io/ingress.class"</span><span style="color:#E1E4E8">             = </span><span style="color:#9ECBFF">"nginx"</span></span>
+<span class="line"><span style="color:#9ECBFF">      "cert-manager.io/cluster-issuer"</span><span style="color:#E1E4E8"> = </span><span style="color:#9ECBFF">"cert-manager"</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#B392F0">  spec</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#B392F0">    tls</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">      hosts</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> [</span><span style="color:#9ECBFF">"xxx.xx.xxx.com"</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">      secret_name</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "cert-manager-private-key-django"</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#B392F0">    rule</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">      host</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "api.xx.xxx.com"</span></span>
+<span class="line"><span style="color:#B392F0">      http</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#B392F0">        path</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">          path</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "/"</span></span>
+<span class="line"><span style="color:#B392F0">          backend</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">            service_name</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "production-django"</span></span>
+<span class="line"><span style="color:#E1E4E8">            service_port</span><span style="color:#F97583"> =</span><span style="color:#79B8FF"> 443</span></span>
+<span class="line"><span style="color:#E1E4E8">          }</span></span>
+<span class="line"><span style="color:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>And then modify the service to be a ClusterIP service.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>resource "kubernetes_service" "django" {</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  metadata {</span></span>
+<span class="line"><span>    name      = "${var.environment}-django"</span></span>
+<span class="line"><span>    namespace = kubernetes_namespace.app_namespace.metadata[0].name</span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  spec {</span></span>
+<span class="line"><span>    type = "ClusterIP"</span></span>
+<span class="line"><span>    port {</span></span>
+<span class="line"><span>      port        = 443</span></span>
+<span class="line"><span>      target_port = var.django_port</span></span>
+<span class="line"><span>      protocol    = "TCP"</span></span>
+<span class="line"><span>      name        = "https"</span></span>
+<span class="line"><span>    }</span></span>
+<span class="line"><span>    selector = {</span></span>
+<span class="line"><span>      app : "django"</span></span>
+<span class="line"><span>    }</span></span>
+<span class="line"><span>  }</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>We moved a bunch of our services which were exposed using individual loadbalancers to a single nginx ingress controller.  A single loadbalancer costs around $22 .<br>
+References</p>
+<ol>
+<li><a href="https://github.com/hashicorp/terraform/issues/27257?ref=sreeraj.dev#issuecomment-825102330">https://github.com/hashicorp/terraform/issues/27257#issuecomment-825102330</a> (Read this if you are installing the module on M1 machines)</li>
+<li><a href="https://cert-manager.io/docs/tutorials/acme/ingress/?ref=sreeraj.dev">Securing NGINX-ingress | cert-manager</a></li>
+<li><a href="https://registry.terraform.io/modules/terraform-iaac/cert-manager/kubernetes/latest?ref=sreeraj.dev">terraform-iaac/cert-manager/kubernetes | Terraform Registry</a></li>
+<li><a href="https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs?ref=sreeraj.dev#installation">Docs overview | gavinbunney/kubectl | Terraform Registry</a></li>
+</ol>  </div> </div> </div> <!-- prev / next register --> <nav class="band" aria-label="Adjacent posts"> <a href="/archive/2026-09/chopta-chandrashila-trek/" class="post-nav-link c6"> <span class="post-nav-border">&larr; older composition</span> <span class="post-nav-title">Chopta Chandrashila Trek</span> </a> <a href="/archive/2026-09/reducing-deploy-times/" class="post-nav-link c6" style="text-align: right; align-items: flex-end;"> <span class="post-nav-border">newer composition &rarr;</span> <span class="post-nav-title">Reducing our Deployment times by 87%</span> </a> </nav> </article> <script type="module">const n=document.getElementById("scroll-rule");if(n){const e=()=>{const t=document.documentElement,s=t.scrollHeight-t.clientHeight;n.style.transform=`scaleX(${s>0?t.scrollTop/s:0})`};e(),document.addEventListener("scroll",e,{passive:!0}),window.addEventListener("resize",e,{passive:!0})}</script>  </main> <footer class="band site-footer"> <div class="cell footer-colophon c5"> <span class="who">sreeraj rajan</span> <span>
+backend engineer at medley learning. composed in horizontals &amp;
+      verticals with astro — set in space grotesk &amp; inter. &copy; 2026 </span> </div> <div class="cell footer-links c3"> <a href="/archive/2026-09/rss.xml">rss feed</a> <a href="/archive/2026-09/tags/">all tags</a> <a href="/archive/">past compositions</a> <a href="/archive/2026-09/contact/">contact</a> </div> <div class="cell cell--blue footer-edition c2"> <span>edition</span> <span class="big">2026-09</span> <span>de stijl</span> </div> <div class="plane plane--yellow c1" aria-hidden="true"></div> <div class="plane plane--red c1" aria-hidden="true"></div> </footer> </div> </body></html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="en" data-theme="tech"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Flashing an ESP8266-01 — sreeraj.dev</title><meta name="description" content="Flashing a ESP8266? Follow this guide written by a beginner for beginners."><meta name="generator" content="Astro v5.17.3"><link rel="canonical" href="https://sreeraj.dev/flashing-esp8266/"><meta property="og:type" content="website"><meta property="og:title" content="Flashing an ESP8266-01 — sreeraj.dev"><meta property="og:description" content="Flashing a ESP8266? Follow this guide written by a beginner for beginners."><meta property="og:url" content="https://sreeraj.dev/flashing-esp8266/"><meta property="og:image" content="https://sreeraj.dev/images/flashing-esp8266/IMG_3319.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Flashing an ESP8266-01 — sreeraj.dev"><meta name="twitter:description" content="Flashing a ESP8266? Follow this guide written by a beginner for beginners."><meta name="twitter:image" content="https://sreeraj.dev/images/flashing-esp8266/IMG_3319.jpg"><script defer src="https://cloud.umami.is/script.js" data-website-id="057ff310-3cdd-46d1-9862-aabd77ec1613"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"><link rel="alternate" type="application/rss+xml" title="sreeraj.dev" href="/archive/2026-09/rss.xml"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/archive/2026-09/_astro/_slug_.BqqVJemX.css"></head> <body><a href="/" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#000;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-family:system-ui,sans-serif;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.92;">
+  <span>You're viewing the <strong>September 2026</strong> archived design</span>
+  <span style="background:#fff;color:#000;padding:2px 10px;border-radius:4px;font-weight:600;">View Current Site &rarr;</span>
+</a>
+<div style="height:32px;"></div> <a href="#main" class="skip-link">skip to content</a> <div class="frame"> <header class="nav-bar"> <a href="/archive/2026-09/" class="nav-brand">sreeraj<span class="dot">.</span>dev</a> <nav style="display: contents;" aria-label="Site"> <a href="/archive/2026-09/" class="nav-link">home</a><a href="/archive/2026-09/about/" class="nav-link">about</a><a href="/archive/2026-09/devops/" class="nav-link">devops</a><a href="/archive/2026-09/treks/" class="nav-link">treks</a><a href="/archive/2026-09/programming/" class="nav-link">programming</a><a href="/archive/2026-09/postgres/" class="nav-link">postgres</a><a href="/archive/" class="nav-link">archive</a> </nav> <span class="nav-void" aria-hidden="true"></span> <a href="/archive/2026-09/rss.xml" class="nav-rss">rss</a> </header> <main id="main">  <div class="scroll-rule" id="scroll-rule" aria-hidden="true"></div> <article style="display: contents;"> <!-- title register --> <header class="post-header-band"> <div class="post-header-plane plane" aria-hidden="true"></div> <div class="post-header-plane2 plane" aria-hidden="true"></div> <div class="cell post-header-cell"> <nav class="crumbs" aria-label="Breadcrumb"> <a href="/archive/2026-09/">home</a> <span aria-hidden="true">/</span>  <span>flashing-esp8266</span> </nav> <h1 class="post-header-title">Flashing an ESP8266-01</h1> <p class="page-description">Flashing a ESP8266? Follow this guide written by a beginner for beginners.</p> </div> <div class="cell post-header-meta-cell post-header-meta"> <div class="row"> <span class="k">published</span> <span class="v"><time datetime="2023-08-04T09:20:24.000Z">2023-08-04</time></span> </div> <div class="row"> <span class="k">revised</span> <span class="v"><time datetime="2023-08-05T11:36:47.000Z">2023-08-05</time></span> </div> <div class="row"> <span class="k">author</span> <span class="v">Sreeraj Rajan</span> </div> <div class="row"> <span class="k">reading</span> <span class="v">2 min</span> </div> <div style="margin-top: var(--s-3);"> <div class="tag-list"> <a href="/archive/2026-09/tags/arduino/" class="tag-pill">arduino</a><a href="/archive/2026-09/tags/esp8266/" class="tag-pill">esp8266</a><a href="/archive/2026-09/tags/usb/" class="tag-pill">usb</a><a href="/archive/2026-09/tags/usb ttl/" class="tag-pill">usb ttl</a><a href="/archive/2026-09/tags/ttl/" class="tag-pill">ttl</a><a href="/archive/2026-09/tags/tech/" class="tag-pill">tech</a><a href="/archive/2026-09/tags/circuit/" class="tag-pill">circuit</a><a href="/archive/2026-09/tags/electronics/" class="tag-pill">electronics</a><a href="/archive/2026-09/tags/bootloader/" class="tag-pill">bootloader</a><a href="/archive/2026-09/tags/flashing/" class="tag-pill">flashing</a> </div> </div> </div> </header> <!-- trek journal register -->  <!-- feature plane --> <div class="band"> <div class="cell trek-hero-wrap c9"> <img src="/images/flashing-esp8266/IMG_3319.jpg" alt="Flashing an ESP8266-01" loading="eager"> </div> <div class="plane plane--accent c2" aria-hidden="true"></div> <div class="plane plane--yellow c1" aria-hidden="true"></div> </div> <!-- reading plane --> <div class="band prose-band"> <div class="cell prose-cell c12"> <div class="prose">  <p>I’ve been working on integrating a Nova PM sensor with an ESP8266-01 controller to send some AQI data to an API hosted on the internet. I have very little experience working with circuit boards, so it took me some time to figure out the nitty-gritties and nuances of working with these devices. There are multiple variations of ESP8266 boards available, this tutorial focuses on the ESP8266-01 board which looks like this.</p>
+<p><img src="/images/flashing-esp8266/image-2.png" alt="ESP8266-01">
+<em>ESP8266-01</em></p>
+<p> Here’s a list of things you’d need to flash a ESP8266-01</p>
+<ol>
+<li>ESP8266-01</li>
+<li>USB TTL Serial Converter</li>
+<li>Breadboard</li>
+<li>Jumper cables (In this case, Female to Male [ESP8266/USB TTL to breadboard] and Male to Male)</li>
+<li>Push Button (makes life easier to switch to flash or normal mode)</li>
+</ol>
+<p>The USB TTL device comes labelled with appropriate pins.</p>
+<p><img src="/images/flashing-esp8266/image-4.png" alt="USB TTL device">
+<em>USB TTL device</em></p>
+<p>A breadboard is used here since the ESP8266 has multiple pins would require to be connected to the 3v and the Ground. A breadboard is divided into multiple rows and columns. <a href="https://learn.sparkfun.com/tutorials/how-to-use-a-breadboard/all?ref=sreeraj.dev">Read this if you want to understand in detail about breadboards (solderless)</a></p>
+<p>Use the following diagram as a reference while connecting the cables.</p>
+<p><img src="/images/flashing-esp8266/Untitled--1-.png" alt="ESP8266-E01 diagram">
+<em>ESP8266-E01 diagram</em></p>
+<p><strong>Wiring instructions</strong></p>
+<ol>
+<li>USB TTL R(x) —> ESP8266 T(x)</li>
+<li>USB TTL T(x) —> ESP8266 R(x)</li>
+<li>USB TTL 3.3v —> ESP8266 3.3v</li>
+<li>USB TTL GND —> ESP8266 GND</li>
+<li>USB TTL 3.3v —> ESP8266 CH_PD/EN</li>
+<li>USB TTL GND —> ESP8266 GPIO0</li>
+</ol>
+<p><strong>ESP8266 circuit diagram</strong></p>
+<p><img src="/images/flashing-esp8266/esp-flash-circuit--1-.png" alt="USB TTL ESP8266 breadboard circuit">
+<em>USB TTL ESP8266 breadboard circuit</em></p>
+<p>Legend:</p>
+<ol>
+<li>Green - RX</li>
+<li>Orange - TX</li>
+<li>Red - 3.3v</li>
+<li>Blue - GND</li>
+<li>Black - RST</li>
+<li>Grey Square with black circle - Push button</li>
+</ol>
+<p>To enable bootloader/flash mode on the ESP8266, the RST pin needs to be low when all the above wires have been configured. There are two ways you can achieve this.</p>
+<p><strong>Method 1</strong></p>
+<ol>
+<li>Place a push button on the breadboard and draw a cable from the GND to one corner of the button.</li>
+<li>Connect the RST pin of the ESP8266 to the other corner of the button such that a line between the corners of the button should be a diagonal.</li>
+<li>Connect the USB TTL to a computer, ensure you have the correct device and port selected on your IDE (I was using Arduino IDE), push the reset button and  flash away!</li>
+</ol>
+<p>If this doesn’t work, you might have to start flashing from your IDE and then push the reset button for the upload to work.</p>
+<p><strong>Method 2</strong></p>
+<ol>
+<li>After connecting all cables, connect the RST pin to the GND row on your breadboard and then connect the USB TTL device to your computer.</li>
+<li>Start flashing on your IDE and immediately remove the RST pin from the breadboard.</li>
+</ol>
+<p>If everything’s in your favour, you’d see something like this on your IDE console.</p>
+<p><img src="/images/flashing-esp8266/image-8.png" alt=""></p>  </div> </div> </div> <!-- prev / next register --> <nav class="band" aria-label="Adjacent posts"> <a href="/archive/2026-09/uuid-vs-ulid/" class="post-nav-link c6"> <span class="post-nav-border">&larr; older composition</span> <span class="post-nav-title">Benchmarking UUID v4 vs ULID</span> </a> <a href="/archive/2026-09/kuari-pass-trek/" class="post-nav-link c6" style="text-align: right; align-items: flex-end;"> <span class="post-nav-border">newer composition &rarr;</span> <span class="post-nav-title">Kuari Pass Trek</span> </a> </nav> </article> <script type="module">const n=document.getElementById("scroll-rule");if(n){const e=()=>{const t=document.documentElement,s=t.scrollHeight-t.clientHeight;n.style.transform=`scaleX(${s>0?t.scrollTop/s:0})`};e(),document.addEventListener("scroll",e,{passive:!0}),window.addEventListener("resize",e,{passive:!0})}</script>  </main> <footer class="band site-footer"> <div class="cell footer-colophon c5"> <span class="who">sreeraj rajan</span> <span>
+backend engineer at medley learning. composed in horizontals &amp;
+      verticals with astro — set in space grotesk &amp; inter. &copy; 2026 </span> </div> <div class="cell footer-links c3"> <a href="/archive/2026-09/rss.xml">rss feed</a> <a href="/archive/2026-09/tags/">all tags</a> <a href="/archive/">past compositions</a> <a href="/archive/2026-09/contact/">contact</a> </div> <div class="cell cell--blue footer-edition c2"> <span>edition</span> <span class="big">2026-09</span> <span>de stijl</span> </div> <div class="plane plane--yellow c1" aria-hidden="true"></div> <div class="plane plane--red c1" aria-hidden="true"></div> </footer> </div> </body></html>

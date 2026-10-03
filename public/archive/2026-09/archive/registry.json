@@ -1,0 +1,36 @@
+{
+  "archives": [
+    {
+      "month": "2026-08",
+      "trend": "Brutalist Web Design",
+      "description": "The Raw Index — the site as an honest document. Black ink on white paper, classic link blue, 2–3px rules, zero radius, instant inverted hover states. A terminal status bar with a live UTC clock, a left-aligned monospace masthead, a README manifest, a hard-shadowed featured record, and the whole blog as one dense INDEX OF / table. Signature: a generative ASCII dither field seeded by the date.",
+      "primaryColor": "#0000e6",
+      "deployedAt": "2026-09-01T03:03:29.341984+00:00",
+      "sourceRef": "edition/2026-08"
+    },
+    {
+      "month": "2026-07",
+      "trend": "Editorial / Magazine Layout",
+      "description": "A broadsheet magazine — 'The Dispatch'. Stacked newspaper masthead with a Fraunces nameplate, a cover-story lead in high-contrast display serif, a full-width pull-quote band over a generative topographic-contour engraving, an asymmetric features well, and a department-grouped table of contents. Lora serif reading column with drop caps, folios, and double rules on warm ivory newsprint with a single claret accent.",
+      "primaryColor": "#9a2a24",
+      "deployedAt": "2026-08-03T17:57:35.813369+00:00",
+      "sourceRef": "edition/2026-07"
+    },
+    {
+      "month": "2026-06",
+      "trend": "Swiss International Typographic",
+      "description": "Strict 12-column grid, neo-grotesque Inter set flush-left ragged-right, hairline rules, zero radius, and a single signal-red accent on warm off-white. Signature numbered editorial index plus a generative Müller-Brockmann grid composition.",
+      "primaryColor": "#e1261c",
+      "deployedAt": "2026-07-01T03:04:21.018963+00:00",
+      "sourceRef": "edition/2026-06"
+    },
+    {
+      "month": "2026-05",
+      "trend": "Cutting-Edge Terminal",
+      "description": "Dark terminal aesthetic with cyan accents, monospace git-log timeline, WebGL mountains, and dual tech/trek theming",
+      "primaryColor": "#22d3ee",
+      "deployedAt": "2026-05-01T00:00:00Z",
+      "sourceRef": "edition/2026-05"
+    }
+  ]
+}

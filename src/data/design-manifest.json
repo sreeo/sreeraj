@@ -1,11 +1,12 @@
 {
-  "trend": "De Stijl / Neoplasticism",
-  "description": "The Composition — the whole page as one Mondrian canvas. Thick black grid lines divide every band into asymmetric cells; a few planes painted primary red, blue, and yellow, the rest broken white. A painted navigation band with a black counterweight void, a featured plane beside a generative date-seeded De Stijl composition (click to re-compose), posts as cells that flood with their section's primary on hover, and a red reading rule that extends across the top as you scroll. Space Grotesk lowercase structure, Inter reading plane. No curves anywhere.",
-  "primaryColor": "#d21f0f",
+  "trend": "Russian Constructivism",
+  "description": "Agitprop — the site as a 1920s poster. Red, black and aged cream only. A black header flag cut on the diagonal with a numbered 4×2 site index; a hero that shouts three imperatives (DEPLOY / INDEX / ASCEND!) stepping down the diagonal beside a lead 'film poster' whose photograph is a red-duotone montage that tears away to colour on hover; a Lissitzky red wedge and circle generated from the date that advance as you scroll; a skewed slogan ticker; staggered poster cards; a skewed black band of four sections; and the complete index as a stair-stepped ledger with Roman-numeral dates. Anton shouts, Oswald labels, Inter reads. Hard shadows, mechanical 160ms inversions, diagonal entrances.",
+  "primaryColor": "#c4201a",
   "fonts": [
-    "Space Grotesk",
+    "Anton",
+    "Oswald",
     "Inter",
     "JetBrains Mono"
   ],
-  "month": "2026-09"
+  "month": "2026-10"
 }

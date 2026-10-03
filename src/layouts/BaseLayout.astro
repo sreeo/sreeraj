@@ -2,6 +2,7 @@
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Reveal from '../components/Reveal.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -20,13 +21,43 @@ const { title, description, image, theme = 'tech' } = Astro.props;
     <BaseHead title={title} description={description} image={image} />
   </head>
   <body>
-    <a href="#main" class="skip-link">skip to content</a>
-    <div class="frame">
-      <Header />
-      <main id="main">
-        <slot />
-      </main>
-      <Footer />
-    </div>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <!-- Print filters for the photomontage: tritone (ink → red → cream) and duotone (ink → cream). -->
+    <svg aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden">
+      <defs>
+        <filter id="tritone" color-interpolation-filters="sRGB">
+          <feColorMatrix type="saturate" values="0" />
+          <feComponentTransfer>
+            <feFuncR type="linear" slope="1.2" intercept="-0.1" />
+            <feFuncG type="linear" slope="1.2" intercept="-0.1" />
+            <feFuncB type="linear" slope="1.2" intercept="-0.1" />
+          </feComponentTransfer>
+          <feComponentTransfer>
+            <feFuncR type="table" tableValues="0.086 0.769 0.941" />
+            <feFuncG type="table" tableValues="0.078 0.125 0.910" />
+            <feFuncB type="table" tableValues="0.071 0.102 0.839" />
+          </feComponentTransfer>
+        </filter>
+        <filter id="duotone" color-interpolation-filters="sRGB">
+          <feColorMatrix type="saturate" values="0" />
+          <feComponentTransfer>
+            <feFuncR type="linear" slope="1.25" intercept="-0.12" />
+            <feFuncG type="linear" slope="1.25" intercept="-0.12" />
+            <feFuncB type="linear" slope="1.25" intercept="-0.12" />
+          </feComponentTransfer>
+          <feComponentTransfer>
+            <feFuncR type="table" tableValues="0.086 0.941" />
+            <feFuncG type="table" tableValues="0.078 0.910" />
+            <feFuncB type="table" tableValues="0.071 0.839" />
+          </feComponentTransfer>
+        </filter>
+      </defs>
+    </svg>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <Reveal />
   </body>
 </html>

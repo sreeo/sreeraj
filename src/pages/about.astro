@@ -8,31 +8,31 @@ if (!about) throw new Error('about page missing from pages collection');
 const { Content } = await render(about);
 ---
 
-<BaseLayout title="about — sreeraj.dev" description="Who Sreeraj Rajan is and what he does." theme="tech">
-  <div class="band" style="grid-auto-rows: minmax(72px, auto);">
-    <div class="cell label-cell cell--red c2">
-      <span>person /</span>
-    </div>
-    <div class="cell c7" style="display: flex; flex-direction: column; justify-content: center;">
-      <h1 class="page-title">about the composer</h1>
-      <p class="section-sub">backend engineer &middot; trekker &middot; occasional open-source contributor</p>
-    </div>
-    {about.data.featureImage ? (
-      <div class="page-portrait c3" style="grid-row: span 2;">
-        <img src={about.data.featureImage} alt="Sreeraj's dog" />
+<BaseLayout title="About — sreeraj.dev" description="Who Sreeraj Rajan is and what he does." theme="tech">
+  <header class="page-poster">
+    <div class="wrap page-poster-grid">
+      <div>
+        <span class="stamp">Dossier</span>
+        <h1 class="page-title">About the author</h1>
+        <p class="page-description">
+          Backend engineer, trekker, occasional open-source contributor.
+          Currently building at Medley Learning.
+        </p>
       </div>
-    ) : (
-      <div class="plane plane--blue c3" aria-hidden="true"></div>
-    )}
-    <div class="plane plane--yellow c2" aria-hidden="true"></div>
-    <div class="plane plane--white c7" aria-hidden="true"></div>
-  </div>
+      {about.data.featureImage && (
+        <figure class="portrait" aria-label="Portrait">
+          <div class="portrait-circle montage montage--mono" style={`--img:url('${about.data.featureImage}')`}>
+            <img src={about.data.featureImage} alt="Sreeraj's dog, looking directly at the camera" loading="eager" />
+          </div>
+          <div class="portrait-wedge" aria-hidden="true"></div>
+        </figure>
+      )}
+    </div>
+  </header>
 
-  <div class="band prose-band">
-    <div class="cell prose-cell c12">
-      <div class="prose">
-        <Content />
-      </div>
+  <section class="wrap">
+    <div class="prose">
+      <Content />
     </div>
-  </div>
+  </section>
 </BaseLayout>

@@ -1,0 +1,175 @@
+<!DOCTYPE html><html lang="en" data-theme="tech"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Using sidecar containers in k8s — sreeraj.dev</title><meta name="description" content="Pods are the basic unit of deployment in k8s and in a typical k8s setup, your application container is probably running inside a pod. Pods themselves are containers, and you can run multiple containers sharing the same volume and network interfaces of the pod concurrently. This is called the sidecar pattern.
+We run an emr django application connected to a RDS postgres database using RDS IAM auth. To make this work, we run a cronjob which generates a token every 10 minutes which is used by the a"><meta name="generator" content="Astro v5.17.3"><link rel="canonical" href="https://sreeraj.dev/sidecar-containers/"><meta property="og:type" content="website"><meta property="og:title" content="Using sidecar containers in k8s — sreeraj.dev"><meta property="og:description" content="Pods are the basic unit of deployment in k8s and in a typical k8s setup, your application container is probably running inside a pod. Pods themselves are containers, and you can run multiple containers sharing the same volume and network interfaces of the pod concurrently. This is called the sidecar pattern.
+We run an emr django application connected to a RDS postgres database using RDS IAM auth. To make this work, we run a cronjob which generates a token every 10 minutes which is used by the a"><meta property="og:url" content="https://sreeraj.dev/sidecar-containers/"><meta property="og:image" content="https://sreeraj.dev/images/sidecar-containers/IMG_20210314_112700.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Using sidecar containers in k8s — sreeraj.dev"><meta name="twitter:description" content="Pods are the basic unit of deployment in k8s and in a typical k8s setup, your application container is probably running inside a pod. Pods themselves are containers, and you can run multiple containers sharing the same volume and network interfaces of the pod concurrently. This is called the sidecar pattern.
+We run an emr django application connected to a RDS postgres database using RDS IAM auth. To make this work, we run a cronjob which generates a token every 10 minutes which is used by the a"><meta name="twitter:image" content="https://sreeraj.dev/images/sidecar-containers/IMG_20210314_112700.jpg"><script defer src="https://cloud.umami.is/script.js" data-website-id="057ff310-3cdd-46d1-9862-aabd77ec1613"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"><link rel="alternate" type="application/rss+xml" title="sreeraj.dev" href="/archive/2026-09/rss.xml"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/archive/2026-09/_astro/_slug_.BqqVJemX.css"></head> <body><a href="/" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#000;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-family:system-ui,sans-serif;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.92;">
+  <span>You're viewing the <strong>September 2026</strong> archived design</span>
+  <span style="background:#fff;color:#000;padding:2px 10px;border-radius:4px;font-weight:600;">View Current Site &rarr;</span>
+</a>
+<div style="height:32px;"></div> <a href="#main" class="skip-link">skip to content</a> <div class="frame"> <header class="nav-bar"> <a href="/archive/2026-09/" class="nav-brand">sreeraj<span class="dot">.</span>dev</a> <nav style="display: contents;" aria-label="Site"> <a href="/archive/2026-09/" class="nav-link">home</a><a href="/archive/2026-09/about/" class="nav-link">about</a><a href="/archive/2026-09/devops/" class="nav-link">devops</a><a href="/archive/2026-09/treks/" class="nav-link">treks</a><a href="/archive/2026-09/programming/" class="nav-link">programming</a><a href="/archive/2026-09/postgres/" class="nav-link">postgres</a><a href="/archive/" class="nav-link">archive</a> </nav> <span class="nav-void" aria-hidden="true"></span> <a href="/archive/2026-09/rss.xml" class="nav-rss">rss</a> </header> <main id="main">  <div class="scroll-rule" id="scroll-rule" aria-hidden="true"></div> <article style="display: contents;"> <!-- title register --> <header class="post-header-band"> <div class="post-header-plane plane" aria-hidden="true"></div> <div class="post-header-plane2 plane" aria-hidden="true"></div> <div class="cell post-header-cell"> <nav class="crumbs" aria-label="Breadcrumb"> <a href="/archive/2026-09/">home</a> <span aria-hidden="true">/</span>  <a href="/archive/2026-09/devops/">devops</a> <span aria-hidden="true">/</span>  <span>sidecar-containers</span> </nav> <h1 class="post-header-title">Using sidecar containers in k8s</h1> <p class="page-description">Pods are the basic unit of deployment in k8s and in a typical k8s setup, your application container is probably running inside a pod. Pods themselves are containers, and you can run multiple containers sharing the same volume and network interfaces of the pod concurrently. This is called the sidecar pattern.
+We run an emr django application connected to a RDS postgres database using RDS IAM auth. To make this work, we run a cronjob which generates a token every 10 minutes which is used by the a</p> </div> <div class="cell post-header-meta-cell post-header-meta"> <div class="row"> <span class="k">published</span> <span class="v"><time datetime="2022-01-22T12:48:06.000Z">2022-01-22</time></span> </div>  <div class="row"> <span class="k">author</span> <span class="v">Sreeraj Rajan</span> </div> <div class="row"> <span class="k">reading</span> <span class="v">3 min</span> </div> <div style="margin-top: var(--s-3);"> <div class="tag-list"> <a href="/archive/2026-09/tags/devops/" class="tag-pill">devops</a><a href="/archive/2026-09/tags/kubernetes/" class="tag-pill">kubernetes</a><a href="/archive/2026-09/tags/aws/" class="tag-pill">aws</a> </div> </div> </div> </header> <!-- trek journal register -->  <!-- feature plane --> <div class="band"> <div class="cell trek-hero-wrap c9"> <img src="/images/sidecar-containers/IMG_20210314_112700.jpg" alt="Using sidecar containers in k8s" loading="eager"> </div> <div class="plane plane--accent c2" aria-hidden="true"></div> <div class="plane plane--yellow c1" aria-hidden="true"></div> </div> <!-- reading plane --> <div class="band prose-band"> <div class="cell prose-cell c12"> <div class="prose">  <p>Pods are the basic unit of deployment in k8s and in a typical k8s setup, your application container is probably running inside a pod. Pods themselves are containers, and you can run multiple containers sharing the same volume and network interfaces of the pod concurrently. This is called the sidecar pattern.</p>
+<p>We run an emr django application connected to a RDS postgres database <a href="https://sreeraj.dev/connecting-django-to-rds-via-pgbouncer/">using RDS IAM auth</a>. To make this work, we run a cronjob which generates a token every 10 minutes which is used by the application to connect to the database server. We decided to abstract out the cron logic to a sidecar container, so that the application container serves a single purpose, i.e to run the application and nothing more.</p>
+<p>We defined a dockerfile for the cron container.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span></span></span>
+<span class="line"><span>FROM python:3.8-slim-buster</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>ENV PYTHONUNBUFFERED 1</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>RUN apt update \</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  &#x26;&#x26; apt-get update \</span></span>
+<span class="line"><span>  # dependencies for building Python packages</span></span>
+<span class="line"><span>  &#x26;&#x26; apt-get install -y build-essential \</span></span>
+<span class="line"><span>  # cron </span></span>
+<span class="line"><span>  &#x26;&#x26; apt-get -y install cron \</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  &#x26;&#x26; pip install awscli  \</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  # cleaning up unused files</span></span>
+<span class="line"><span>  &#x26;&#x26; apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \</span></span>
+<span class="line"><span>  &#x26;&#x26; rm -rf /var/lib/apt/lists/*</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>RUN addgroup --system django \</span></span>
+<span class="line"><span>    &#x26;&#x26; adduser --system --ingroup django django</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>RUN find /etc/ -path /etc -prune -o -path '*/resolv.conf' -prune -o -path '*/alternatives/*' -prune -o -path '*/hosts' -prune -o -exec chown django {} +</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>COPY ./compose/cron-sidecar/entrypoint /entrypoint</span></span>
+<span class="line"><span>RUN sed -i 's/\r$//g' /entrypoint</span></span>
+<span class="line"><span>RUN chmod +x /entrypoint</span></span>
+<span class="line"><span>RUN chown django /entrypoint</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>RUN mkdir /app</span></span>
+<span class="line"><span>RUN chown -R django /app</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>COPY ./rds-ca-2019-root.pem /rds-ca-2019-root.pem</span></span>
+<span class="line"><span>COPY ./scripts/pgbouncer-update.sh /pgbouncer-update.sh</span></span>
+<span class="line"><span>COPY ./users.template.txt /app/users.template.txt</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>RUN sed -i -e 's/\r//' /pgbouncer-update.sh</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>RUN chmod +x /pgbouncer-update.sh</span></span>
+<span class="line"><span>RUN chmod +x /pgbouncer-update.sh</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>RUN touch /var/run/crond.pid</span></span>
+<span class="line"><span>RUN chown django /var/run/crond.pid</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>RUN chmod gu+rw /var/run \</span></span>
+<span class="line"><span>    &#x26;&#x26; chmod gu+s /usr/sbin/cron</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>USER django</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>ENTRYPOINT ["/entrypoint"]</span></span></code></pre>
+<p>Dockerfile</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>#!/bin/bash</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>set -o errexit</span></span>
+<span class="line"><span>set -o pipefail</span></span>
+<span class="line"><span>set -o nounset</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>echo "*/2 * * * * bash /pgbouncer-update.sh >> /app/cron.log 2>&#x26;1</span></span>
+<span class="line"><span># This extra line makes it a valid cron" > scheduler.txt</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>crontab scheduler.txt</span></span>
+<span class="line"><span>nohup cron -f &#x26;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>while true</span></span>
+<span class="line"><span>do</span></span>
+<span class="line"><span>    echo "Press [CTRL+C] to stop.."</span></span>
+<span class="line"><span>    sleep 1</span></span>
+<span class="line"><span>done</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>exec "$@"</span></span></code></pre>
+<p>entrypoint.sh</p>
+<p>We also make changes to the pgbouncer config so that it picks up auth credentials from the volume which is mounted in the application container and the sidecar container.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>[databases]</span></span>
+<span class="line"><span>{{PGBOUNCER_NAME}} = host={{POSTGRES_HOST}} port={{POSTGRES_PORT}} dbname={{POSTGRES_DB}}</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>[pgbouncer]</span></span>
+<span class="line"><span>pool_mode = transaction</span></span>
+<span class="line"><span>listen_port = {{PGBOUNCER_PORT}}</span></span>
+<span class="line"><span>listen_addr = {{PGBOUNCER_HOST}}</span></span>
+<span class="line"><span>auth_type = trust</span></span>
+<span class="line"><span>auth_file = /shared/users.txt</span></span>
+<span class="line"><span>pidfile = /var/run/pgbouncer/pgbouncer.pid</span></span>
+<span class="line"><span>logfile = /var/run/pgbouncer/pgbouncer.log</span></span>
+<span class="line"><span>max_client_conn = 4000</span></span>
+<span class="line"><span>default_pool_size = 20</span></span>
+<span class="line"><span>reserve_pool_size = 5</span></span>
+<span class="line"><span>server_tls_sslmode = verify-full</span></span>
+<span class="line"><span>server_tls_ca_file = rds-ca-2019-root.pem</span></span>
+<span class="line"><span>syslog = 1</span></span></code></pre>
+<p>The base logic is to create a sidecar container, spawn a cron job which would generate auth credentials and write it to the file in the volume mounted to it. The volume which also be mounted in the application container with access to the file written by the sidecar container. Any writes to the volume by the sidecar container will be available to the application container. The following is an example terraform config of a kubernetes deployment running a sidecar container sharing a volume.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="terraform"><code><span class="line"><span style="color:#B392F0">resource</span><span style="color:#79B8FF"> "kubernetes_deployment"</span><span style="color:#79B8FF"> "django"</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">metadata</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    namespace</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> kubernetes_namespace</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">app_namespace</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">metadata[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">name</span></span>
+<span class="line"><span style="color:#E1E4E8">    labels</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">      name </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "django"</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">    name</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "django"</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">  spec</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">    replicas</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> var</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">django_replicas</span></span>
+<span class="line"><span style="color:#B392F0">    selector</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">      match_labels</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">        app </span><span style="color:#F97583">:</span><span style="color:#9ECBFF"> "django"</span></span>
+<span class="line"><span style="color:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#B392F0">    template</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#B392F0">      metadata</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">        labels</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">          app </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> "django"</span></span>
+<span class="line"><span style="color:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#E1E4E8">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">      spec</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">        enable_service_links</span><span style="color:#F97583">    =</span><span style="color:#79B8FF"> false</span></span>
+<span class="line"><span style="color:#E1E4E8">        </span></span>
+<span class="line"><span style="color:#B392F0">        volume</span><span style="color:#E1E4E8">  {</span></span>
+<span class="line"><span style="color:#E1E4E8">          name</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "shared-app"</span></span>
+<span class="line"><span style="color:#B392F0">          empty_dir</span><span style="color:#E1E4E8"> {}</span></span>
+<span class="line"><span style="color:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">        container</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">          name</span><span style="color:#F97583">              =</span><span style="color:#9ECBFF"> "django"</span></span>
+<span class="line"><span style="color:#E1E4E8">          image</span><span style="color:#F97583">             =</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">var</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">ecr_url</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">:latest"</span></span>
+<span class="line"><span style="color:#E1E4E8">          image_pull_policy</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "Always"</span></span>
+<span class="line"><span style="color:#E1E4E8">          args</span><span style="color:#F97583">              =</span><span style="color:#E1E4E8"> [</span><span style="color:#9ECBFF">"/start"</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#B392F0">          port</span><span style="color:#E1E4E8">  {</span></span>
+<span class="line"><span style="color:#E1E4E8">            name</span><span style="color:#F97583">           =</span><span style="color:#9ECBFF"> "django-port"</span></span>
+<span class="line"><span style="color:#E1E4E8">            container_port</span><span style="color:#F97583"> =</span><span style="color:#E1E4E8"> var</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">django_port</span></span>
+<span class="line"><span style="color:#E1E4E8">          }</span></span>
+<span class="line"><span style="color:#B392F0">          volume_mount</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">            name</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "shared-app"</span></span>
+<span class="line"><span style="color:#E1E4E8">            mount_path</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "/shared"</span></span>
+<span class="line"><span style="color:#E1E4E8">          }</span></span>
+<span class="line"><span style="color:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">        container</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">          name</span><span style="color:#F97583">              =</span><span style="color:#9ECBFF"> "cron"</span></span>
+<span class="line"><span style="color:#E1E4E8">          image</span><span style="color:#F97583">             =</span><span style="color:#9ECBFF"> "</span><span style="color:#F97583">${</span><span style="color:#E1E4E8">var</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">cron_sidecar_ecr_url</span><span style="color:#F97583">}</span><span style="color:#9ECBFF">:latest"</span></span>
+<span class="line"><span style="color:#E1E4E8">          image_pull_policy</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "Always"</span></span>
+<span class="line"><span style="color:#E1E4E8">          args</span><span style="color:#F97583">              =</span><span style="color:#E1E4E8"> [</span><span style="color:#9ECBFF">"/start"</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">        </span></span>
+<span class="line"><span style="color:#B392F0">          volume_mount</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#E1E4E8">            name</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "shared-app"</span></span>
+<span class="line"><span style="color:#E1E4E8">            mount_path</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "/shared"</span></span>
+<span class="line"><span style="color:#E1E4E8">          }</span></span>
+<span class="line"><span style="color:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>We add a volume named <strong>shared_app</strong> which is then mounted to the /<strong>shared</strong> path in both containers. The cron job in the cron container writes to a file in this path which is then read by the django(application) container.</p>
+<p>Note: Do not mount to a path which already exists in the container. Doing that would override all contents which were present in that location before mounting. <a href="https://stackoverflow.com/questions/46389817/kubernetes-share-volume-between-containers-inside-a-deployment?ref=sreeraj.dev">If you want to mount to a path which exists, has contents and also want to preserve it, use an init container to mount that volume to a different path, copy contents from the original path to the mounted location, and then mount it in the original path.</a></p>
+<p>References :<br>
+<a href="https://v1-20.docs.kubernetes.io/docs/concepts/workloads/pods/?ref=sreeraj.dev">Pods | Kubernetes</a><br>
+<a href="https://www.magalix.com/blog/the-sidecar-pattern?ref=sreeraj.dev">The Sidecar Pattern (magalix.com)</a></p>  </div> </div> </div> <!-- prev / next register --> <nav class="band" aria-label="Adjacent posts"> <a href="/archive/2026-09/setting-up-aws-amplify-for-a-next-js-ssr-app-with-terraform/" class="post-nav-link c6"> <span class="post-nav-border">&larr; older composition</span> <span class="post-nav-title">Setting up AWS Amplify for a Next JS SSR app with Terraform</span> </a> <a href="/archive/2026-09/setting-up-signoz-opentelemetry-in-django-gunicorn-asgi/" class="post-nav-link c6" style="text-align: right; align-items: flex-end;"> <span class="post-nav-border">newer composition &rarr;</span> <span class="post-nav-title">Setting up OpenTelemetry in Django gUnicorn ASGI</span> </a> </nav> </article> <script type="module">const n=document.getElementById("scroll-rule");if(n){const e=()=>{const t=document.documentElement,s=t.scrollHeight-t.clientHeight;n.style.transform=`scaleX(${s>0?t.scrollTop/s:0})`};e(),document.addEventListener("scroll",e,{passive:!0}),window.addEventListener("resize",e,{passive:!0})}</script>  </main> <footer class="band site-footer"> <div class="cell footer-colophon c5"> <span class="who">sreeraj rajan</span> <span>
+backend engineer at medley learning. composed in horizontals &amp;
+      verticals with astro — set in space grotesk &amp; inter. &copy; 2026 </span> </div> <div class="cell footer-links c3"> <a href="/archive/2026-09/rss.xml">rss feed</a> <a href="/archive/2026-09/tags/">all tags</a> <a href="/archive/">past compositions</a> <a href="/archive/2026-09/contact/">contact</a> </div> <div class="cell cell--blue footer-edition c2"> <span>edition</span> <span class="big">2026-09</span> <span>de stijl</span> </div> <div class="plane plane--yellow c1" aria-hidden="true"></div> <div class="plane plane--red c1" aria-hidden="true"></div> </footer> </div> </body></html>

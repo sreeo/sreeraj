@@ -1,0 +1,17 @@
+---
+// The slogan tape — a skewed black band of shouted lines, running on a loop.
+interface Props {
+  items: string[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="ticker" aria-label="Slogans">
+  <div class="ticker-track">
+    {items.map((t) => <span class="ticker-item">{t}</span>)}
+  </div>
+  <div class="ticker-track" aria-hidden="true">
+    {items.map((t) => <span class="ticker-item">{t}</span>)}
+  </div>
+</div>

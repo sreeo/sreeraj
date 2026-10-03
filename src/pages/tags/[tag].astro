@@ -18,16 +18,13 @@ export async function getStaticPaths() {
 }
 
 const { posts, tag } = Astro.props;
-
-const PAINTS: Record<string, 'red' | 'blue' | 'yellow' | 'ink'> = {
-  devops: 'red',
-  postgres: 'blue',
-  programming: 'yellow',
-  treks: 'ink',
-  trek: 'ink',
-};
-const paint = PAINTS[tag] ?? 'blue';
 const theme = getThemeForTags([tag]);
 ---
 
-<TagLayout title={`tag / ${tag}`} paint={paint} theme={theme} posts={posts} />
+<TagLayout
+  title={tag}
+  kicker="Tag"
+  description={`Everything filed under “${tag}”, newest first.`}
+  theme={theme}
+  posts={posts}
+/>

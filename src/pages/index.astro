@@ -2,100 +2,157 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
-import Composition from '../components/Composition.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import { spanFor } from '../utils/spans';
+import RedWedge from '../components/RedWedge.astro';
+import Ticker from '../components/Ticker.astro';
+import { SECTIONS, catFor } from '../utils/sections';
 
 const posts = (await getCollection('blog'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-const feat = posts.filter((p) => p.data.featured)[0] ?? posts[0];
-const rest = posts;
 const total = posts.length;
+const numOf = (i: number) => String(total - i).padStart(3, '0');
 
-const has = (p: (typeof posts)[number], ...names: string[]) =>
-  names.some((n) => p.data.tags.includes(n));
+const leadIndex = Math.max(0, posts.findIndex((p) => p.data.featured));
+const lead = posts[leadIndex];
+const fresh = posts.filter((_, i) => i !== leadIndex).slice(0, 3);
 
-const cats = [
-  { name: 'devops', href: '/devops/', paint: 'red', n: posts.filter((p) => has(p, 'devops')).length },
-  { name: 'postgres', href: '/postgres/', paint: 'blue', n: posts.filter((p) => has(p, 'postgres')).length },
-  { name: 'programming', href: '/programming/', paint: 'yellow', n: posts.filter((p) => has(p, 'programming')).length },
-  { name: 'treks', href: '/treks/', paint: 'ink', n: posts.filter((p) => has(p, 'treks', 'trek')).length },
-];
-
-const featNo = String(total - posts.indexOf(feat)).padStart(3, '0');
 const firstYear = Math.min(...posts.map((p) => p.data.pubDate.getUTCFullYear()));
+
+const sections = SECTIONS.map((s) => ({
+  ...s,
+  n: posts.filter((p) => s.match.some((m) => p.data.tags.includes(m))).length,
+}));
+
+const slogans = [
+  'Deploy · Index · Ascend',
+  'Dispatches on DevOps, Postgres, programming & Himalayan treks',
+  'All power to the pipelines',
+  `${total} dispatches printed since ${firstYear}`,
+  'Red, black & cream — nothing else',
+  'Read it. Ship it. Climb it.',
+];
 ---
 
-<BaseLayout title="sreeraj.dev — devops, postgres, programming & treks" theme="tech">
-  <h1 class="sr-only">sreeraj.dev — devops, postgres, programming and himalayan treks</h1>
-
-  <!-- ============ the master composition ============ -->
-  <section class="hero-band" aria-label="Featured">
-    <div class="hero-plr plane plane--red" aria-hidden="true"></div>
-
-    <div class="cell hero-feat">
-      <div>
-        <p class="feat-label">featured composition — no. {featNo}</p>
-        <h2 class="feat-title">
-          <a href={`/${feat.data.slug}/`}>{feat.data.title}</a>
-        </h2>
-        {feat.data.description && <p class="feat-desc">{feat.data.description}</p>}
+<BaseLayout title="sreeraj.dev — DevOps, Postgres, programming & treks" theme="tech">
+  <!-- ============ the poster ============ -->
+  <section class="poster" aria-labelledby="shout">
+    <RedWedge />
+    <div class="wrap poster-grid">
+      <div class="poster-copy">
+        <p class="poster-kicker">Sreeraj Rajan · Backend engineer · Medley Learning</p>
+        <h1 class="shout" id="shout">
+          <span class="shout-row shout-row--1"><a class="shout-line shout-line--1" href="/devops/">Deploy</a></span>
+          <span class="shout-row shout-row--2"><a class="shout-line shout-line--2" href="/postgres/">Index</a></span>
+          <span class="shout-row shout-row--3"><a class="shout-line shout-line--3" href="/treks/">Ascend<span class="shout-bang">!</span></a></span>
+          <span class="sr-only">sreeraj.dev — DevOps, Postgres, programming and Himalayan treks</span>
+        </h1>
+        <p class="poster-manifesto">
+          Dispatches from a backend engineer: Kubernetes pipelines, Postgres
+          benchmarks, Django internals and the occasional Himalayan pass.
+        </p>
+        <p class="poster-facts">
+          <span>{total} dispatches</span>
+          <span>4 sections</span>
+          <span>Since {firstYear}</span>
+          <span>Last printed <FormattedDate date={posts[0].data.pubDate} /></span>
+        </p>
       </div>
-      <a href={`/${feat.data.slug}/`} class="feat-go">
-        read the piece
-        <span aria-hidden="true">&rarr;</span>
-      </a>
-    </div>
 
-    <div class="hero-stmt">
-      <p class="stmt-kicker">composition 2026 &middot; 09</p>
-      <p class="stmt-text">
-        devops, postgres, programming &amp; the himalaya — a blog arranged in
-        pure horizontals and verticals.
-      </p>
-      <p class="stmt-counts">{total} posts &middot; 4 sections &middot; since {firstYear}</p>
-    </div>
-
-    <Composition />
-
-    <nav class="hero-cats" aria-label="Sections">
-      {cats.map((c) => (
-        <a href={c.href} class="cat-cell" data-paint={c.paint}>
-          <span class="cat-mark" aria-hidden="true"></span>
-          <span class="cat-name">{c.name}</span>
-          <span class="cat-n">{c.n} posts</span>
+      <article class="lead">
+        <a href={`/${lead.data.slug}/`} class="lead-link">
+          <div class="lead-visual montage" style={`--img:url('${lead.data.featureImage}')`}>
+            <img src={lead.data.featureImage} alt="" loading="eager" decoding="async" />
+          </div>
+          <div class="lead-plate">
+            <span class="stamp stamp--paper">Lead dispatch</span>
+            <h2 class="lead-title">{lead.data.title}</h2>
+            {lead.data.description && <p class="lead-desc">{lead.data.description}</p>}
+            <p class="lead-meta">
+              <span class="num">N&ordm; {numOf(leadIndex)}</span>
+              <span>{catFor(lead.data.tags)}</span>
+              <FormattedDate date={lead.data.pubDate} />
+              <span>{lead.data.readingTime} min</span>
+            </p>
+          </div>
         </a>
-      ))}
-    </nav>
-
-    <div class="hero-plb plane plane--blue" aria-hidden="true"></div>
+      </article>
+    </div>
   </section>
 
-  <!-- ============ the index ============ -->
-  <section class="band" aria-label="All posts">
-    <div class="cell c8">
-      <h2 class="section-title">the index</h2>
-      <p class="section-sub">
-        all {total} compositions, newest first — last published
-        <FormattedDate date={posts[0].data.pubDate} />
-      </p>
-    </div>
-    <div class="plane plane--yellow c1" aria-hidden="true"></div>
-    <div class="plane plane--white c2" aria-hidden="true"></div>
-    <div class="plane plane--red c1" aria-hidden="true"></div>
+  <Ticker items={slogans} />
 
-    {rest.map((post, i) => (
-      <PostCard
-        title={post.data.title}
-        slug={post.data.slug}
-        description={post.data.description}
-        pubDate={post.data.pubDate}
-        tags={post.data.tags}
-        readingTime={post.data.readingTime}
-        num={String(total - i).padStart(3, '0')}
-        span={spanFor(i)}
-      />
-    ))}
+  <!-- ============ fresh off the press ============ -->
+  <section class="wrap sec" aria-labelledby="fresh-title">
+    <header class="sec-head">
+      <h2 class="section-title" id="fresh-title">Fresh off the press</h2>
+      <p class="sec-sub">The three newest dispatches after the lead — each one a poster of its own.</p>
+    </header>
+    <ul class="poster-grid-3">
+      {fresh.map((post, i) => (
+        <li style={`--stagger:${i}`} data-reveal>
+          <PostCard
+            title={post.data.title}
+            slug={post.data.slug}
+            description={post.data.description}
+            pubDate={post.data.pubDate}
+            tags={post.data.tags}
+            readingTime={post.data.readingTime}
+            featureImage={post.data.featureImage}
+            num={numOf(posts.indexOf(post))}
+          />
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- ============ the four sections ============ -->
+  <section class="sect-band" aria-labelledby="sect-title">
+    <div class="wrap">
+      <div class="sect-band-head">
+        <h2 class="sect-band-title" id="sect-title">Four sections</h2>
+        <p class="sect-band-sub">Choose your front</p>
+      </div>
+      <div class="sect-grid">
+        {sections.map((s) => (
+          <a href={s.href} class="sect">
+            <span class="sect-count">{String(s.n).padStart(2, '0')}</span>
+            <span class="sect-name">{s.label}</span>
+            <span class="sect-desc">{s.blurb}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ the complete index ============ -->
+  <section class="wrap sec" aria-labelledby="index-title">
+    <header class="sec-head">
+      <h2 class="section-title" id="index-title">The complete index</h2>
+      <p class="sec-sub">All {total} dispatches, newest first, stepping down the diagonal four at a time.</p>
+    </header>
+    <ol class="ledger" reversed>
+      {posts.map((post, i) => {
+        const year = post.data.pubDate.getUTCFullYear();
+        const newYear = i === 0 || year !== posts[i - 1].data.pubDate.getUTCFullYear();
+        return (
+          <li class="ledger-row" style={`--step:${i % 4}`} data-reveal>
+            {newYear && <span class="ledger-year">{year}</span>}
+            <a href={`/${post.data.slug}/`} class="ledger-link">
+              <span class="ledger-no" aria-hidden="true">{numOf(i)}</span>
+              <div class="ledger-main">
+                <h3 class="ledger-title">{post.data.title}</h3>
+                {post.data.description && <span class="ledger-desc">{post.data.description}</span>}
+              </div>
+              <div class="ledger-side">
+                <span class="ledger-cat">{catFor(post.data.tags)}</span>
+                <FormattedDate date={post.data.pubDate} />
+                <span>{post.data.readingTime} min</span>
+              </div>
+            </a>
+          </li>
+        );
+      })}
+    </ol>
   </section>
 </BaseLayout>

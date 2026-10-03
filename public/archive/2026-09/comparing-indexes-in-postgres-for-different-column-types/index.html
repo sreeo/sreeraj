@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="en" data-theme="tech"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>UUID vs Serials — sreeraj.dev</title><meta name="description" content="Benchmarking UUID and Serial Values in Postgres and Python."><meta name="generator" content="Astro v5.17.3"><link rel="canonical" href="https://sreeraj.dev/comparing-indexes-in-postgres-for-different-column-types/"><meta property="og:type" content="website"><meta property="og:title" content="UUID vs Serials — sreeraj.dev"><meta property="og:description" content="Benchmarking UUID and Serial Values in Postgres and Python."><meta property="og:url" content="https://sreeraj.dev/comparing-indexes-in-postgres-for-different-column-types/"><meta property="og:image" content="https://sreeraj.dev/images/comparing-indexes-in-postgres-for-different-column-types/office---1.jpeg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="UUID vs Serials — sreeraj.dev"><meta name="twitter:description" content="Benchmarking UUID and Serial Values in Postgres and Python."><meta name="twitter:image" content="https://sreeraj.dev/images/comparing-indexes-in-postgres-for-different-column-types/office---1.jpeg"><script defer src="https://cloud.umami.is/script.js" data-website-id="057ff310-3cdd-46d1-9862-aabd77ec1613"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"><link rel="alternate" type="application/rss+xml" title="sreeraj.dev" href="/archive/2026-09/rss.xml"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/archive/2026-09/_astro/_slug_.BqqVJemX.css"></head> <body><a href="/" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#000;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-family:system-ui,sans-serif;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.92;">
+  <span>You're viewing the <strong>September 2026</strong> archived design</span>
+  <span style="background:#fff;color:#000;padding:2px 10px;border-radius:4px;font-weight:600;">View Current Site &rarr;</span>
+</a>
+<div style="height:32px;"></div> <a href="#main" class="skip-link">skip to content</a> <div class="frame"> <header class="nav-bar"> <a href="/archive/2026-09/" class="nav-brand">sreeraj<span class="dot">.</span>dev</a> <nav style="display: contents;" aria-label="Site"> <a href="/archive/2026-09/" class="nav-link">home</a><a href="/archive/2026-09/about/" class="nav-link">about</a><a href="/archive/2026-09/devops/" class="nav-link">devops</a><a href="/archive/2026-09/treks/" class="nav-link">treks</a><a href="/archive/2026-09/programming/" class="nav-link">programming</a><a href="/archive/2026-09/postgres/" class="nav-link">postgres</a><a href="/archive/" class="nav-link">archive</a> </nav> <span class="nav-void" aria-hidden="true"></span> <a href="/archive/2026-09/rss.xml" class="nav-rss">rss</a> </header> <main id="main">  <div class="scroll-rule" id="scroll-rule" aria-hidden="true"></div> <article style="display: contents;"> <!-- title register --> <header class="post-header-band"> <div class="post-header-plane plane" aria-hidden="true"></div> <div class="post-header-plane2 plane" aria-hidden="true"></div> <div class="cell post-header-cell"> <nav class="crumbs" aria-label="Breadcrumb"> <a href="/archive/2026-09/">home</a> <span aria-hidden="true">/</span>  <a href="/archive/2026-09/postgres/">postgres</a> <span aria-hidden="true">/</span>  <span>comparing-indexes-in-postgres-for-different-column-types</span> </nav> <h1 class="post-header-title">UUID vs Serials</h1> <p class="page-description">Benchmarking UUID and Serial Values in Postgres and Python.</p> </div> <div class="cell post-header-meta-cell post-header-meta"> <div class="row"> <span class="k">published</span> <span class="v"><time datetime="2022-12-21T17:12:14.000Z">2022-12-21</time></span> </div> <div class="row"> <span class="k">revised</span> <span class="v"><time datetime="2023-05-22T18:12:50.000Z">2023-05-22</time></span> </div> <div class="row"> <span class="k">author</span> <span class="v">Sreeraj Rajan</span> </div> <div class="row"> <span class="k">reading</span> <span class="v">2 min</span> </div> <div style="margin-top: var(--s-3);"> <div class="tag-list"> <a href="/archive/2026-09/tags/postgres/" class="tag-pill">postgres</a><a href="/archive/2026-09/tags/python/" class="tag-pill">python</a><a href="/archive/2026-09/tags/uuid/" class="tag-pill">uuid</a> </div> </div> </div> </header> <!-- trek journal register -->  <!-- feature plane --> <div class="band"> <div class="cell trek-hero-wrap c9"> <img src="/images/comparing-indexes-in-postgres-for-different-column-types/office---1.jpeg" alt="UUID vs Serials" loading="eager"> </div> <div class="plane plane--accent c2" aria-hidden="true"></div> <div class="plane plane--yellow c1" aria-hidden="true"></div> </div> <!-- reading plane --> <div class="band prose-band"> <div class="cell prose-cell c12"> <div class="prose">  <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span></span></span>
+<span class="line"><span>CREATE TABLE test_uuid (</span></span>
+<span class="line"><span>    id uuid DEFAULT uuid_generate_v4(),</span></span>
+<span class="line"><span>    name VARCHAR,</span></span>
+<span class="line"><span>    phone VARCHAR,</span></span>
+<span class="line"><span>    created_at timestamp with time zone default now(),</span></span>
+<span class="line"><span>    PRIMARY KEY (id)</span></span>
+<span class="line"><span>);</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>CREATE TABLE foreign_uuid(</span></span>
+<span class="line"><span>   id uuid DEFAULT uuid_generate_v4(),</span></span>
+<span class="line"><span>   test_id uuid,</span></span>
+<span class="line"><span>   name VARCHAR(255),</span></span>
+<span class="line"><span>   PRIMARY KEY(id),</span></span>
+<span class="line"><span>   CONSTRAINT fk_uuid</span></span>
+<span class="line"><span>   FOREIGN KEY(test_id) </span></span>
+<span class="line"><span>   REFERENCES test_uuid(id)</span></span>
+<span class="line"><span>);</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>CREATE TABLE foreign_serial(</span></span>
+<span class="line"><span>   id serial,</span></span>
+<span class="line"><span>   test_id int,</span></span>
+<span class="line"><span>   name VARCHAR(255),</span></span>
+<span class="line"><span>   PRIMARY KEY(id),</span></span>
+<span class="line"><span>   CONSTRAINT fk_id_serial</span></span>
+<span class="line"><span>   FOREIGN KEY(test_id) </span></span>
+<span class="line"><span>   REFERENCES test_serial(id)</span></span>
+<span class="line"><span>);</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span></span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>CREATE TABLE test_serial (</span></span>
+<span class="line"><span>    id serial,</span></span>
+<span class="line"><span>    name VARCHAR,</span></span>
+<span class="line"><span>    phone VARCHAR,</span></span>
+<span class="line"><span>    created_at timestamp with time zone default now(),</span></span>
+<span class="line"><span>    PRIMARY KEY (id)</span></span>
+<span class="line"><span>);</span></span></code></pre>
+<p>I created two tables <code>test_uuid</code> and <code>test_serial</code> with uuid and serial columns as the primary keys respectively.  Both these tables have approximately a million rows.</p>
+<p>There are two more tables <code>foreign_serial</code> and <code>foreign_uuid</code> which have foreign keys to <code>test_serial</code> and <code>test_uuid</code> . Both of these tables have 100,000 records.</p>
+<p>The following are the benchmarks for different operations on the two columns. All of the queries have been run multiple times. The results posted denote the median duration for execution.</p>
+<p>The benchmark was run on postgres 13 running on a linode machine with 1 CPU and 2 GB memory</p>
+<h2 id="order-by">Order By</h2>
+<p><strong>1. UUID</strong></p>
+<p><img src="/images/comparing-indexes-in-postgres-for-different-column-types/image-26.png" alt=""></p>
+<p>Execution Time: <strong>857.755</strong> ms</p>
+<p><strong>2. Serial</strong></p>
+<p><img src="/images/comparing-indexes-in-postgres-for-different-column-types/image-27.png" alt=""></p>
+<p>Execution Time: <strong>264.139</strong> ms</p>
+<h2 id="accessing-a-row">Accessing a row</h2>
+<p>The difference is negligible for both UUID and Serial columns.</p>
+<p><img src="/images/comparing-indexes-in-postgres-for-different-column-types/image-13.png" alt=""></p>
+<h2 id="join">Join</h2>
+<p><strong>Running a join on a large set of rows</strong><br>
+<strong>1.</strong>  <strong>UUID</strong></p>
+<p><img src="/images/comparing-indexes-in-postgres-for-different-column-types/image-15.png" alt=""></p>
+<p>Execution Time: <strong>958.832</strong> ms</p>
+<p><strong>2. Serial</strong></p>
+<p><img src="/images/comparing-indexes-in-postgres-for-different-column-types/image-16.png" alt=""></p>
+<p>Execution Time: <strong>121.893</strong> ms</p>
+<p><strong>Running a join on a single row</strong><br>
+<strong>1. UUID</strong></p>
+<p><img src="/images/comparing-indexes-in-postgres-for-different-column-types/image-19.png" alt=""></p>
+<p>Execution Time: <strong>12.991</strong> ms</p>
+<p><strong>2. Serial</strong></p>
+<p><img src="/images/comparing-indexes-in-postgres-for-different-column-types/image-20.png" alt=""></p>
+<p>Execution Time: <strong>18.261</strong> ms</p>
+<h2 id=""></h2>
+<p>Group By</p>
+<p><strong>1. UUID</strong></p>
+<p><img src="/images/comparing-indexes-in-postgres-for-different-column-types/image-25.png" alt=""></p>
+<p>Execution Time:  <strong>1376.974</strong> ms</p>
+<p><strong>2. Serial</strong></p>
+<p><img src="/images/comparing-indexes-in-postgres-for-different-column-types/image-24.png" alt=""></p>
+<p>Execution Time: <strong>771.580</strong> ms</p>
+<p>Summarising, UUIDs seem to perform worse than serial/int columns on operations involving <strong>n</strong> rows, sometimes by a magnitude of 3.</p>
+<h3 id="benchmarking-uuid-and-integer-in-python">Benchmarking UUID and Integer in Python</h3>
+<p>There aren’t many resources that describe how <strong>postgres</strong> internally stores UUID values. So I created a binary tree with integer and UUID values (values converted to integer) with 1000 nodes and did a small benchmark.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">>>></span><span style="color:#6A737D"> # generate a tree with 1000 integers</span></span>
+<span class="line"><span style="color:#F97583">>>></span><span style="color:#E1E4E8"> int_tree </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> binary_tree_int(</span><span style="color:#79B8FF">1000</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">>>></span><span style="color:#E1E4E8"> int_timer </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> timeit.Timer(</span><span style="color:#F97583">lambda</span><span style="color:#E1E4E8">: int_tree.find(</span><span style="color:#79B8FF">947</span><span style="color:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#F97583">>>></span><span style="color:#E1E4E8"> int_timer.timeit(</span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">0.0024061249999931533</span></span></code></pre>
+<p><strong>Binary Tree With Plain Integer Values</strong></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>>>> # generate a tree with 1000 uuid values</span></span>
+<span class="line"><span>>>> uuid_tree = binary_tree_uuid(1000)</span></span>
+<span class="line"><span>>>> uuid_timer = timeit.Timer(lambda: uuid_tree.find(145519741522210453075912730917727185547))</span></span>
+<span class="line"><span>>>> uuid_timer.timeit(2)</span></span>
+<span class="line"><span>7.775000017318234e-05</span></span></code></pre>
+<p><strong>Binary Tree With UUID Values (UUID converted to Integer)</strong></p>
+<p>There’s a stark difference with respect to performance when you compare UUID to integer values. Serial values have a storage size of 4 bytes and UUID values take 16 bytes of storage.</p>  </div> </div> </div> <!-- prev / next register --> <nav class="band" aria-label="Adjacent posts"> <a href="/archive/2026-09/adding-auth-to-kibana-via-nginx/" class="post-nav-link c6"> <span class="post-nav-border">&larr; older composition</span> <span class="post-nav-title">Adding Basic Authentication via NGINX in Kubernetes</span> </a> <a href="/archive/2026-09/uuid-vs-ulid/" class="post-nav-link c6" style="text-align: right; align-items: flex-end;"> <span class="post-nav-border">newer composition &rarr;</span> <span class="post-nav-title">Benchmarking UUID v4 vs ULID</span> </a> </nav> </article> <script type="module">const n=document.getElementById("scroll-rule");if(n){const e=()=>{const t=document.documentElement,s=t.scrollHeight-t.clientHeight;n.style.transform=`scaleX(${s>0?t.scrollTop/s:0})`};e(),document.addEventListener("scroll",e,{passive:!0}),window.addEventListener("resize",e,{passive:!0})}</script>  </main> <footer class="band site-footer"> <div class="cell footer-colophon c5"> <span class="who">sreeraj rajan</span> <span>
+backend engineer at medley learning. composed in horizontals &amp;
+      verticals with astro — set in space grotesk &amp; inter. &copy; 2026 </span> </div> <div class="cell footer-links c3"> <a href="/archive/2026-09/rss.xml">rss feed</a> <a href="/archive/2026-09/tags/">all tags</a> <a href="/archive/">past compositions</a> <a href="/archive/2026-09/contact/">contact</a> </div> <div class="cell cell--blue footer-edition c2"> <span>edition</span> <span class="big">2026-09</span> <span>de stijl</span> </div> <div class="plane plane--yellow c1" aria-hidden="true"></div> <div class="plane plane--red c1" aria-hidden="true"></div> </footer> </div> </body></html>
