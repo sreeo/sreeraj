@@ -14,10 +14,13 @@ redesign runner ──POST /webhook/decide──▶ decide gateway ──▶ dec
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `pr-review-learner` | every hour, `POST /webhook/redesign-reviews/sync`, manual | Lists closed `redesign/*` PRs with `gh`, skips ones already stored, reads the owner's review comments, asks the decider typed questions, applies code rules, and upserts one row per PR. |
+| `pr-review-learner` | every hour, `POST /webhook/redesign-reviews/sync`, manual | Lists closed `redesign/*` PRs with `gh`. Picks PRs never classified, or updated (e.g. a new review comment) after their last decision. Reads the owner's review comments, asks the decider typed questions, applies code rules, and upserts one row per PR. |
 | `feedback-api` | `GET /webhook/redesign-feedback` | Returns `avoid_styles`, `lessons`, `rejected`, `accepted` and `needs_review` for the runner. |
 | `decide-gateway` | `POST /webhook/decide` | TypeSafe System One request in, averaged answer out. Logs every decision for later calibration. |
 | `setup-data-tables` | `POST /webhook/setup-redesign-tables` | Creates both data tables if they do not exist. |
+| `alerts` | `POST /webhook/redesign-alert`; monthly on the 2nd at 06:00 UTC | Posts `{level, title, message, url}` to Discord. The monthly check alerts when no redesign PR exists for the month, or when it is only a draft. The runner (failure, PR ready) and the weekly probe call the webhook. |
+
+Every webhook requires the header `x-redesign-token` (credential "Redesign webhook token"). The runner reads the same secret as `N8N_WEBHOOK_TOKEN` from its env file.
 
 ### How a PR becomes a row
 
@@ -59,9 +62,12 @@ cp docker-compose.override.example.yml docker-compose.override.yml   # Tailscale
 docker compose up -d --build        # first decider start downloads the 2.7 GB model
 # open http://<N8N_HOST>:5678 and create the owner account
 scripts/create-ssh-credential.sh    # SSH key for gh on the host, allowed from the n8n network only
+scripts/create-webhook-token.sh     # webhook secret: n8n credential + N8N_WEBHOOK_TOKEN in the runner env
+scripts/create-discord-credential.sh < discord-webhook-url.txt   # alert channel
 scripts/deploy-workflows.sh         # import + publish workflows, create data tables
-curl -s -X POST http://127.0.0.1:5678/webhook/redesign-reviews/sync >/dev/null   # first backfill
-curl -s http://127.0.0.1:5678/webhook/redesign-feedback
+T=$(cat ~/n8n/secrets/webhook-token)
+curl -s -H "x-redesign-token: $T" -X POST http://127.0.0.1:5678/webhook/redesign-reviews/sync >/dev/null   # first backfill
+curl -s -H "x-redesign-token: $T" http://127.0.0.1:5678/webhook/redesign-feedback
 ```
 
 ## Gotchas found while building this
@@ -69,4 +75,5 @@ curl -s http://127.0.0.1:5678/webhook/redesign-feedback
 - A CLI `n8n execute` run cannot use Data Tables ("the module is disabled"). Trigger setup through a webhook on the running server instead.
 - Workflows activated with `n8n publish:workflow` register their triggers only after a restart.
 - n8n's expression sandbox blocks any property named `caller`. Use another name.
+- A `lastNode` webhook answers HTTP 500 "No item to return was found" when the run ends with no items (for example, no PR needs re-classifying). The execution still succeeds; callers of `/redesign-reviews/sync` ignore the status and only wait for it to finish.
 - The HTTP Request node sends all items at once by default. The decider scores one request at a time, so the node uses batching with a batch size of 1. Otherwise the queue outlasts the timeout.

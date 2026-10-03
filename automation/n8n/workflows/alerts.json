@@ -1,0 +1,186 @@
+{
+  "id": "rdAlerts0000001",
+  "name": "Redesign · alerts",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "UTC"
+  },
+  "nodes": [
+    {
+      "id": "c1a0e0b1-0004-4a1a-9a01-000000000001",
+      "name": "POST /redesign-alert",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "redesign-alert",
+        "responseMode": "onReceived",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "webhookId": "3c9e1f7a-5b2d-4e8f-9a6c-1d2e3f4a0b05",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rdWebhookToken01",
+          "name": "Redesign webhook token"
+        }
+      }
+    },
+    {
+      "id": "c1a0e0b1-0004-4a1a-9a01-000000000002",
+      "name": "Monthly missed-run check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        220
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 2 * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c1a0e0b1-0004-4a1a-9a01-000000000003",
+      "name": "List redesign PRs (gh)",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        240,
+        220
+      ],
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "gh pr list -R sreeo/sreeraj --state all --limit 20 --json number,url,isDraft,createdAt,headRefName"
+      },
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "rdHostSshKey0001",
+          "name": "Redesign host (gh CLI)"
+        }
+      }
+    },
+    {
+      "id": "c1a0e0b1-0004-4a1a-9a01-000000000004",
+      "name": "Missing or draft?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        220
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Dead-man's switch: by the 2nd there should be a ready (non-draft) redesign PR for this month.\nconst month = new Date().toISOString().slice(0, 7);\nconst prs = JSON.parse($input.first().json.stdout || '[]').filter(p => /^redesign\\//.test(p.headRefName) && p.createdAt.startsWith(month));\nif (!prs.length) return [{ json: { body: { level: 'error', title: `No redesign PR for ${month}`, message: 'The monthly run did not open a PR. Check the run viewer (http://100.104.153.63:8790) and journalctl --user -u sreeraj-redesign.service.' } } }];\nconst ready = prs.filter(p => !p.isDraft);\nif (!ready.length) return [{ json: { body: { level: 'warn', title: `${month} redesign PR is a draft`, message: 'Blocking e2e or visual checks still failed after the fix passes; it needs manual finishing.', url: prs[0].url } } }];\nreturn [];\n"
+      }
+    },
+    {
+      "id": "c1a0e0b1-0004-4a1a-9a01-000000000005",
+      "name": "Format message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "mode": "runOnceForAllItems",
+        "jsCode": "// One Discord message per alert. Body: { level: info|warn|error, title, message, url? }.\nconst icons = { info: '🟢', warn: '🟠', error: '🔴' };\nreturn $input.all().map(i => {\n  const b = i.json.body ?? i.json;\n  const level = icons[b.level] ? b.level : 'info';\n  const lines = [`${icons[level]} **${String(b.title ?? 'Redesign').slice(0, 200)}**`];\n  if (b.message) lines.push(String(b.message).slice(0, 1500));\n  if (b.url) lines.push(String(b.url));\n  return { json: { content: lines.join('\\n') } };\n});\n"
+      }
+    },
+    {
+      "id": "c1a0e0b1-0004-4a1a-9a01-000000000006",
+      "name": "Send to Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ],
+      "parameters": {
+        "authentication": "webhook",
+        "operation": "sendLegacy",
+        "content": "={{ $json.content }}",
+        "options": {
+          "username": "sreeraj.dev redesign"
+        }
+      },
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "rdDiscordHook001",
+          "name": "Redesign alerts (Discord)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "POST /redesign-alert": {
+      "main": [
+        [
+          {
+            "node": "Format message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monthly missed-run check": {
+      "main": [
+        [
+          {
+            "node": "List redesign PRs (gh)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List redesign PRs (gh)": {
+      "main": [
+        [
+          {
+            "node": "Missing or draft?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Missing or draft?": {
+      "main": [
+        [
+          {
+            "node": "Format message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format message": {
+      "main": [
+        [
+          {
+            "node": "Send to Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

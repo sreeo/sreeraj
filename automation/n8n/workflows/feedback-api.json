@@ -21,7 +21,14 @@
         "httpMethod": "GET",
         "path": "redesign-feedback",
         "responseMode": "responseNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rdWebhookToken01",
+          "name": "Redesign webhook token"
+        }
       }
     },
     {

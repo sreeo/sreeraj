@@ -138,7 +138,7 @@ async function loadSession(id, quiet) {
   renderPane();
 }
 
-const TABS = [['session', 'Session'], ['prompt', 'Rebuild prompt'], ['trend', 'Trend decision'], ['calls', 'Agent calls'], ['qa', 'Layout QA'], ['log', 'Full log']];
+const TABS = [['session', 'Session'], ['prompt', 'Rebuild prompt'], ['trend', 'Trend decision'], ['calls', 'Agent calls'], ['qa', 'QA'], ['log', 'Full log']];
 function renderTabs() {
   $('#tabs').innerHTML = TABS.map(([k, l]) => `<button class="${k === tab ? 'sel' : ''}" data-k="${k}">${l}</button>`).join('');
   document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { tab = b.dataset.k; tab === 'session' && sessionId ? loadSession(sessionId) : renderPane(); });
@@ -162,7 +162,12 @@ function renderPane() {
       calls.map(c => `<tr class="${c.ok ? '' : 'bad'}"><td>${fmt(c.ts)}</td><td>${esc(c.label || c.role)}</td><td><span class="prov ${esc(c.provider)}">${esc(c.provider)}</span> ${esc(c.model)}</td><td>${c.ok ? 'ok' + (c.hitTurnLimit ? ' (turn limit)' : '') : esc((c.kind || 'error') + ': ' + (c.error || '').slice(0, 140))}</td><td>${dur(new Date(new Date(c.ts) - c.durationMs).toISOString(), c.ts)}</td></tr>`).join('')
     }</tbody></table>` : '<div class="empty">No agent calls logged for this run (runs before the agent adapter have none).</div>';
   }
-  else if (tab === 'qa') pane.innerHTML = a.qa_summary ? `<pre>${esc(a.qa_summary)}</pre>` : '<div class="empty">Layout QA has not finished.</div>';
+  else if (tab === 'qa') {
+    const block = (title, text) => text ? `<h3 style="font-size:13px">${title}</h3><pre>${esc(text)}</pre>` : '';
+    const shots = (a.shots || []).map(f => `<a href="/shots/${esc(f)}" target="_blank" title="${esc(f)}"><img src="/shots/${esc(f)}" loading="lazy" style="width:${/-390\./.test(f) ? 90 : 200}px;height:140px;object-fit:cover;object-position:top;border:1px solid var(--line);border-radius:4px;margin:0 6px 6px 0"></a>`).join('');
+    pane.innerHTML = (block('E2E', a.e2e_summary) + block('Visual QA', a.visual_summary) + block('Layout geometry', a.qa_summary)
+      + (shots ? `<h3 style="font-size:13px">Screenshots</h3><div>${shots}</div>` : '')) || '<div class="empty">QA has not run yet for this run.</div>';
+  }
   else if (tab === 'log') pane.innerHTML = `<pre>${esc((data.log || []).join('\n'))}</pre>`;
   else {
     const s = sessionCache[sessionId];

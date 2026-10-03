@@ -48,8 +48,29 @@ nvm use default >/dev/null 2>&1 || true
 
 log() { echo "[$(date -u +%FT%TZ)] $*"; }
 hc()  { [ -n "$HC_URL" ] && curl -fsS -m 10 "${HC_URL}${1:-}" >/dev/null 2>&1 || true; }
+# Alerts go to n8n (/webhook/redesign-alert), which posts them to Discord. Best effort.
+N8N_URL="${N8N_URL:-http://127.0.0.1:5678}"
+notify() {  # level title message [url]
+  [ -n "${N8N_WEBHOOK_TOKEN:-}" ] || return 0
+  LEVEL="$1" TITLE="$2" MESSAGE="$3" URL="${4:-}" python3 -c 'import json,os; print(json.dumps({k.lower(): os.environ[k] for k in ("LEVEL", "TITLE", "MESSAGE", "URL")}))' \
+    | curl -fsS -m 15 -X POST "$N8N_URL/webhook/redesign-alert" -H "x-redesign-token: $N8N_WEBHOOK_TOKEN" \
+        -H 'content-type: application/json' --data-binary @- >/dev/null 2>&1 || true
+}
 
-trap 'rc=$?; if [ $rc -ne 0 ]; then hc "/fail"; log "FAILED rc=$rc (state kept in '"$STATE_DIR"'; run: redesign-run.sh resume)"; fi' EXIT
+# The 3 GB CPU decider is only needed while the style is decided. Pausing it frees memory for
+# the build, e2e and visual QA stages on this 7.7 GB host without swap (a Chrome was
+# OOM-killed on 2026-10-03). The EXIT trap always starts it again.
+DECIDER_CONTAINER="${DECIDER_CONTAINER:-redesign-n8n-decider-1}"
+DECIDER_PAUSED=0
+pause_decider() {
+  [ "${REDESIGN_PAUSE_DECIDER:-1}" = "1" ] || return 0
+  if docker ps -q -f "name=^${DECIDER_CONTAINER}$" 2>/dev/null | grep -q .; then
+    docker stop "$DECIDER_CONTAINER" >/dev/null 2>&1 && DECIDER_PAUSED=1 && log "Paused the decider to free memory for the build and QA stages."
+  fi
+}
+
+trap 'rc=$?; [ "$DECIDER_PAUSED" = 1 ] && docker start "$DECIDER_CONTAINER" >/dev/null 2>&1; if [ $rc -ne 0 ]; then hc "/fail"; log "FAILED rc=$rc (state kept in '"$STATE_DIR"'; run: redesign-run.sh resume)"; notify error "Monthly redesign failed (rc=$rc)" "$(journalctl --user -u sreeraj-redesign.service -n 12 --no-pager -o cat 2>/dev/null | grep -E "^\[20" | tail -6)
+Run viewer: http://100.104.153.63:8790"; fi' EXIT
 hc "/start"
 log "=== Monthly redesign (mode=$MODE, dry=$DRY_RUN, host=$(hostname)) ==="
 
@@ -131,6 +152,7 @@ if [ "$MODE" = "resume" ]; then
   TREND="$(cat "$TREND_FILE" 2>/dev/null || echo 'Resumed redesign')"
   log "Resuming: applying saved generation patch, skipping trend + rebuild."
   git apply --whitespace=nowarn "$PATCH_FILE" || { log "FATAL: could not apply generation patch."; exit 3; }
+  pause_decider
 else
   # --- Full: clear stale state, then generate ---
   rm -f "$STAGE_FILE" "$PATCH_FILE" "$TREND_FILE"
@@ -193,7 +215,11 @@ PY
   # to automation/history/current-trend.json plus test-output/decision*.{json,md}.
   # pick-trend.ts (the style registry) is the fallback. Clear stale outputs first so
   # a manual REDESIGN_TREND override can't pick up last month's files.
-  rm -f automation/history/current-trend.json automation/test-output/decision.json automation/test-output/decision-summary.md
+  rm -f automation/history/current-trend.json automation/test-output/decision.json automation/test-output/decision-summary.md \
+        automation/test-output/e2e-summary.md automation/test-output/agent-calls.jsonl \
+        automation/test-output/visual-qa-summary.md automation/test-output/visual-qa.json \
+        automation/test-output/gallery.md
+  rm -rf automation/test-output/visual
   TREND="${REDESIGN_TREND:-}"
   if [ -z "$TREND" ]; then
     TREND="$(cd automation && timeout 3600 npx tsx pipeline/ideation.ts 2>>/tmp/ideation.err)" || TREND=""
@@ -208,6 +234,7 @@ PY
   fi
   printf '%s' "$TREND" > "$TREND_FILE"
   log "Trend: $TREND"
+  pause_decider
 
   # 4. Build the rebuild prompt from the template.
   cp automation/prompts/full-rebuild.md /tmp/rebuild-prompt.md
@@ -244,7 +271,9 @@ PY
   # Runs on the implementer role's provider order (Claude, then Codex) — see pipeline/roles.json.
   ( cd automation && npx tsx pipeline/rebuild.ts /tmp/rebuild-prompt.md ) \
     || REBUILD_RC=$?
-  [ "$REBUILD_RC" -ne 0 ] && log "claude rebuild exited $REBUILD_RC"
+  [ "$REBUILD_RC" -ne 0 ] && log "rebuild exited $REBUILD_RC"
+  # The tests, prompts and pipeline that judge the design are off limits to the agent.
+  log "$(cd automation && npx tsx pipeline/guard.ts 2>&1 | tail -1)"
 
   # HARD GATE: the rebuild must actually have changed the presentation layer.
   # Without this, a failed rebuild (e.g. expired OAuth) still produced a PR
@@ -306,10 +335,22 @@ PY
   log "Checkpoint saved (generation) -> $PATCH_FILE"
 fi
 
-# --- 7. Layout QA & Fix stage (deterministic geometry + Agent SDK + webwright) ---
+# --- 6b. E2E stage: blocking invariants (routes, content, data-qa contract, nav, overflow,
+# archive) with an agent fix loop. A design that still fails becomes a DRAFT PR.
+E2E_RC=0
+( cd automation && npx tsx pipeline/e2e-stage.ts ) || E2E_RC=$?
+log "e2e exit: $E2E_RC"
+
+# --- 7. Layout QA & Fix stage (deterministic geometry + agent fixer + webwright) ---
 QA_RC=0
 ( cd automation && npx tsx layout-qa-stage.ts ) || QA_RC=$?
 log "layout-qa exit: $QA_RC"
+
+# --- 7b. Visual QA: 14 page templates at 390/1280px, a typed vision verdict per page, a
+# code gate (only high-severity layout breakage blocks) and a bounded fix loop.
+VQA_RC=0
+( cd automation && npx tsx pipeline/visual-qa.ts ) || VQA_RC=$?
+log "visual-qa exit: $VQA_RC"
 
 # --- 8. Record the design in the log (used by trend discovery to avoid repeats) ---
 # Record the ACTUAL outcome, not a hardcoded success — a design logged as
@@ -358,14 +399,31 @@ else
   git add -A
   git commit -m "Monthly redesign: ${TREND:0:60}"
   git push -u origin "$BRANCH"
-  SUMMARY="automation/test-output/layout-qa-summary.md"
-  BODY="Automated monthly redesign on $(hostname).\n\n**Trend:** ${TREND}"
-  DECISION="automation/test-output/decision-summary.md"
-  [ -f "$DECISION" ] && BODY="$(printf '%b\n\n---\n\n' "$BODY"; cat "$DECISION")"
-  [ -f "$SUMMARY" ] && BODY="$(printf '%b\n\n---\n\n' "$BODY"; cat "$SUMMARY")"
-  gh pr create --title "Monthly redesign: ${TREND:0:60}" \
-    --body "$BODY" --head "$BRANCH" --base "$BASE_BRANCH" \
-    || log "PR creation failed (push succeeded; open the PR manually)"
+  # Screenshots go to the orphan branch redesign-assets (never main); gallery.md links them.
+  ( cd automation && npx tsx pipeline/publish-shots.ts "${NEW_MONTH:-$(date -u +%Y-%m)}" "${BRANCH#redesign/}" ) || true
+  # Build the body in a file: printf %b on accumulated markdown would eat backslashes.
+  BODY_FILE="$(mktemp)"
+  printf 'Automated monthly redesign on %s.\n\n**Trend:** %s\n' "$(hostname)" "$TREND" > "$BODY_FILE"
+  for part in decision-summary e2e-summary visual-qa-summary layout-qa-summary gallery; do
+    f="automation/test-output/$part.md"
+    if [ -f "$f" ]; then printf '\n---\n\n' >> "$BODY_FILE"; cat "$f" >> "$BODY_FILE"; fi
+  done
+  DRAFT=()
+  if [ "$E2E_RC" -ne 0 ] || [ "$VQA_RC" -ne 0 ]; then
+    DRAFT=(--draft)
+    log "Blocking checks still fail (e2e=$E2E_RC, visual=$VQA_RC) — opening a DRAFT PR for manual finishing."
+  fi
+  if PR_URL="$(gh pr create "${DRAFT[@]}" --title "Monthly redesign: ${TREND:0:60}" \
+      --body-file "$BODY_FILE" --head "$BRANCH" --base "$BASE_BRANCH")"; then
+    log "$PR_URL"
+    if [ ${#DRAFT[@]} -gt 0 ]; then
+      notify warn "Redesign opened as a DRAFT: ${TREND%% — *}" "Blocking checks still fail (e2e=$E2E_RC, visual=$VQA_RC). It needs manual finishing." "$PR_URL"
+    else
+      notify info "Redesign ready for review: ${TREND%% — *}" "All blocking checks passed." "$PR_URL"
+    fi
+  else
+    log "PR creation failed (push succeeded; open the PR manually)"
+  fi
 fi
 
 # --- Success: clear the checkpoint so the next run starts fresh ---

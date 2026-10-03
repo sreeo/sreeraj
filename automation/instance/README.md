@@ -60,6 +60,29 @@ journalctl --user -u sreeraj-redesign.service -f
 REDESIGN_DRY_RUN=1 ~/.local/share/sreeraj-redesign/redesign-run.sh full
 ```
 
+## Stages and gates
+
+| Stage | What decides | Blocks? |
+|---|---|---|
+| Preflight | `pipeline/probe.ts` (Claude Code and Codex) | Only when no provider works |
+| Style | `pipeline/ideation.ts`: researchers, novelty filter, decider, two judges | Falls back to the style registry |
+| Rebuild | implementer agent (Claude, then Codex) | No `src/` change = abort |
+| Guard | `pipeline/guard.ts` undoes any agent edit under `automation/` | — |
+| E2E | `pipeline/e2e-stage.ts`: blocking checks + up to 3 fix passes | Still failing = draft PR |
+| Layout QA | geometry analyzer + fixer | Reported |
+| Visual QA | `pipeline/visual-qa.ts`: 14 templates x 2 widths, typed verdicts, up to 2 fix passes | High layout breakage left = draft PR |
+| PR | decision, e2e, visual QA and layout summaries, plus a screenshot gallery (`redesign-assets` branch) | Never auto-merges |
+
+The run pauses the 3 GB decider container after the style decision and starts it again on exit:
+the host has 7.7 GB and no swap, and a Chrome was OOM-killed when both ran at once.
+
+## Health check and alerts
+
+`sreeraj-redesign-probe.timer` runs `redesign-probe.sh` every Monday at 09:00 UTC. It checks both
+agent logins, the decider and n8n, and posts to the n8n `alerts` workflow (Discord) on failure.
+The runner also posts when a run fails and when a PR is ready. Set `N8N_WEBHOOK_TOKEN` in the env
+file (`automation/n8n/scripts/create-webhook-token.sh` does it).
+
 ## Watch a run
 
 `sreeraj-run-viewer.service` serves a read-only page on port 8790. Put `VIEWER_BIND=<tailscale-ip>` in

@@ -21,7 +21,14 @@
         "httpMethod": "POST",
         "path": "redesign-reviews/sync",
         "responseMode": "lastNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rdWebhookToken01",
+          "name": "Redesign webhook token"
+        }
       }
     },
     {
@@ -66,7 +73,7 @@
       ],
       "parameters": {
         "authentication": "privateKey",
-        "command": "gh pr list -R sreeo/sreeraj --state closed --limit 100 --json number,title,headRefName,url,mergedAt,closedAt,createdAt,additions,deletions,changedFiles"
+        "command": "gh pr list -R sreeo/sreeraj --state closed --limit 100 --json number,title,headRefName,url,mergedAt,closedAt,createdAt,updatedAt,additions,deletions,changedFiles"
       },
       "credentials": {
         "sshPrivateKey": {
@@ -81,42 +88,13 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        480,
+        720,
         100
       ],
       "parameters": {
         "language": "javaScript",
         "mode": "runOnceForAllItems",
-        "jsCode": "// Turn `gh pr list` output into one item per closed redesign PR.\n// Adds structured state the decider can use: whether a later PR with the same title replaced this one.\nconst prs = JSON.parse($input.first().json.stdout || '[]');\nconst redesignBranch = /^(redesign|rebuild|preview\\/redesign)\\//;\nconst redesign = prs.filter(p => redesignBranch.test(p.headRefName));\n\nconst styleOf = title => title.replace(/^(Monthly redesign|Full rebuild|Preview: Monthly redesign)\\s*[:—-]\\s*/i, '').split(' — ')[0].trim();\n\nreturn redesign.map(p => {\n  const later = redesign\n    .filter(o => o.number !== p.number && styleOf(o.title) === styleOf(p.title) && o.createdAt > p.createdAt)\n    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];\n  return {\n    json: {\n      pr_number: p.number,\n      title: p.title,\n      style_name: styleOf(p.title),\n      branch: p.headRefName,\n      url: p.url,\n      outcome: p.mergedAt ? 'merged' : 'rejected',\n      closed_at: p.closedAt,\n      changed_files: p.changedFiles,\n      additions: p.additions,\n      deletions: p.deletions,\n      later_pr_same_style: later ? { number: later.number, outcome: later.mergedAt ? 'merged' : 'closed without merge' } : null,\n    },\n  };\n});\n"
-      }
-    },
-    {
-      "id": "c1a0e0b1-0001-4a1a-9a01-000000000005",
-      "name": "Only new PRs",
-      "type": "n8n-nodes-base.dataTable",
-      "typeVersion": 1.1,
-      "position": [
-        720,
-        100
-      ],
-      "parameters": {
-        "resource": "row",
-        "operation": "rowNotExists",
-        "dataTableId": {
-          "__rl": true,
-          "mode": "name",
-          "value": "redesign_reviews"
-        },
-        "matchType": "allConditions",
-        "filters": {
-          "conditions": [
-            {
-              "keyName": "pr_number",
-              "condition": "eq",
-              "keyValue": "={{ $json.pr_number }}"
-            }
-          ]
-        }
+        "jsCode": "// Turn `gh pr list` output into one item per closed redesign PR that needs a decision:\n// never classified, or updated (e.g. a review comment added) after its last decision.\n// Adds structured state the decider can use: whether a later PR with the same title replaced this one.\nconst prs = JSON.parse($('List closed PRs (gh)').first().json.stdout || '[]');\nconst decidedAt = new Map($input.all().map(i => i.json).filter(r => r.pr_number).map(r => [r.pr_number, r.decided_at]));\nconst redesignBranch = /^(redesign|rebuild|preview\\/redesign)\\//;\nconst redesign = prs.filter(p => redesignBranch.test(p.headRefName));\n\nconst styleOf = title => title.replace(/^(Monthly redesign|Full rebuild|Preview: Monthly redesign)\\s*[:—-]\\s*/i, '').split(' — ')[0].trim();\nconst needsDecision = p => !decidedAt.has(p.number) || String(p.updatedAt) > String(decidedAt.get(p.number) ?? '');\n\nreturn redesign.filter(needsDecision).map(p => {\n  const later = redesign\n    .filter(o => o.number !== p.number && styleOf(o.title) === styleOf(p.title) && o.createdAt > p.createdAt)\n    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];\n  return {\n    json: {\n      pr_number: p.number,\n      title: p.title,\n      style_name: styleOf(p.title),\n      branch: p.headRefName,\n      url: p.url,\n      outcome: p.mergedAt ? 'merged' : 'rejected',\n      closed_at: p.closedAt,\n      changed_files: p.changedFiles,\n      additions: p.additions,\n      deletions: p.deletions,\n      later_pr_same_style: later ? { number: later.number, outcome: later.mergedAt ? 'merged' : 'closed without merge' } : null,\n    },\n  };\n});\n"
       }
     },
     {
@@ -151,7 +129,7 @@
       "parameters": {
         "language": "javaScript",
         "mode": "runOnceForEachItem",
-        "jsCode": "// State in, typed questions out. The decider answers; the next node decides.\nconst pr = $('Only new PRs').item.json;\nconst fetched = JSON.parse($json.stdout || '{}');\n\n// Feedback from the site owner only. Deploy bots (Cloudflare preview) comment on every PR\n// and add nothing but input tokens, which cost about a minute per 1k on this CPU.\nconst REVIEWERS = ['sreeo'];\nconst feedback = [...(fetched.reviews || []), ...(fetched.comments || [])]\n  .filter(c => REVIEWERS.includes(c.author) && c.body && c.body.trim())\n  .map(c => ({ author: c.author, body: c.body.slice(0, 1500) }))\n  .slice(0, 10);\n\nconst state = {\n  pr: {\n    number: pr.pr_number,\n    title: pr.title,\n    outcome: pr.outcome === 'merged' ? 'merged' : 'closed without merge',\n    changed_files: pr.changed_files,\n    additions: pr.additions,\n    deletions: pr.deletions,\n    files: fetched.files || [],\n  },\n  review_comments: feedback,\n  later_pr_same_style: pr.later_pr_same_style,\n};\n\nconst questions = pr.outcome === 'merged'\n  ? {\n      reception: {\n        type: 'score',\n        instructions: 'How positive was the reviewer about this redesign?',\n        criteria: ['negative', 'mixed', 'positive'],\n      },\n    }\n  : {\n      reason: {\n        type: 'choice',\n        instructions: 'Why was this redesign pull request closed without merging?',\n        criteria: {\n          'pipeline-failure': 'The automation produced an empty or bogus change, not a real redesign',\n          'superseded': 'A newer pull request replaced it',\n          'test-run': 'A rehearsal or test run of the automation, never meant to merge',\n          'broken-layout': 'Pages render broken: overlap, overflow, missing content',\n          'unreadable': 'Text is hard to read: contrast, size, typography',\n          'style-disliked': 'The reviewer did not want this visual style',\n          'too-similar': 'Too close to an earlier design',\n          'no-reason': 'Nothing in the state explains it',\n        },\n      },\n      // One choice keeps only the main reason. A comment can give several, so every signal\n      // the pipeline acts on gets its own yes/no question.\n      says_too_similar: { type: 'noul', instructions: 'Does the review say the design was too close to, or a reskin of, an earlier design?' },\n      says_quality_problem: { type: 'noul', instructions: 'Does the review say text was hard to read or pages rendered broken?' },\n      avoid_style: { type: 'noul', instructions: 'Should future redesigns avoid this visual style?' },\n    };\n\nreturn {\n  json: {\n    ...pr,\n    review_text: feedback.map(c => `${c.author}: ${c.body}`).join('\\n---\\n').slice(0, 4000),\n    request: { state, questions },\n  },\n};\n"
+        "jsCode": "// State in, typed questions out. The decider answers; the next node decides.\nconst pr = $('Keep redesign PRs').item.json;\nconst fetched = JSON.parse($json.stdout || '{}');\n\n// Feedback from the site owner only. Deploy bots (Cloudflare preview) comment on every PR\n// and add nothing but input tokens, which cost about a minute per 1k on this CPU.\nconst REVIEWERS = ['sreeo'];\nconst feedback = [...(fetched.reviews || []), ...(fetched.comments || [])]\n  .filter(c => REVIEWERS.includes(c.author) && c.body && c.body.trim())\n  .map(c => ({ author: c.author, body: c.body.slice(0, 1500) }))\n  .slice(0, 10);\n\nconst state = {\n  pr: {\n    number: pr.pr_number,\n    title: pr.title,\n    outcome: pr.outcome === 'merged' ? 'merged' : 'closed without merge',\n    changed_files: pr.changed_files,\n    additions: pr.additions,\n    deletions: pr.deletions,\n    files: fetched.files || [],\n  },\n  review_comments: feedback,\n  later_pr_same_style: pr.later_pr_same_style,\n};\n\nconst questions = pr.outcome === 'merged'\n  ? {\n      reception: {\n        type: 'score',\n        instructions: 'How positive was the reviewer about this redesign?',\n        criteria: ['negative', 'mixed', 'positive'],\n      },\n    }\n  : {\n      reason: {\n        type: 'choice',\n        instructions: 'Why was this redesign pull request closed without merging?',\n        criteria: {\n          'pipeline-failure': 'The automation produced an empty or bogus change, not a real redesign',\n          'superseded': 'A newer pull request replaced it',\n          'test-run': 'A rehearsal or test run of the automation, never meant to merge',\n          'broken-layout': 'Pages render broken: overlap, overflow, missing content',\n          'unreadable': 'Text is hard to read: contrast, size, typography',\n          'style-disliked': 'The reviewer did not want this visual style',\n          'too-similar': 'Too close to an earlier design',\n          'no-reason': 'Nothing in the state explains it',\n        },\n      },\n      // One choice keeps only the main reason. A comment can give several, so every signal\n      // the pipeline acts on gets its own yes/no question.\n      says_too_similar: { type: 'noul', instructions: 'Does the review say the design was too close to, or a reskin of, an earlier design?' },\n      says_quality_problem: { type: 'noul', instructions: 'Does the review say text was hard to read or pages rendered broken?' },\n      avoid_style: { type: 'noul', instructions: 'Should future redesigns avoid this visual style?' },\n    };\n\nreturn {\n  json: {\n    ...pr,\n    review_text: feedback.map(c => `${c.author}: ${c.body}`).join('\\n---\\n').slice(0, 4000),\n    request: { state, questions },\n  },\n};\n"
       }
     },
     {
@@ -228,6 +206,28 @@
         },
         "options": {}
       }
+    },
+    {
+      "id": "c1a0e0b1-0001-4a1a-9a01-000000000005",
+      "name": "Read stored reviews",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        100
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "redesign_reviews"
+        },
+        "returnAll": true
+      }
     }
   ],
   "connections": {
@@ -257,7 +257,7 @@
       "main": [
         [
           {
-            "node": "Keep redesign PRs",
+            "node": "Read stored reviews",
             "type": "main",
             "index": 0
           }
@@ -265,17 +265,6 @@
       ]
     },
     "Keep redesign PRs": {
-      "main": [
-        [
-          {
-            "node": "Only new PRs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Only new PRs": {
       "main": [
         [
           {
@@ -335,6 +324,17 @@
         [
           {
             "node": "List closed PRs (gh)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read stored reviews": {
+      "main": [
+        [
+          {
+            "node": "Keep redesign PRs",
             "type": "main",
             "index": 0
           }
