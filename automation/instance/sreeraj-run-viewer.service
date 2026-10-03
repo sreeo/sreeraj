@@ -1,0 +1,13 @@
+[Unit]
+Description=Read-only web viewer for sreeraj.dev redesign runs
+After=network-online.target
+
+[Service]
+# Optional VIEWER_BIND / VIEWER_PORT (default 127.0.0.1:8790). Set VIEWER_BIND to the Tailscale IP.
+EnvironmentFile=-%h/.config/sreeraj-redesign/viewer.env
+ExecStart=/usr/bin/python3 %h/.local/share/sreeraj-redesign/viewer/run-viewer.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

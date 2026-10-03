@@ -29,10 +29,18 @@ install -m 0644 "$SCRIPT_DIR/sreeraj-redesign.service"        "$UNIT_DIR/"
 install -m 0644 "$SCRIPT_DIR/sreeraj-redesign.timer"          "$UNIT_DIR/"
 install -m 0644 "$SCRIPT_DIR/sreeraj-redesign-check.service"  "$UNIT_DIR/"
 install -m 0644 "$SCRIPT_DIR/sreeraj-redesign-resume.service" "$UNIT_DIR/"
+install -m 0644 "$SCRIPT_DIR/sreeraj-run-viewer.service"      "$UNIT_DIR/"
 echo "  • units    -> $UNIT_DIR/"
 
 systemctl --user daemon-reload
 systemctl --user enable --now sreeraj-redesign.timer
+
+# 3b. Run viewer (read-only web page; see README "Watch a run").
+mkdir -p "$SHARE_DIR/viewer"
+install -m 0644 "$SCRIPT_DIR/run-viewer.py" "$SCRIPT_DIR/run-viewer.html" "$SHARE_DIR/viewer/"
+systemctl --user enable --now sreeraj-run-viewer.service
+systemctl --user restart sreeraj-run-viewer.service
+echo "  • viewer   -> port 8790 (set VIEWER_BIND in $CONF_DIR/viewer.env to reach it over Tailscale)"
 
 # 4. Linger so the timer fires even when you're not logged in.
 if command -v loginctl >/dev/null && [ "$(loginctl show-user "$USER" -p Linger --value 2>/dev/null)" != "yes" ]; then

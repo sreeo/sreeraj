@@ -38,6 +38,10 @@ required** — leave it unset.
 - The session token can expire and need an interactive `claude` re-login; the
   healthcheck (below) surfaces a run that fails because of this.
 
+**Unattended runs: use a long-lived token.** The interactive login expires (it broke the 2026-10-01 run).
+Run `claude setup-token` once, approve in a browser, and put the result in the env file as
+`CLAUDE_CODE_OAUTH_TOKEN=...`. It is valid for one year and still bills to the subscription.
+
 ## Verify
 
 ```sh
@@ -55,6 +59,19 @@ journalctl --user -u sreeraj-redesign.service -f
 # Dry run (all stages, no PR) — leaves the redesign in the managed clone:
 REDESIGN_DRY_RUN=1 ~/.local/share/sreeraj-redesign/redesign-run.sh full
 ```
+
+## Watch a run
+
+`sreeraj-run-viewer.service` serves a read-only page on port 8790. Put `VIEWER_BIND=<tailscale-ip>` in
+`~/.config/sreeraj-redesign/viewer.env` to reach it over Tailscale.
+
+- **Stage bar:** start, auth, archive, trend, rebuild, build, Layout QA, archives, PR, done (from the runner log).
+- **Claude sessions:** every `claude -p` and Agent SDK call the run made, with prompts, tool calls, tool results,
+  replies, model and token counts (read from `~/.claude/projects/<clone>/*.jsonl`).
+- **Artifacts:** the trend spec, the full rebuild prompt and the Layout QA summary (latest run only).
+- **Past runs:** pick any earlier run from the journal in the selector.
+
+Transcripts can contain file contents. Keep the viewer on localhost or the tailnet.
 
 ## Resume after a failure
 

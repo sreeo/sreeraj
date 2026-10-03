@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redesign runs</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a64; --line: #e3e1da;
+    --accent: #2b59c3; --ok: #1f7a4d; --warn: #a76200; --bad: #b3261e; --code: #f1efe9;
+    --user: #eef3fd; --think: #f7f3e8; --tool: #eef7f1; --result: #f4f4f2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #141412; --panel: #1c1c1a; --ink: #ecebe6; --muted: #9b998f; --line: #2e2d29;
+      --accent: #7aa2ff; --ok: #5cc28f; --warn: #e0a548; --bad: #ff8a80; --code: #23221f;
+      --user: #1b2333; --think: #26231a; --tool: #18261f; --result: #21211e; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 2; }
+  h1 { font-size: 16px; margin: 0; letter-spacing: -0.01em; }
+  .pill { padding: 2px 10px; border-radius: 999px; font-weight: 600; font-size: 12px; border: 1px solid currentColor; }
+  .pill.running { color: var(--accent); } .pill.ok { color: var(--ok); } .pill.bad { color: var(--bad); } .pill.idle { color: var(--muted); }
+  .meta { color: var(--muted); font-size: 13px; }
+  select { font: inherit; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; }
+  .stages { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+  .stage { font-size: 12px; padding: 3px 9px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); }
+  .stage.on { color: var(--ink); border-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
+  .stage.now { border-color: var(--accent); color: var(--accent); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .45; } }
+  .failed { margin: 10px 20px 0; padding: 8px 12px; border: 1px solid var(--bad); color: var(--bad); border-radius: 8px; font-family: ui-monospace, monospace; font-size: 12px; }
+  main { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 16px; padding: 16px 20px 24px; align-items: start; }
+  .detail { display: flex; flex-direction: column; max-height: calc(100vh - 150px); position: sticky; top: 70px; }
+  .detail .pane { overflow: auto; flex: 1; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } .detail { max-height: none; position: static; } }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  section h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .list button { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); color: inherit; font: inherit; padding: 10px 14px; cursor: pointer; }
+  .list button:hover, .list button.sel { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .list .t { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .list .s { color: var(--muted); font-size: 12px; }
+  .milestones { font-family: ui-monospace, monospace; font-size: 12px; padding: 10px 14px; max-height: 320px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .tabs { display: flex; gap: 2px; padding: 8px 10px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; padding: 6px 10px; cursor: pointer; }
+  .tabs button.sel { color: var(--ink); border-color: var(--accent); }
+  .pane { padding: 14px; }
+  pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code); padding: 10px 12px; border-radius: 8px; }
+  .ev { border-left: 3px solid var(--line); margin: 0 0 10px; padding: 6px 10px; border-radius: 0 8px 8px 0; }
+  .ev .h { font-size: 12px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+  .ev .h b { color: var(--ink); }
+  .ev.user { background: var(--user); border-color: var(--accent); }
+  .ev.thinking { background: var(--think); border-color: var(--warn); }
+  .ev.tool_use, .ev.server_tool_use { background: var(--tool); border-color: var(--ok); }
+  .ev.tool_result, .ev.advisor_tool_result { background: var(--result); }
+  .ev.err { border-color: var(--bad); }
+  .ev pre { background: transparent; padding: 0; max-height: 420px; overflow: auto; }
+  .ev details summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin-bottom: 12px; }
+  .filters { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .empty { color: var(--muted); padding: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>sreeraj.dev · redesign runs</h1>
+  <span id="pill" class="pill idle">…</span>
+  <label class="meta">run <select id="run"></select></label>
+  <span id="meta" class="meta"></span>
+  <span class="meta" style="margin-left:auto">refreshes every 5 s · <a id="n8n" style="color:var(--accent)">n8n</a></span>
+</header>
+<div id="stages" class="stages"></div>
+<div id="failed"></div>
+<main>
+  <div style="display:grid;gap:16px;align-content:start">
+    <section><h2>Claude sessions in this run</h2><div id="sessions" class="list"></div></section>
+    <section><h2>Runner milestones</h2><div id="milestones" class="milestones"></div></section>
+  </div>
+  <section class="detail">
+    <div class="tabs" id="tabs"></div>
+    <div class="pane" id="pane"></div>
+  </section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = iso => iso ? new Date(iso).toISOString().slice(11, 19) + 'Z' : '';
+const dur = (a, b) => { if (!a) return ''; const s = Math.max(0, ((b ? new Date(b) : new Date()) - new Date(a)) / 1000); return s < 90 ? `${s|0}s` : `${(s/60).toFixed(1)}m`; };
+$('#n8n').href = `http://${location.hostname}:5678/home/executions`;
+
+let data = null, tab = 'session', sessionId = null, sessionCache = {}, chosenRun = null, filters = {thinking: true, tool_result: true};
+
+async function load() {
+  const q = chosenRun ? `?since=${encodeURIComponent(chosenRun)}` : '';
+  data = await (await fetch('/api/state' + q)).json();
+  renderHeader(); renderSessions();
+  if (tab === 'session' && sessionId) await loadSession(sessionId, true); else renderPane();
+}
+
+function renderHeader() {
+  const svc = data.service || {};
+  const pill = $('#pill');
+  const done = data.stages?.find(s => s.name === 'done')?.reached;
+  const [cls, label] = data.running ? ['running', 'running'] : data.failed ? ['bad', 'failed'] : done ? ['ok', 'done'] : ['idle', svc.ActiveState || 'idle'];
+  pill.className = 'pill ' + cls; pill.textContent = label;
+  const sel = $('#run');
+  const opts = (data.runs || []).map((r, i) => `<option value="${esc(r)}" ${r === data.run ? 'selected' : ''}>${esc(r.replace('T', ' ').slice(0, 19))}${i === 0 ? ' (latest)' : ''}</option>`).join('');
+  if (sel.innerHTML !== opts) sel.innerHTML = opts;
+  $('#meta').textContent = data.run ? `started ${fmt(data.run)} · ${data.running ? 'elapsed' : 'ran'} ${dur(data.run, data.running ? null : (data.service?.ExecMainExitTimestamp && data.run === data.runs?.[0] ? new Date(data.service.ExecMainExitTimestamp) : null))}` : '';
+  const reached = (data.stages || []).filter(s => s.reached).length;
+  $('#stages').innerHTML = (data.stages || []).map((s, i) =>
+    `<span class="stage ${s.reached ? 'on' : ''} ${data.running && i === reached ? 'now' : ''}" title="${esc(s.line || '')}">${esc(s.name)}</span>`).join('');
+  $('#failed').innerHTML = data.failed ? `<div class="failed">${esc(data.failed)}</div>` : '';
+  $('#milestones').textContent = (data.milestones || []).join('\n') || 'no runner output yet';
+}
+
+function renderSessions() {
+  const list = data.sessions || [];
+  if (!sessionId && list.length) sessionId = list[list.length - 1].id;
+  $('#sessions').innerHTML = list.length ? list.map(s => `
+    <button class="${s.id === sessionId ? 'sel' : ''}" data-id="${s.id}">
+      <span class="t">${esc(s.title || s.id)}</span>
+      <span class="s">${fmt(s.first)} · ${dur(s.first, s.last)} · ${esc(s.model || '?')} · ${s.turns} turns · ${s.tools} tools · out ${s.tokens.output.toLocaleString()} tok</span>
+    </button>`).join('') : '<div class="empty">No Claude session yet.</div>';
+  document.querySelectorAll('#sessions button').forEach(b => b.onclick = () => { sessionId = b.dataset.id; tab = 'session'; renderSessions(); loadSession(sessionId); });
+}
+
+async function loadSession(id, quiet) {
+  const s = await (await fetch('/api/session/' + id)).json();
+  const prev = sessionCache[id];
+  sessionCache[id] = s;
+  if (tab !== 'session' || id !== sessionId) return;
+  if (quiet && prev && prev.events.length === s.events.length) return renderTabs();
+  renderPane();
+}
+
+const TABS = [['session', 'Session'], ['prompt', 'Rebuild prompt'], ['trend', 'Trend decision'], ['qa', 'Layout QA'], ['log', 'Full log']];
+function renderTabs() {
+  $('#tabs').innerHTML = TABS.map(([k, l]) => `<button class="${k === tab ? 'sel' : ''}" data-k="${k}">${l}</button>`).join('');
+  document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { tab = b.dataset.k; tab === 'session' && sessionId ? loadSession(sessionId) : renderPane(); });
+}
+
+function renderPane() {
+  renderTabs();
+  const a = data.artifacts || {}, pane = $('#pane');
+  // Follow new events only if the reader is already at the end of the transcript.
+  const atBottom = pane.scrollHeight - pane.scrollTop - pane.clientHeight < 40;
+  if (tab === 'prompt') pane.innerHTML = a.rebuild_prompt ? `<pre>${esc(a.rebuild_prompt)}</pre>` : '<div class="empty">Shown for the latest run only, once the runner has written it.</div>';
+  else if (tab === 'trend') {
+    let spec = a.trend_spec; try { spec = JSON.stringify(JSON.parse(spec), null, 2); } catch {}
+    pane.innerHTML = (a.trend_line ? `<p><b>Chosen:</b> ${esc(a.trend_line)}</p>` : '') + (spec ? `<pre>${esc(spec)}</pre>` : '<div class="empty">No trend spec for this run.</div>');
+  }
+  else if (tab === 'qa') pane.innerHTML = a.qa_summary ? `<pre>${esc(a.qa_summary)}</pre>` : '<div class="empty">Layout QA has not finished.</div>';
+  else if (tab === 'log') pane.innerHTML = `<pre>${esc((data.log || []).join('\n'))}</pre>`;
+  else {
+    const s = sessionCache[sessionId];
+    if (!s) { pane.innerHTML = '<div class="empty">Pick a session.</div>'; return; }
+    const shown = s.events.filter(e => (filters.thinking || e.kind !== 'thinking') && (filters.tool_result || !/result/.test(e.kind)));
+    pane.innerHTML = `
+      <div class="stats"><span><b>${esc(s.model || '')}</b></span><span>${fmt(s.first)} → ${fmt(s.last)} (${dur(s.first, s.last)})</span>
+        <span>in ${s.tokens.input.toLocaleString()} · cache read ${s.tokens.cache_read.toLocaleString()} · cache write ${s.tokens.cache_write.toLocaleString()} · out ${s.tokens.output.toLocaleString()}</span>
+        <a href="/api/session/${s.id}?full=1" style="color:var(--accent)">raw JSON</a></div>
+      <div class="filters"><label><input type="checkbox" data-f="thinking" ${filters.thinking ? 'checked' : ''}> thinking</label>
+        <label><input type="checkbox" data-f="tool_result" ${filters.tool_result ? 'checked' : ''}> tool results</label></div>
+      ${shown.map((e, i) => {
+        const long = e.text.length > 1500 && !(e.role === 'user' && i === 0);
+        const body = `<pre>${esc(e.text)}</pre>`;
+        return `<div class="ev ${e.role === 'user' && e.kind === 'text' ? 'user' : e.kind} ${e.error ? 'err' : ''}">
+          <div class="h"><b>${e.role === 'user' && e.kind === 'text' ? 'prompt' : esc(e.kind)}</b>${e.name ? `<span>${esc(e.name)}</span>` : ''}<span>${fmt(e.ts)}</span>${e.error ? '<span style="color:var(--bad)">error</span>' : ''}</div>
+          ${long ? `<details><summary>${e.text.length.toLocaleString()} chars</summary>${body}</details>` : body}</div>`;
+      }).join('')}`;
+    pane.querySelectorAll('[data-f]').forEach(cb => cb.onchange = () => { filters[cb.dataset.f] = cb.checked; renderPane(); });
+    if (data.running && atBottom && pane.dataset.sid === sessionId) pane.scrollTop = pane.scrollHeight;
+    pane.dataset.sid = sessionId;
+  }
+}
+
+$('#run').onchange = e => { chosenRun = e.target.value === data.runs?.[0] ? null : e.target.value; sessionId = null; sessionCache = {}; load(); };
+load(); setInterval(() => load().catch(() => {}), 5000);
+</script>
+</body>
+</html>
