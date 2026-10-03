@@ -124,21 +124,27 @@ interface PageSnapshot {
 // --- Server helpers (self-contained; mirrors validate-design.ts) ---
 
 export function startServer(port: number): ChildProcess {
+  // Own process group: `npx serve` runs serve as a grandchild, and killing only the npx
+  // wrapper leaked servers for months on the host.
   const server = spawn('npx', ['serve', 'dist', '-l', String(port), '--no-clipboard'], {
     cwd: CONFIG.projectRoot,
-    stdio: 'pipe',
-    detached: false,
+    stdio: 'ignore',
+    detached: true,
   });
   server.on('error', () => {});
   return server;
 }
 
 export function killServer(server: ChildProcess | null): void {
-  if (!server || server.killed) return;
+  if (!server?.pid) return;
   try {
-    server.kill('SIGKILL');
+    process.kill(-server.pid, 'SIGKILL');
   } catch {
-    /* already dead */
+    try {
+      server.kill('SIGKILL');
+    } catch {
+      /* already dead */
+    }
   }
 }
 

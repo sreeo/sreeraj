@@ -1,8 +1,9 @@
-import { execSync, spawn, ChildProcess } from 'child_process';
+import { execSync, type ChildProcess } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { CONFIG } from './config.js';
 import type { VisionScore } from './vision-quality-gate.js';
+import { killServer, startServer, waitForServer } from './layout-geometry.js';
 
 export interface ValidationResult {
   passed: boolean;
@@ -57,42 +58,6 @@ const RECOMMENDED_SELECTORS = [
   'post-nav-link',
   'post-nav-border',
 ];
-
-// --- Server management helpers ---
-
-function startServer(port: number): ChildProcess {
-  const server = spawn('npx', ['serve', 'dist', '-l', String(port), '--no-clipboard'], {
-    cwd: CONFIG.projectRoot,
-    stdio: 'pipe',
-    detached: false,
-  });
-  // Prevent unhandled error from crashing the process
-  server.on('error', () => {});
-  return server;
-}
-
-function killServer(server: ChildProcess | null): void {
-  if (!server || server.killed) return;
-  try {
-    server.kill('SIGKILL');
-  } catch {
-    // already dead
-  }
-}
-
-async function waitForServer(port: number, timeoutMs = 10_000): Promise<boolean> {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const res = await fetch(`http://localhost:${port}/`);
-      if (res.ok) return true;
-    } catch {
-      // not ready yet
-    }
-    await new Promise(resolve => setTimeout(resolve, 300));
-  }
-  return false;
-}
 
 // --- Main validation ---
 

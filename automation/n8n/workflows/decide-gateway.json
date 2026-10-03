@@ -21,7 +21,14 @@
         "httpMethod": "POST",
         "path": "decide",
         "responseMode": "responseNode",
-        "options": {}
+        "options": {},
+        "authentication": "headerAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rdWebhookToken01",
+          "name": "Redesign webhook token"
+        }
       }
     },
     {

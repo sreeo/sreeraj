@@ -18,6 +18,8 @@ const channel = process.env.PLAYWRIGHT_CHROME_CHANNEL || undefined;
 export default defineConfig({
   testDir: here,
   timeout: 60_000,
+  // Hard cap for the whole run, so a wedged browser can never stall the redesign.
+  globalTimeout: 15 * 60_000,
   // Short waits: a missing marker should fail in seconds, not hold a worker for the full test timeout.
   expect: { timeout: 5_000 },
   fullyParallel: true,

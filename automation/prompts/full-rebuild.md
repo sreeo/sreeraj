@@ -323,6 +323,23 @@ export async function GET(context) {
 }
 ```
 
+## Markup Contract (required — the e2e suite enforces it)
+
+Class names are yours to invent. These `data-qa` attributes are not: the e2e tests in `automation/e2e/` find content through them, and a missing one fails the run.
+
+| Attribute | Element | Where |
+|-----------|---------|-------|
+| `data-qa="site-nav"` | the main navigation; links to `/`, `/about/`, `/devops/`, `/treks/`, `/programming/`, `/postgres/`, `/archive/` | `Header.astro`, exactly once per page |
+| `data-qa="post-list"` | the element that holds the post cards | home page, section pages, tag pages |
+| `data-qa="post-card"` | each post preview (at least 3 on the home page) | `PostCard.astro` |
+| `data-qa="post-title"` | the post's `<h1>` | `PostLayout.astro` |
+| `data-qa="post-body"` | the element that wraps `<Content />` | `PostLayout.astro` |
+| `data-qa="tag-list"` | the tag list | `TagList.astro` |
+| `data-qa="site-footer"` | the footer | `Footer.astro` |
+| `data-qa="contact"` | the element that wraps the contact page content | `contact.astro` |
+
+The tests also require, on every page: HTTP 200, a `<title>`, at least one `<h1>`, no JavaScript errors, no broken same-site requests, and no horizontal scroll at 390, 768 or 1280 px. Post body text must be at least 15px.
+
 ## What NOT to Touch
 
 - `src/content/**`, `src/content.config.ts` — content
@@ -338,9 +355,10 @@ export async function GET(context) {
 4. Generate layouts, then components, then pages
 5. Run `npm run build` and fix any errors
 6. Run `cd automation && npm ci && npx tsx run-validation.ts ../src/styles/global.css`
-7. If validation fails, inspect the reported failing steps, fix the site, and rerun both build and validation
-8. Keep iterating until both `npm run build` and the validation command succeed with 0 errors
-9. Write `src/data/design-manifest.json`:
+7. Run the blocking e2e checks: `cd automation && npm run test:e2e:hard` (it serves `dist/`, so build first)
+8. If validation or e2e fails, read the failures (each names the page and the check), fix the site, and rerun build, validation and e2e
+9. Keep iterating until `npm run build`, the validation command and `npm run test:e2e:hard` all succeed with 0 errors. Never edit anything under `automation/` to make a check pass
+10. Write `src/data/design-manifest.json`:
 ```json
 {
   "trend": "Design style name",
@@ -354,7 +372,8 @@ export async function GET(context) {
 
 - `npm run build` completes with 0 errors
 - `cd automation && npx tsx run-validation.ts ../src/styles/global.css` completes with 0 errors
-- All 19 blog posts accessible at their slugs
+- `cd automation && npm run test:e2e:hard` passes (routes, content, markup contract, navigation, layout, archive)
+- Every blog post accessible at its slug
 - The homepage has a distinctive layout (not just a generic card grid)
 - Blog posts are comfortable to read (proper max-width, line-height, spacing)
 - Every interactive element has a hover state

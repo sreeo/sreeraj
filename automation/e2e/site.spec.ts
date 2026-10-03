@@ -34,7 +34,8 @@ async function watch(page: Page, fn: () => Promise<void>) {
 
 test.describe('routes @hard', () => {
   test(`all ${PATHS.length} sitemap pages render`, async ({ page }) => {
-    test.setTimeout(PATHS.length * 15_000);
+    // ~4s per page: a crashed browser (e.g. killed for memory) must fail fast, not hang.
+    test.setTimeout(30_000 + PATHS.length * 4_000);
     for (const p of PATHS) {
       const { errors, failed } = await watch(page, async () => {
         const res = await page.goto(p, { waitUntil: 'load' });
@@ -56,7 +57,7 @@ test.describe('content @hard', () => {
     for (const p of POSTS) expect(PATHS, `sitemap has /${p.slug}/`).toContain(`/${p.slug}/`);
   });
   test(`all ${POSTS.length} posts show their title and body`, async ({ page }) => {
-    test.setTimeout(POSTS.length * 15_000);
+    test.setTimeout(30_000 + POSTS.length * 6_000);
     for (const p of POSTS) {
       await page.goto(`/${p.slug}/`);
       await expect.soft(page.locator('[data-qa="post-title"]'), `/${p.slug}/: title`).toContainText(p.title.slice(0, 40));
@@ -124,7 +125,7 @@ test.describe('navigation @hard', () => {
 test.describe('layout @hard', () => {
   for (const width of [390, 768, 1280]) {
     test(`no horizontal scroll at ${width}px on any template`, async ({ page }) => {
-      test.setTimeout(TEMPLATES.length * 15_000);
+      test.setTimeout(30_000 + TEMPLATES.length * 6_000);
       await page.setViewportSize({ width, height: 900 });
       for (const t of TEMPLATES) {
         await page.goto(t.path);

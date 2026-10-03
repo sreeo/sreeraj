@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly health check for the sreeraj.dev monthly redesign (logins, decider, n8n)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/sreeraj-redesign/env
+ExecStart=%h/.local/share/sreeraj-redesign/redesign-probe.sh
+TimeoutStartSec=600

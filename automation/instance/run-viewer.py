@@ -31,6 +31,7 @@ STATE = os.environ.get("REDESIGN_STATE_DIR", f"{HOME}/.local/share/sreeraj-redes
 SESSIONS = f"{HOME}/.claude/projects/" + REPO.replace("/", "-").replace(".", "-")
 CODEX_SESSIONS = f"{HOME}/.codex/sessions"
 AGENT_LOG = os.path.join(REPO, "automation/test-output/agent-calls.jsonl")
+SHOTS_DIR = os.path.join(REPO, "automation/test-output/visual")
 BIND = os.environ.get("VIEWER_BIND", "127.0.0.1")
 PORT = int(os.environ.get("VIEWER_PORT", "8790"))
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -43,8 +44,9 @@ STAGES = [
     ("trend", r"^\[[^\]]+\] Trend: "),
     ("rebuild", r"Rebuild changed|claude rebuild exited"),
     ("build", r"Checkpoint saved"),
-    ("layout-qa", r"=== Layout QA & Fix stage ==="),
-    ("qa-done", r"layout-qa exit:"),
+    ("e2e", r"e2e exit:"),
+    ("layout-qa", r"layout-qa exit:"),
+    ("visual-qa", r"visual-qa exit:"),
     ("archives", r"Generating archive snapshots"),
     ("pr", r"https://github\.com/\S+/pull/\d+"),
     ("done", r"=== done ==="),
@@ -317,6 +319,9 @@ def state(since=None):
             "qa_summary": read(os.path.join(REPO, "automation/test-output/layout-qa-summary.md")),
             "trend_line": read(os.path.join(STATE, "trend.txt")),
             "decision_summary": read(os.path.join(REPO, "automation/test-output/decision-summary.md")),
+            "e2e_summary": read(os.path.join(REPO, "automation/test-output/e2e-summary.md")),
+            "visual_summary": read(os.path.join(REPO, "automation/test-output/visual-qa-summary.md")),
+            "shots": sorted(os.path.basename(f) for f in glob.glob(os.path.join(SHOTS_DIR, "*.jpg"))),
         }
     return {
         "service": svc, "runs": starts, "run": since, "running": running, "failed": failed,
@@ -345,6 +350,13 @@ class Handler(BaseHTTPRequestHandler):
                               "text/html; charset=utf-8")
         if url.path == "/api/state":
             return self._send(200, json.dumps(state(q.get("since", [None])[0])), "application/json")
+        shot = re.fullmatch(r"/shots/([a-z0-9-]+\.jpg)", url.path)
+        if shot:
+            try:
+                with open(os.path.join(SHOTS_DIR, shot.group(1)), "rb") as f:
+                    return self._send(200, f.read(), "image/jpeg")
+            except OSError:
+                return self._send(404, "no such screenshot", "text/plain")
         m = re.fullmatch(r"/api/session/([0-9a-f-]{36})", url.path)
         if m:
             path = os.path.join(SESSIONS, m.group(1) + ".jsonl")
