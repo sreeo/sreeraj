@@ -151,7 +151,8 @@ except Exception:
 out = m.get('month')
 if out and out != os.environ['NEW_MONTH']:
     print('\t'.join([out, m.get('trend', 'Previous design'),
-                     m.get('description', ''), m.get('primaryColor', '#000000')]))
+                     m.get('description', ''), m.get('primaryColor', '#000000'),
+                     json.dumps(m.get('fingerprint') or {})]))
 PY
 )"
   if [ -n "$ARCHIVE_INFO" ]; then
@@ -164,7 +165,7 @@ PY
     git push -f origin "edition/$OUT_MONTH" >/dev/null 2>&1 || log "edition tag push failed (continuing)"
     ARCHIVE_INFO="$ARCHIVE_INFO" python3 - <<'PY'
 import json, os, datetime
-month, trend, desc, color = os.environ['ARCHIVE_INFO'].split('\t')
+month, trend, desc, color, fp = (os.environ['ARCHIVE_INFO'].split('\t') + ['{}'])[:5]
 p = 'public/archive/registry.json'
 try:
     reg = json.load(open(p))
@@ -175,6 +176,7 @@ reg['archives'].append({
     'month': month, 'trend': trend, 'description': desc, 'primaryColor': color,
     'deployedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
     'sourceRef': f'edition/{month}',
+    **({'fingerprint': json.loads(fp)} if fp and fp != '{}' else {}),
 })
 reg['archives'].sort(key=lambda a: a['month'], reverse=True)
 json.dump(reg, open(p, 'w'), indent=2, ensure_ascii=False)
@@ -184,16 +186,21 @@ PY
     log "No outgoing edition to archive (manifest has no month, or same month)."
   fi
 
-  # 3. Discover the design trend (Agent SDK web search; registry fallback).
-  # pick-trend.ts is a real file (reliable relative-import resolution, unlike
-  # `tsx -e`) and always prints a usable trend on stdout (progress -> stderr).
-  # It also writes the FULL style spec to automation/history/current-trend.json,
-  # which we inject into the rebuild prompt below. Clear any stale spec first so
-  # a manual REDESIGN_TREND override can't pick up last month's file.
-  rm -f automation/history/current-trend.json
+  # 3. Decide the design style. pipeline/ideation.ts researches candidates (three
+  # researcher agents with web search), drops repeats of the archive and of styles
+  # rejected in PR reviews (n8n), scores the shortlist (local decider + two judges)
+  # and decides in code. It prints the trend line on stdout and writes the full spec
+  # to automation/history/current-trend.json plus test-output/decision*.{json,md}.
+  # pick-trend.ts (the style registry) is the fallback. Clear stale outputs first so
+  # a manual REDESIGN_TREND override can't pick up last month's files.
+  rm -f automation/history/current-trend.json automation/test-output/decision.json automation/test-output/decision-summary.md
   TREND="${REDESIGN_TREND:-}"
   if [ -z "$TREND" ]; then
-    TREND="$(cd automation && npx tsx pick-trend.ts 2>>/tmp/pick-trend.err)" || TREND=""
+    TREND="$(cd automation && timeout 3600 npx tsx pipeline/ideation.ts 2>>/tmp/ideation.err)" || TREND=""
+    if [ -z "$TREND" ]; then
+      log "Ideation produced nothing (see /tmp/ideation.err); falling back to the style registry."
+      TREND="$(cd automation && npx tsx pick-trend.ts 2>>/tmp/pick-trend.err)" || TREND=""
+    fi
     if [ -z "$TREND" ]; then
       log "Trend selection produced nothing; using a safe default."
       TREND="Editorial Minimalism — restrained type-driven layout, generous whitespace, a single accent, clear hierarchy"
@@ -222,7 +229,7 @@ s = s.replace('{{DESIGN_HISTORY}}', hist)
 spec = 'No detailed specification available — interpret the style line above with conviction and research the idiom yourself.'
 try:
     t = json.load(open('automation/history/current-trend.json'))
-    parts = [f"**{k.capitalize()}:** {t[k]}" for k in ('structure', 'typography', 'spacing', 'interactions', 'references') if t.get(k)]
+    parts = [f"**{k.capitalize()}:** {t[k]}" for k in ('structure', 'typography', 'color', 'spacing', 'interactions', 'motifs', 'references', 'lessons') if t.get(k)]
     if parts: spec = "\n\n".join(parts)
 except Exception:
     pass
@@ -277,6 +284,13 @@ if not m.get('primaryColor'):
         m['primaryColor'] = hit.group(1) if hit else '#000000'
     except Exception:
         m['primaryColor'] = '#000000'
+# Fingerprint of the chosen style, so next month's ideation can compare against it.
+try:
+    fp = json.load(open('automation/history/current-trend.json')).get('fingerprint')
+    if fp:
+        m['fingerprint'] = fp
+except Exception:
+    pass
 json.dump(m, open(p, 'w'), indent=2, ensure_ascii=False)
 open(p, 'a').write('\n')
 PY
@@ -346,6 +360,8 @@ else
   git push -u origin "$BRANCH"
   SUMMARY="automation/test-output/layout-qa-summary.md"
   BODY="Automated monthly redesign on $(hostname).\n\n**Trend:** ${TREND}"
+  DECISION="automation/test-output/decision-summary.md"
+  [ -f "$DECISION" ] && BODY="$(printf '%b\n\n---\n\n' "$BODY"; cat "$DECISION")"
   [ -f "$SUMMARY" ] && BODY="$(printf '%b\n\n---\n\n' "$BODY"; cat "$SUMMARY")"
   gh pr create --title "Monthly redesign: ${TREND:0:60}" \
     --body "$BODY" --head "$BRANCH" --base "$BASE_BRANCH" \

@@ -58,6 +58,11 @@
   .stats { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin-bottom: 12px; }
   .filters { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
   .empty { color: var(--muted); padding: 14px; }
+  .prov { font-size: 11px; padding: 0 6px; border-radius: 4px; border: 1px solid var(--line); }
+  .prov.claude { color: var(--warn); border-color: var(--warn); } .prov.codex { color: var(--ok); border-color: var(--ok); }
+  table.calls { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.calls th, table.calls td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.calls tr.bad td { color: var(--bad); }
 </style>
 </head>
 <body>
@@ -72,7 +77,7 @@
 <div id="failed"></div>
 <main>
   <div style="display:grid;gap:16px;align-content:start">
-    <section><h2>Claude sessions in this run</h2><div id="sessions" class="list"></div></section>
+    <section><h2>Agent sessions in this run</h2><div id="sessions" class="list"></div></section>
     <section><h2>Runner milestones</h2><div id="milestones" class="milestones"></div></section>
   </div>
   <section class="detail">
@@ -119,7 +124,7 @@ function renderSessions() {
   $('#sessions').innerHTML = list.length ? list.map(s => `
     <button class="${s.id === sessionId ? 'sel' : ''}" data-id="${s.id}">
       <span class="t">${esc(s.title || s.id)}</span>
-      <span class="s">${fmt(s.first)} · ${dur(s.first, s.last)} · ${esc(s.model || '?')} · ${s.turns} turns · ${s.tools} tools · out ${s.tokens.output.toLocaleString()} tok</span>
+      <span class="s"><span class="prov ${esc(s.provider || 'claude')}">${esc(s.provider || 'claude')}</span> ${fmt(s.first)} · ${dur(s.first, s.last)} · ${esc(s.model || '?')} · ${s.turns} turns · ${s.tools} tools · out ${s.tokens.output.toLocaleString()} tok</span>
     </button>`).join('') : '<div class="empty">No Claude session yet.</div>';
   document.querySelectorAll('#sessions button').forEach(b => b.onclick = () => { sessionId = b.dataset.id; tab = 'session'; renderSessions(); loadSession(sessionId); });
 }
@@ -133,7 +138,7 @@ async function loadSession(id, quiet) {
   renderPane();
 }
 
-const TABS = [['session', 'Session'], ['prompt', 'Rebuild prompt'], ['trend', 'Trend decision'], ['qa', 'Layout QA'], ['log', 'Full log']];
+const TABS = [['session', 'Session'], ['prompt', 'Rebuild prompt'], ['trend', 'Trend decision'], ['calls', 'Agent calls'], ['qa', 'Layout QA'], ['log', 'Full log']];
 function renderTabs() {
   $('#tabs').innerHTML = TABS.map(([k, l]) => `<button class="${k === tab ? 'sel' : ''}" data-k="${k}">${l}</button>`).join('');
   document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { tab = b.dataset.k; tab === 'session' && sessionId ? loadSession(sessionId) : renderPane(); });
@@ -147,7 +152,15 @@ function renderPane() {
   if (tab === 'prompt') pane.innerHTML = a.rebuild_prompt ? `<pre>${esc(a.rebuild_prompt)}</pre>` : '<div class="empty">Shown for the latest run only, once the runner has written it.</div>';
   else if (tab === 'trend') {
     let spec = a.trend_spec; try { spec = JSON.stringify(JSON.parse(spec), null, 2); } catch {}
-    pane.innerHTML = (a.trend_line ? `<p><b>Chosen:</b> ${esc(a.trend_line)}</p>` : '') + (spec ? `<pre>${esc(spec)}</pre>` : '<div class="empty">No trend spec for this run.</div>');
+    pane.innerHTML = (a.trend_line ? `<p><b>Chosen:</b> ${esc(a.trend_line)}</p>` : '')
+      + (a.decision_summary ? `<h3 style="font-size:13px">Decision</h3><pre>${esc(a.decision_summary)}</pre>` : '')
+      + (spec ? `<h3 style="font-size:13px">Style spec sent to the rebuild</h3><pre>${esc(spec)}</pre>` : '<div class="empty">No trend spec for this run.</div>');
+  }
+  else if (tab === 'calls') {
+    const calls = data.agent_calls || [];
+    pane.innerHTML = calls.length ? `<table class="calls"><thead><tr><th>Time</th><th>Step</th><th>Provider / model</th><th>Result</th><th>Duration</th></tr></thead><tbody>${
+      calls.map(c => `<tr class="${c.ok ? '' : 'bad'}"><td>${fmt(c.ts)}</td><td>${esc(c.label || c.role)}</td><td><span class="prov ${esc(c.provider)}">${esc(c.provider)}</span> ${esc(c.model)}</td><td>${c.ok ? 'ok' + (c.hitTurnLimit ? ' (turn limit)' : '') : esc((c.kind || 'error') + ': ' + (c.error || '').slice(0, 140))}</td><td>${dur(new Date(new Date(c.ts) - c.durationMs).toISOString(), c.ts)}</td></tr>`).join('')
+    }</tbody></table>` : '<div class="empty">No agent calls logged for this run (runs before the agent adapter have none).</div>';
   }
   else if (tab === 'qa') pane.innerHTML = a.qa_summary ? `<pre>${esc(a.qa_summary)}</pre>` : '<div class="empty">Layout QA has not finished.</div>';
   else if (tab === 'log') pane.innerHTML = `<pre>${esc((data.log || []).join('\n'))}</pre>`;
