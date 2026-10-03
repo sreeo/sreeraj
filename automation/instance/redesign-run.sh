@@ -48,8 +48,29 @@ nvm use default >/dev/null 2>&1 || true
 
 log() { echo "[$(date -u +%FT%TZ)] $*"; }
 hc()  { [ -n "$HC_URL" ] && curl -fsS -m 10 "${HC_URL}${1:-}" >/dev/null 2>&1 || true; }
+# Alerts go to n8n (/webhook/redesign-alert), which posts them to Discord. Best effort.
+N8N_URL="${N8N_URL:-http://127.0.0.1:5678}"
+notify() {  # level title message [url]
+  [ -n "${N8N_WEBHOOK_TOKEN:-}" ] || return 0
+  LEVEL="$1" TITLE="$2" MESSAGE="$3" URL="${4:-}" python3 -c 'import json,os; print(json.dumps({k.lower(): os.environ[k] for k in ("LEVEL", "TITLE", "MESSAGE", "URL")}))' \
+    | curl -fsS -m 15 -X POST "$N8N_URL/webhook/redesign-alert" -H "x-redesign-token: $N8N_WEBHOOK_TOKEN" \
+        -H 'content-type: application/json' --data-binary @- >/dev/null 2>&1 || true
+}
 
-trap 'rc=$?; if [ $rc -ne 0 ]; then hc "/fail"; log "FAILED rc=$rc (state kept in '"$STATE_DIR"'; run: redesign-run.sh resume)"; fi' EXIT
+# The 3 GB CPU decider is only needed while the style is decided. Pausing it frees memory for
+# the build, e2e and visual QA stages on this 7.7 GB host without swap (a Chrome was
+# OOM-killed on 2026-10-03). The EXIT trap always starts it again.
+DECIDER_CONTAINER="${DECIDER_CONTAINER:-redesign-n8n-decider-1}"
+DECIDER_PAUSED=0
+pause_decider() {
+  [ "${REDESIGN_PAUSE_DECIDER:-1}" = "1" ] || return 0
+  if docker ps -q -f "name=^${DECIDER_CONTAINER}$" 2>/dev/null | grep -q .; then
+    docker stop "$DECIDER_CONTAINER" >/dev/null 2>&1 && DECIDER_PAUSED=1 && log "Paused the decider to free memory for the build and QA stages."
+  fi
+}
+
+trap 'rc=$?; [ "$DECIDER_PAUSED" = 1 ] && docker start "$DECIDER_CONTAINER" >/dev/null 2>&1; if [ $rc -ne 0 ]; then hc "/fail"; log "FAILED rc=$rc (state kept in '"$STATE_DIR"'; run: redesign-run.sh resume)"; notify error "Monthly redesign failed (rc=$rc)" "$(journalctl --user -u sreeraj-redesign.service -n 12 --no-pager -o cat 2>/dev/null | grep -E "^\[20" | tail -6)
+Run viewer: http://100.104.153.63:8790"; fi' EXIT
 hc "/start"
 log "=== Monthly redesign (mode=$MODE, dry=$DRY_RUN, host=$(hostname)) ==="
 
@@ -131,6 +152,7 @@ if [ "$MODE" = "resume" ]; then
   TREND="$(cat "$TREND_FILE" 2>/dev/null || echo 'Resumed redesign')"
   log "Resuming: applying saved generation patch, skipping trend + rebuild."
   git apply --whitespace=nowarn "$PATCH_FILE" || { log "FATAL: could not apply generation patch."; exit 3; }
+  pause_decider
 else
   # --- Full: clear stale state, then generate ---
   rm -f "$STAGE_FILE" "$PATCH_FILE" "$TREND_FILE"
@@ -212,6 +234,7 @@ PY
   fi
   printf '%s' "$TREND" > "$TREND_FILE"
   log "Trend: $TREND"
+  pause_decider
 
   # 4. Build the rebuild prompt from the template.
   cp automation/prompts/full-rebuild.md /tmp/rebuild-prompt.md
@@ -390,9 +413,17 @@ else
     DRAFT=(--draft)
     log "Blocking checks still fail (e2e=$E2E_RC, visual=$VQA_RC) — opening a DRAFT PR for manual finishing."
   fi
-  gh pr create "${DRAFT[@]}" --title "Monthly redesign: ${TREND:0:60}" \
-    --body-file "$BODY_FILE" --head "$BRANCH" --base "$BASE_BRANCH" \
-    || log "PR creation failed (push succeeded; open the PR manually)"
+  if PR_URL="$(gh pr create "${DRAFT[@]}" --title "Monthly redesign: ${TREND:0:60}" \
+      --body-file "$BODY_FILE" --head "$BRANCH" --base "$BASE_BRANCH")"; then
+    log "$PR_URL"
+    if [ ${#DRAFT[@]} -gt 0 ]; then
+      notify warn "Redesign opened as a DRAFT: ${TREND%% — *}" "Blocking checks still fail (e2e=$E2E_RC, visual=$VQA_RC). It needs manual finishing." "$PR_URL"
+    else
+      notify info "Redesign ready for review: ${TREND%% — *}" "All blocking checks passed." "$PR_URL"
+    fi
+  else
+    log "PR creation failed (push succeeded; open the PR manually)"
+  fi
 fi
 
 # --- Success: clear the checkpoint so the next run starts fresh ---

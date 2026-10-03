@@ -14,12 +14,13 @@ mkdir -p "$SHARE_DIR" "$CONF_DIR" "$UNIT_DIR"
 
 # 1. Wrapper script (kept outside the managed clone so a reset can't clobber it).
 install -m 0755 "$SCRIPT_DIR/redesign-run.sh" "$SHARE_DIR/redesign-run.sh"
+install -m 0755 "$SCRIPT_DIR/redesign-probe.sh" "$SHARE_DIR/redesign-probe.sh"
 echo "  • wrapper  -> $SHARE_DIR/redesign-run.sh"
 
 # 2. Env file (don't overwrite an existing one with real secrets).
 if [ ! -f "$CONF_DIR/env" ]; then
   install -m 0600 "$SCRIPT_DIR/env.example" "$CONF_DIR/env"
-  echo "  • env      -> $CONF_DIR/env  (EDIT THIS: add ANTHROPIC_API_KEY)"
+  echo "  • env      -> $CONF_DIR/env  (EDIT THIS: add CLAUDE_CODE_OAUTH_TOKEN from 'claude setup-token')"
 else
   echo "  • env      -> $CONF_DIR/env  (kept existing)"
 fi
@@ -30,10 +31,13 @@ install -m 0644 "$SCRIPT_DIR/sreeraj-redesign.timer"          "$UNIT_DIR/"
 install -m 0644 "$SCRIPT_DIR/sreeraj-redesign-check.service"  "$UNIT_DIR/"
 install -m 0644 "$SCRIPT_DIR/sreeraj-redesign-resume.service" "$UNIT_DIR/"
 install -m 0644 "$SCRIPT_DIR/sreeraj-run-viewer.service"      "$UNIT_DIR/"
+install -m 0644 "$SCRIPT_DIR/sreeraj-redesign-probe.service"  "$UNIT_DIR/"
+install -m 0644 "$SCRIPT_DIR/sreeraj-redesign-probe.timer"    "$UNIT_DIR/"
 echo "  • units    -> $UNIT_DIR/"
 
 systemctl --user daemon-reload
 systemctl --user enable --now sreeraj-redesign.timer
+systemctl --user enable --now sreeraj-redesign-probe.timer
 
 # 3b. Run viewer (read-only web page; see README "Watch a run").
 mkdir -p "$SHARE_DIR/viewer"
@@ -53,7 +57,7 @@ fi
 
 echo
 echo "Done. Next:"
-echo "  1) Edit $CONF_DIR/env and add your ANTHROPIC_API_KEY"
+echo "  1) Logins: CLAUDE_CODE_OAUTH_TOKEN in $CONF_DIR/env (claude setup-token) and 'codex login --device-auth'"
 echo "  2) Plumbing check:  systemctl --user start sreeraj-redesign-check && journalctl --user -u sreeraj-redesign-check -n 40 --no-pager"
 echo "  3) Next run:        systemctl --user list-timers sreeraj-redesign.timer"
 echo "  4) Manual full run: systemctl --user start sreeraj-redesign.service"

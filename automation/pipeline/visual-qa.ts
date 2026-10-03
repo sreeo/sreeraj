@@ -7,12 +7,13 @@
  * Writes test-output/visual/<page>-<width>.jpg, test-output/visual-qa.json and
  * test-output/visual-qa-summary.md. publish-shots.ts turns the screenshots into a PR gallery.
  */
-import { execSync, spawn, type ChildProcess } from 'child_process';
+import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { chromium } from 'playwright';
 import { CONFIG } from '../config.js';
 import { templatePages, type TemplatePage } from '../e2e/site.js';
+import { killServer, startServer, waitForServer } from '../layout-geometry.js';
 import { runAgent } from './agent.js';
 import { runE2e } from './e2e-stage.js';
 import { restoreAutomation } from './guard.js';
@@ -112,29 +113,12 @@ export function blockingIssues(results: PageResult[]): { page: string; issue: Is
 
 // ---------- screenshots ----------
 
-function serve(): ChildProcess {
-  return spawn('npx', ['serve', 'dist', '-l', String(PORT), '--no-clipboard'], { cwd: CONFIG.projectRoot, stdio: 'ignore' });
-}
-
-async function waitFor(url: string, ms = 20_000): Promise<void> {
-  const end = Date.now() + ms;
-  while (Date.now() < end) {
-    try {
-      if ((await fetch(url)).ok) return;
-    } catch {
-      /* not up yet */
-    }
-    await new Promise(r => setTimeout(r, 300));
-  }
-  throw new Error(`static server did not start on ${url}`);
-}
-
 export async function screenshot(pages: TemplatePage[]): Promise<Map<string, string[]>> {
   fs.mkdirSync(SHOTS, { recursive: true });
-  const server = serve();
+  const server = startServer(PORT);
   const out = new Map<string, string[]>();
   try {
-    await waitFor(`http://127.0.0.1:${PORT}/`);
+    if (!(await waitForServer(PORT, 20_000))) throw new Error(`static server did not start on port ${PORT}`);
     const channel = process.env.PLAYWRIGHT_CHROME_CHANNEL || undefined;
     const browser = await chromium.launch({ headless: true, ...(channel ? { channel } : {}) });
     try {
@@ -158,7 +142,7 @@ export async function screenshot(pages: TemplatePage[]): Promise<Map<string, str
       await browser.close();
     }
   } finally {
-    server.kill('SIGTERM');
+    killServer(server);
   }
   return out;
 }
