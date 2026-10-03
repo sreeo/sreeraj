@@ -1,12 +1,14 @@
 ---
+// The flag: a black band cut on the diagonal, carrying the wordmark and a
+// numbered index of the site — four across, two deep, like a poster's contents.
 const navItems = [
-  { label: 'home', href: '/' },
-  { label: 'about', href: '/about/' },
-  { label: 'devops', href: '/devops/' },
-  { label: 'treks', href: '/treks/' },
-  { label: 'programming', href: '/programming/' },
-  { label: 'postgres', href: '/postgres/' },
-  { label: 'archive', href: '/archive/' },
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about/' },
+  { label: 'DevOps', href: '/devops/' },
+  { label: 'Treks', href: '/treks/' },
+  { label: 'Programming', href: '/programming/' },
+  { label: 'Postgres', href: '/postgres/' },
+  { label: 'Archive', href: '/archive/' },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -15,16 +17,26 @@ const isActive = (href: string) =>
 ---
 
 <header class="nav-bar">
-  <a href="/" class="nav-brand">sreeraj<span class="dot">.</span>dev</a>
-  <nav style="display: contents;" aria-label="Site">
-    {navItems.map((item) => (
-      <a
-        href={item.href}
-        class="nav-link"
-        aria-current={isActive(item.href) ? 'page' : undefined}
-      >{item.label}</a>
-    ))}
-  </nav>
-  <span class="nav-void" aria-hidden="true"></span>
-  <a href="/rss.xml" class="nav-rss">rss</a>
+  <div class="wrap nav-inner">
+    <div class="nav-mast">
+      <a href="/" class="nav-brand">sreeraj.dev</a>
+      <p class="nav-slogan">Dispatches on DevOps, Postgres, programming &amp; treks</p>
+    </div>
+    <nav class="nav-index" aria-label="Site">
+      {navItems.map((item, i) => (
+        <a
+          href={item.href}
+          class="nav-link"
+          aria-current={isActive(item.href) ? 'page' : undefined}
+        >
+          <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <span class="nav-label">{item.label}</span>
+        </a>
+      ))}
+      <a href="/rss.xml" class="nav-link">
+        <span class="num" aria-hidden="true">08</span>
+        <span class="nav-label">RSS</span>
+      </a>
+    </nav>
+  </div>
 </header>

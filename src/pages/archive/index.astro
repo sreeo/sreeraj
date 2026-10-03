@@ -3,48 +3,48 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import registryData from '../../../public/archive/registry.json';
 
 const archives = registryData.archives || [];
-
-const spans = ['c7', 'c5', 'c5', 'c7'];
 const fmt = (iso: string) => iso.slice(0, 10);
 ---
 
 <BaseLayout
-  title="archive — sreeraj.dev"
-  description="Every past monthly redesign of sreeraj.dev, preserved."
+  title="Archive — sreeraj.dev"
+  description="Every past monthly redesign of sreeraj.dev, preserved as deployed."
   theme="tech"
 >
-  <div class="band">
-    <div class="cell label-cell cell--red c3">
-      <span>museum /</span>
+  <header class="page-poster">
+    <div class="wrap page-poster-grid">
+      <div>
+        <span class="stamp">Museum</span>
+        <h1 class="page-title">Past editions</h1>
+        <p class="page-description">
+          This site is reprinted in a new idiom every month. Each earlier
+          edition is preserved exactly as it was deployed.
+        </p>
+      </div>
+      <div class="count-stamp" aria-hidden="true">
+        <strong>{String(archives.length).padStart(2, '0')}</strong>
+        <span>{archives.length === 1 ? 'edition' : 'editions'}</span>
+      </div>
     </div>
-    <div class="cell c7">
-      <h1 class="page-title">past compositions</h1>
-      <p class="section-sub">
-        this site is repainted monthly — {archives.length}
-        {archives.length === 1 ? 'edition is' : 'editions are'} preserved exactly as deployed
-      </p>
-    </div>
-    <div class="plane plane--yellow c2" aria-hidden="true"></div>
-  </div>
+  </header>
 
-  <div class="band">
-    {archives.map((edition, i) => (
-      <a href={`/archive/${edition.month}/`} class:list={['edition-cell', spans[i % spans.length]]}>
-        <span class="edition-month">
-          <span class="edition-swatch" style={`background: ${edition.primaryColor};`} aria-hidden="true"></span>
-          {edition.month}
-        </span>
-        <span class="edition-trend">{edition.trend}</span>
-        <span class="edition-desc">{edition.description}</span>
-        <span class="edition-date">deployed {fmt(edition.deployedAt)} &middot; view &rarr;</span>
-      </a>
-    ))}
-    <div class="plane plane--blue c5" aria-hidden="true"></div>
-    <div class="cell c7" style="display: flex; align-items: center;">
-      <p style="margin: 0; color: var(--muted); font-size: var(--t-sm);">
-        the current de stijl edition will join the museum when october's
-        composition replaces it.
-      </p>
-    </div>
-  </div>
+  <section class="wrap sec" aria-label="Past editions">
+    <ol class="editions">
+      {archives.map((edition) => (
+        <li data-reveal>
+          <a href={`/archive/${edition.month}/`} class="edition" style={`--swatch:${edition.primaryColor}`}>
+            <span class="edition-swatch" aria-hidden="true"></span>
+            <span class="edition-month">{edition.month}</span>
+            <span class="edition-trend">{edition.trend}</span>
+            <span class="edition-desc">{edition.description}</span>
+            <span class="edition-date">Deployed {fmt(edition.deployedAt)} — view &rarr;</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+    <p class="sec-sub" style="margin-top: var(--s-7);">
+      The current Constructivist edition joins the museum when November's
+      poster replaces it.
+    </p>
+  </section>
 </BaseLayout>

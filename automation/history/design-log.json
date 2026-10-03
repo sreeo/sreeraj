@@ -50,6 +50,14 @@
       "status": "success",
       "timestamp": "2026-09-01T03:35:48.650332+00:00",
       "description": "De Stijl / Neoplasticism — Mondrian and Rietveld's reduction of design to primary colors, black lines, and rectangles. The page as an abstract composition of pure horizontal/vertical relationships."
+    },
+    {
+      "month": "2026-10",
+      "trendId": "russian-constructivism",
+      "trendName": "Russian Constructivism — Agitprop graphic design of the 1920s — Rodchenko, El Lissitzky. Diagonal compositions, photomontage, bold red/black/cream, type as a shouting machine. Raw revolutionary energy with rigorous geometry.",
+      "status": "success",
+      "timestamp": "2026-10-03T10:58:34.562878+00:00",
+      "description": "Russian Constructivism — Agitprop graphic design of the 1920s — Rodchenko, El Lissitzky. Diagonal compositions, photomontage, bold red/black/cream, type as a shouting machine. Raw revolutionary energy with rigorous geometry."
     }
   ]
 }

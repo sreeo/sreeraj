@@ -10,6 +10,7 @@ export async function getStaticPaths() {
     params: { slug: post.data.slug },
     props: {
       post,
+      num: String(posts.length - i).padStart(3, '0'),
       prevPost:
         i < posts.length - 1
           ? { slug: posts[i + 1].data.slug, title: posts[i + 1].data.title }
@@ -20,7 +21,7 @@ export async function getStaticPaths() {
   }));
 }
 
-const { post, prevPost, nextPost } = Astro.props;
+const { post, num, prevPost, nextPost } = Astro.props;
 const { Content } = await render(post);
 const theme = getThemeForTags(post.data.tags);
 ---
@@ -36,6 +37,7 @@ const theme = getThemeForTags(post.data.tags);
   author={post.data.author}
   readingTime={post.data.readingTime}
   theme={theme}
+  num={num}
   prevPost={prevPost}
   nextPost={nextPost}
   trekStats={post.data.trekStats}

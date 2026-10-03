@@ -14,24 +14,33 @@ const tags = [...tagCounts.entries()].sort(
 );
 ---
 
-<BaseLayout title="tags — sreeraj.dev" description="Every tag on sreeraj.dev." theme="tech">
-  <div class="band">
-    <div class="cell label-cell cell--yellow c3">
-      <span>taxonomy /</span>
+<BaseLayout title="Tags — sreeraj.dev" description="Every tag on sreeraj.dev." theme="tech">
+  <header class="page-poster">
+    <div class="wrap page-poster-grid">
+      <div>
+        <span class="stamp">Taxonomy</span>
+        <h1 class="page-title">Every tag</h1>
+        <p class="page-description">
+          {tags.length} tags across {posts.length} dispatches, largest first.
+        </p>
+      </div>
+      <div class="count-stamp" aria-hidden="true">
+        <strong>{String(tags.length).padStart(2, '0')}</strong>
+        <span>tags</span>
+      </div>
     </div>
-    <div class="cell c7">
-      <h1 class="page-title">every tag</h1>
-      <p class="section-sub">{tags.length} tags across {posts.length} compositions</p>
-    </div>
-    <div class="plane plane--blue c2" aria-hidden="true"></div>
-  </div>
+  </header>
 
-  <div style="display: flex; flex-wrap: wrap; gap: var(--line); background: var(--ink);">
-    {tags.map(([tag, count]) => (
-      <a href={`/tags/${tag}/`} class="tag-cell" style="flex: 1 1 180px;">
-        <span>{tag}</span>
-        <span class="n">{count} {count === 1 ? 'post' : 'posts'}</span>
-      </a>
-    ))}
-  </div>
+  <section class="wrap sec" aria-label="All tags">
+    <ul class="tag-wall">
+      {tags.map(([tag, count]) => (
+        <li>
+          <a href={`/tags/${tag}/`} class="tag-pill">
+            <span>{tag}</span>
+            <span class="n">{String(count).padStart(2, '0')}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
 </BaseLayout>

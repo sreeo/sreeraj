@@ -1,66 +1,66 @@
 ---
+import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
-import { spanFor } from '../utils/spans';
 
 interface Props {
   title: string;
   description?: string;
-  paint?: 'red' | 'blue' | 'yellow' | 'ink';
+  kicker?: string;
   theme?: 'tech' | 'trek';
   posts: CollectionEntry<'blog'>[];
 }
 
-const { title, description, paint = 'red', theme = 'tech', posts } = Astro.props;
+const { title, description, kicker = 'Section', theme = 'tech', posts } = Astro.props;
 
-const paintCell = {
-  red: 'cell--red',
-  blue: 'cell--blue',
-  yellow: 'cell--yellow',
-  ink: 'cell--ink',
-}[paint];
+// Global dispatch numbers, so Nº 017 is 017 on every page it appears.
+const all = (await getCollection('blog'))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const numOf = (slug: string) =>
+  String(all.length - all.findIndex((p) => p.data.slug === slug)).padStart(3, '0');
+
+// Stagger: the lead spans two columns; everything after it steps down the diagonal.
+const staggerFor = (i: number) => (i === 0 ? 0 : i === 1 ? 2 : (i - 2) % 3);
+const count = posts.length;
 ---
 
 <BaseLayout title={`${title} — sreeraj.dev`} description={description} theme={theme}>
-  <!-- title register -->
-  <div class="band">
-    <div class:list={['cell', 'label-cell', paintCell, 'c3']}>
-      <span>section /</span>
-    </div>
-    <div class="cell c7">
-      <h1 class="page-title">{title}</h1>
-      <p class="section-sub">
-        {posts.length} {posts.length === 1 ? 'composition' : 'compositions'}, newest first
-        {description && ` — ${description}`}
-      </p>
-    </div>
-    <div class="plane plane--yellow c2" aria-hidden="true"></div>
-  </div>
-
-  <!-- post composition -->
-  {posts.length > 0 ? (
-    <div class="band">
-      {posts.map((post, i) => (
-        <PostCard
-          title={post.data.title}
-          slug={post.data.slug}
-          description={post.data.description}
-          pubDate={post.data.pubDate}
-          tags={post.data.tags}
-          readingTime={post.data.readingTime}
-          num={String(posts.length - i).padStart(3, '0')}
-          span={spanFor(i)}
-          lead={i === 0}
-        />
-      ))}
-    </div>
-  ) : (
-    <div class="band">
-      <div class="cell c8">
-        <p style="color: var(--muted); margin: 0;">nothing composed here yet.</p>
+  <header class="page-poster">
+    <div class="wrap page-poster-grid">
+      <div>
+        <span class="stamp">{kicker}</span>
+        <h1 class="page-title">{title}</h1>
+        {description && <p class="page-description">{description}</p>}
       </div>
-      <div class="plane plane--red c4" aria-hidden="true"></div>
+      <div class="count-stamp" aria-hidden="true">
+        <strong>{String(count).padStart(2, '0')}</strong>
+        <span>{count === 1 ? 'dispatch' : 'dispatches'}</span>
+      </div>
     </div>
-  )}
+  </header>
+
+  <section class="wrap sec" aria-label={`${title} dispatches`}>
+    {count > 0 ? (
+      <ul class="poster-grid-3">
+        {posts.map((post, i) => (
+          <li class:list={[i === 0 && 'is-lead']} style={`--stagger:${staggerFor(i)}`} data-reveal>
+            <PostCard
+              title={post.data.title}
+              slug={post.data.slug}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              tags={post.data.tags}
+              readingTime={post.data.readingTime}
+              featureImage={post.data.featureImage}
+              num={numOf(post.data.slug)}
+              lead={i === 0}
+            />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="lost-text">Nothing has been printed under this heading yet.</p>
+    )}
+  </section>
 </BaseLayout>
