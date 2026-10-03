@@ -9,14 +9,19 @@
     "generate": "tsx design-generator.ts",
     "validate": "tsx validate-design.ts",
     "layout:check": "tsx layout-geometry.ts",
-    "layout:qa": "tsx layout-qa-stage.ts"
+    "layout:qa": "tsx layout-qa-stage.ts",
+    "probe": "tsx pipeline/probe.ts",
+    "typecheck": "tsc --noEmit -p .",
+    "test:unit": "node --import tsx --test pipeline/*.test.ts"
   },
   "dependencies": {
-    "@anthropic-ai/claude-agent-sdk": "^0.3.288",
-    "@anthropic-ai/sdk": "^0.93.0",
     "@axe-core/playwright": "^4.10.0",
     "playwright": "^1.49.0",
     "serve": "^14.2.4",
     "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^24.0.0"
   }
 }

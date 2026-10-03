@@ -13,11 +13,8 @@ export const CONFIG = {
   testOutputDir: path.resolve(__dirname, 'test-output'),
   promptsDir: path.resolve(__dirname, 'prompts'),
 
-  // Claude API
-  // Pinned to Opus 5.5 by choice. Full IDs, not aliases, so an upgrade is a deliberate edit.
-  model: 'claude-opus-5-5' as const,
-  maxTokens: 16384,
-  temperature: 0.8,
+  // Agent providers, models and turn budgets live in pipeline/roles.json (Claude pinned to
+  // claude-opus-5-5, Codex to gpt-6.1-sol; REDESIGN_CLAUDE_MODEL / REDESIGN_CODEX_MODEL override).
 
   // Validation
   pagesToCheck: [
@@ -32,7 +29,6 @@ export const CONFIG = {
   maxRetries: 2,
 
   // Vision quality gate
-  visionModel: 'claude-opus-5-5' as const,
   visionThreshold: 6.0,
   visionMaxScreenshots: 4,
   visionEnabled: true,
@@ -46,16 +42,11 @@ export const CONFIG = {
 
   // Layout QA & fix stage
   layoutQa: {
-    // Model every Agent SDK call runs as (fixer, trend discovery, vision gate).
-    fixerModel: 'claude-opus-5-5' as const,
     maxFixPasses: 3,
-    // Per-pass turn budget for the SDK agent. The orchestrator drives the
-    // build + re-analyze loop between passes, so the agent should spend turns
-    // editing, not building — but a fresh redesign can need many edits.
-    fixerMaxTurns: 60,
     // Webwright agentic visual review (the "vision" half). Non-blocking:
     // if webwright isn't installed or errors, the stage continues on geometry.
     webwrightEnabled: true,
+    // Webwright calls the raw API with ANTHROPIC_API_KEY, outside the subscription adapter.
     webwrightModel: 'claude-opus-5-5' as const,
     // Pages the webwright reviewer inspects (a subset — it's slower than geometry).
     webwrightPages: ['/', '/treks/'],
