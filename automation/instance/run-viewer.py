@@ -4,8 +4,10 @@
 Shows, for the current or a past run of sreeraj-redesign.service:
   - service state and the runner's stage log (journald)
   - the chosen trend spec and the full rebuild prompt
-  - every Claude Code session the run started: prompts, thinking, tool calls,
-    tool results and replies, read from ~/.claude/projects/<repo>/*.jsonl
+  - every Claude Code and Codex session the run started: prompts, thinking, tool
+    calls, tool results and replies, read from ~/.claude/projects/<repo>/*.jsonl
+    and ~/.codex/sessions/YYYY/MM/DD/*.jsonl
+  - the agent call log (role, provider, model, fallbacks) and the style decision
   - the layout-QA summary
 
 Standard library only. Bind it to the Tailscale address; it serves no secrets
@@ -27,6 +29,8 @@ UNIT = os.environ.get("VIEWER_UNIT", "sreeraj-redesign.service")
 REPO = os.environ.get("REDESIGN_REPO_DIR", f"{HOME}/.local/share/sreeraj-redesign/repo")
 STATE = os.environ.get("REDESIGN_STATE_DIR", f"{HOME}/.local/share/sreeraj-redesign/state")
 SESSIONS = f"{HOME}/.claude/projects/" + REPO.replace("/", "-").replace(".", "-")
+CODEX_SESSIONS = f"{HOME}/.codex/sessions"
+AGENT_LOG = os.path.join(REPO, "automation/test-output/agent-calls.jsonl")
 BIND = os.environ.get("VIEWER_BIND", "127.0.0.1")
 PORT = int(os.environ.get("VIEWER_PORT", "8790"))
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -180,16 +184,115 @@ def parse_session(path, full=False):
     }
 
 
+def codex_text(content):
+    if isinstance(content, str):
+        return content
+    parts = []
+    for c in content or []:
+        if isinstance(c, dict):
+            parts.append(c.get("text") or ("[image]" if "image" in str(c.get("type")) else json.dumps(c, ensure_ascii=False)[:2000]))
+    return "\n".join(parts)
+
+
+def parse_codex_session(path, full=False):
+    """Codex rollout file -> the same shape as parse_session()."""
+    events, model, cwd, first_ts, last_ts = [], None, None, None, None
+    tokens = {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}
+    names = {}
+    with open(path, encoding="utf-8", errors="replace") as f:
+        for raw in f:
+            try:
+                e = json.loads(raw)
+            except ValueError:
+                continue
+            ts, kind, p = e.get("timestamp"), e.get("type"), e.get("payload") or {}
+            if ts:
+                first_ts = first_ts or ts
+                last_ts = ts
+            if kind == "session_meta":
+                cwd = p.get("cwd")
+            elif kind == "turn_context":
+                model = p.get("model") or model
+            elif kind == "token_usage_record":
+                u = p.get("thread_token_usage") or {}
+                tokens = {"input": u.get("input_tokens", 0), "output": u.get("output_tokens", 0),
+                          "cache_read": u.get("cached_input_tokens", 0), "cache_write": u.get("cache_write_input_tokens", 0)}
+            if kind != "response_item":
+                continue
+            t = p.get("type")
+            ev = None
+            if t == "message" and p.get("role") in ("user", "assistant"):
+                ev = {"role": p["role"], "kind": "text", "name": None, "text": codex_text(p.get("content"))}
+            elif t == "reasoning":
+                summary = "\n".join(x.get("text", "") for x in p.get("summary") or [] if isinstance(x, dict))
+                ev = {"role": "assistant", "kind": "thinking", "name": None, "text": summary or "(reasoning not stored in the transcript)"}
+            elif t in ("function_call", "custom_tool_call", "local_shell_call", "web_search_call"):
+                names[p.get("call_id")] = p.get("name") or t
+                body = p.get("arguments") or p.get("input") or p.get("action") or {}
+                ev = {"role": "assistant", "kind": "tool_use", "name": p.get("name") or t,
+                      "text": body if isinstance(body, str) else json.dumps(body, indent=2, ensure_ascii=False)}
+            elif t in ("function_call_output", "custom_tool_call_output", "local_shell_call_output"):
+                out = p.get("output")
+                ev = {"role": "user", "kind": "tool_result", "name": names.get(p.get("call_id")),
+                      "text": out if isinstance(out, str) else json.dumps(out, ensure_ascii=False)}
+            if ev:
+                if not full and len(ev["text"]) > TEXT_LIMIT:
+                    ev["text"] = ev["text"][:TEXT_LIMIT] + f"\n… [{len(ev['text']) - TEXT_LIMIT} more chars]"
+                events.append({"ts": ts, "error": False, **ev})
+    # The first user message is Codex's own <environment_context> block; the prompt comes next.
+    prompt = next((ev["text"] for ev in events if ev["role"] == "user" and ev["kind"] == "text"
+                   and not ev["text"].lstrip().startswith("<environment_context")), "")
+    sid = re.search(r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jsonl$", path)
+    return {
+        "id": sid.group(1) if sid else os.path.basename(path), "provider": "codex", "cwd": cwd,
+        "title": prompt.strip().splitlines()[0][:120] if prompt.strip() else None,
+        "model": model, "first": first_ts, "last": last_ts, "tokens": tokens,
+        "turns": sum(1 for ev in events if ev["role"] == "assistant"),
+        "tools": sum(1 for ev in events if ev["kind"] == "tool_use"),
+        "events": events,
+    }
+
+
+def find_codex_session(sid):
+    hits = glob.glob(os.path.join(CODEX_SESSIONS, "*", "*", "*", f"*{sid}.jsonl"))
+    return hits[0] if hits else None
+
+
 def sessions_between(start_epoch, end_epoch):
     out = []
-    for path in glob.glob(os.path.join(SESSIONS, "*.jsonl")):
+    def in_window(path):
         mtime = os.path.getmtime(path)
-        if mtime < start_epoch or (end_epoch and mtime > end_epoch + 120):
-            continue
-        s = parse_session(path)
-        s.pop("events")
-        out.append(s)
+        return not (mtime < start_epoch or (end_epoch and mtime > end_epoch + 120))
+    for path in glob.glob(os.path.join(SESSIONS, "*.jsonl")):
+        if in_window(path):
+            s = parse_session(path)
+            s.pop("events")
+            out.append({**s, "provider": "claude"})
+    # Codex keeps one dated folder per day; only sessions that ran in the redesign clone.
+    for path in glob.glob(os.path.join(CODEX_SESSIONS, "*", "*", "*", "*.jsonl")):
+        if in_window(path):
+            s = parse_codex_session(path)
+            if (s.get("cwd") or "").startswith(REPO):
+                s.pop("events")
+                out.append(s)
     return sorted(out, key=lambda s: s.get("first") or "")
+
+
+def agent_calls(start_epoch, end_epoch):
+    calls = []
+    try:
+        with open(AGENT_LOG, encoding="utf-8") as f:
+            for raw in f:
+                try:
+                    c = json.loads(raw)
+                except ValueError:
+                    continue
+                t = to_epoch(c.get("ts", "1970-01-01T00:00:00Z"))
+                if t >= start_epoch and (not end_epoch or t <= end_epoch + 120):
+                    calls.append(c)
+    except OSError:
+        pass
+    return calls
 
 
 def state(since=None):
@@ -213,11 +316,13 @@ def state(since=None):
             "rebuild_prompt": read("/tmp/rebuild-prompt.md"),
             "qa_summary": read(os.path.join(REPO, "automation/test-output/layout-qa-summary.md")),
             "trend_line": read(os.path.join(STATE, "trend.txt")),
+            "decision_summary": read(os.path.join(REPO, "automation/test-output/decision-summary.md")),
         }
     return {
         "service": svc, "runs": starts, "run": since, "running": running, "failed": failed,
         "stages": stages, "log": lines[-600:], "milestones": [l for l in lines if l.startswith("[20")],
         "sessions": sessions_between(start_epoch, end_epoch), "artifacts": artifacts,
+        "agent_calls": agent_calls(start_epoch, end_epoch),
         "now": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -243,9 +348,12 @@ class Handler(BaseHTTPRequestHandler):
         m = re.fullmatch(r"/api/session/([0-9a-f-]{36})", url.path)
         if m:
             path = os.path.join(SESSIONS, m.group(1) + ".jsonl")
-            if not os.path.exists(path):
-                return self._send(404, '{"error":"no such session"}', "application/json")
-            return self._send(200, json.dumps(parse_session(path, full="full" in q)), "application/json")
+            if os.path.exists(path):
+                return self._send(200, json.dumps(parse_session(path, full="full" in q)), "application/json")
+            codex = find_codex_session(m.group(1))
+            if codex:
+                return self._send(200, json.dumps(parse_codex_session(codex, full="full" in q)), "application/json")
+            return self._send(404, '{"error":"no such session"}', "application/json")
         return self._send(404, "not found", "text/plain")
 
     def log_message(self, *args):
