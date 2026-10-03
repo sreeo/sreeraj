@@ -35,6 +35,7 @@ const trek = isTrek(tags);
   href={`/${slug}/`}
   class:list={['post-card', lead && 'post-card--lead', trek && 'trek-card']}
   data-cat={cat.toLowerCase()}
+  data-qa="post-card"
 >
   <div class="post-card-visual montage" style={featureImage ? `--img:url('${featureImage}')` : undefined}>
     {featureImage ? (

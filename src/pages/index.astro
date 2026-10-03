@@ -88,7 +88,7 @@ const slogans = [
       <h2 class="section-title" id="fresh-title">Fresh off the press</h2>
       <p class="sec-sub">The three newest dispatches after the lead — each one a poster of its own.</p>
     </header>
-    <ul class="poster-grid-3">
+    <ul class="poster-grid-3" data-qa="post-list">
       {fresh.map((post, i) => (
         <li style={`--stagger:${i}`} data-reveal>
           <PostCard
