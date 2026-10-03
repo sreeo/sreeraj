@@ -1,0 +1,22 @@
+{
+  "$comment": "Agent roles for the redesign pipeline. providers: tried in order; the next one runs on a login error, rate limit, timeout or invalid output. Override the order for every role with REDESIGN_PROVIDERS=codex,claude. Models are full IDs on purpose (REDESIGN_CLAUDE_MODEL / REDESIGN_CODEX_MODEL override them).",
+  "models": {
+    "claude": "claude-opus-5-5",
+    "codex": "gpt-6.1-sol"
+  },
+  "defaults": {
+    "providers": ["claude", "codex"],
+    "maxTurns": 8,
+    "timeoutMin": 10
+  },
+  "roles": {
+    "probe": { "tools": [], "maxTurns": 1, "timeoutMin": 2 },
+    "researcher": { "tools": ["web_search"], "maxTurns": 14, "timeoutMin": 10 },
+    "judge": { "tools": [], "maxTurns": 3, "timeoutMin": 8 },
+    "trend": { "tools": ["web_search"], "maxTurns": 12, "timeoutMin": 8 },
+    "implementer": { "tools": ["read", "edit", "bash"], "maxTurns": 50, "timeoutMin": 50 },
+    "fixer": { "tools": ["read", "edit", "bash"], "maxTurns": 60, "timeoutMin": 25 },
+    "visual_qa": { "tools": ["image"], "maxTurns": 6, "timeoutMin": 6 },
+    "vision_gate": { "tools": ["image"], "maxTurns": 6, "timeoutMin": 8 }
+  }
+}

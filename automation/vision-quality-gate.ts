@@ -107,9 +107,9 @@ const VISION_SCORE_SCHEMA = {
 } as const;
 
 // --- Core evaluation ---
-// Score the screenshots via the Agent SDK (session auth). The agent Reads each
-// PNG (which presents it visually) and returns the rubric scores as validated
-// JSON — no raw image API call, no ANTHROPIC_API_KEY required.
+// Score the screenshots through the agent adapter (subscription login, Claude or
+// Codex). The adapter hands the PNGs to the model and returns the rubric scores as
+// schema-checked JSON — no raw image API call, no ANTHROPIC_API_KEY required.
 async function scoreScreenshots(
   screenshotDir: string,
   minScore: number,
@@ -145,15 +145,13 @@ async function scoreScreenshots(
 ---
 ${idiomContext}
 
-Use the Read tool on EACH of these ${screenshots.length} screenshot files so you can see them, then score the design. Pages shown: ${pages}.
-Acceptance threshold: ${minScore}/10.${extraContext}
-
-Screenshot files:
-${paths.map(p => `- ${p}`).join('\n')}`;
+Look at EACH of the ${screenshots.length} screenshots, then score the design. Pages shown: ${pages}.
+Acceptance threshold: ${minScore}/10.${extraContext}`;
 
   const parsed = await agentJson<Partial<VisionScore>>(prompt, VISION_SCORE_SCHEMA, {
-    allowedTools: ['Read'],
-    maxTurns: 6,
+    role: 'vision_gate',
+    label: 'vision-gate',
+    images: paths,
   });
 
   if (!parsed) {

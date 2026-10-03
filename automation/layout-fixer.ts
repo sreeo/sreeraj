@@ -1,14 +1,16 @@
 /**
- * Layout fixer — the Claude Agent SDK half of the layout QA stage.
+ * Layout fixer — the agent half of the layout QA stage.
  *
  * Given a consolidated list of layout issues (deterministic geometry violations
- * plus any agentic visual findings), it runs an Agent SDK `query()` that loads
- * the `layout-qa` skill and edits the CSS to resolve them — without touching the
- * approved visual style. The orchestrator drives the build/re-check loop; this
- * module performs one focused fix pass and reports what it changed.
+ * plus any agentic visual findings), it runs the fixer agent (Claude Code or Codex,
+ * see pipeline/roles.json) with the layout-qa skill's rules in the prompt, and edits
+ * the CSS to resolve them — without touching the approved visual style. The
+ * orchestrator drives the build/re-check loop; this module performs one focused fix
+ * pass and reports what it changed.
  */
-import { query } from '@anthropic-ai/claude-agent-sdk';
-import { agentEnv } from './agent-query.js';
+import fs from 'fs';
+import path from 'path';
+import { runAgent } from './pipeline/agent.js';
 import { CONFIG } from './config.js';
 import type { Violation } from './layout-geometry.js';
 
@@ -31,9 +33,19 @@ const FIX_OUTPUT_SCHEMA = {
     changes: { type: 'string', description: 'What was changed and why, concise.' },
     notes: { type: 'string', description: 'Anything unresolved or risky.' },
   },
-  required: ['filesChanged', 'changes'],
+  required: ['filesChanged', 'changes', 'notes'],
   additionalProperties: false,
 } as const;
+
+/** The layout-qa skill's rules, inlined so any provider follows the same contract. */
+function layoutQaRules(): string {
+  try {
+    const skill = fs.readFileSync(path.join(CONFIG.projectRoot, '.claude/skills/layout-qa/SKILL.md'), 'utf-8');
+    return skill.replace(/^---[\s\S]*?---\n/, '').trim();
+  } catch {
+    return '';
+  }
+}
 
 function renderIssues(issues: ConsolidatedIssues): string {
   const lines: string[] = [];
@@ -63,8 +75,9 @@ function renderIssues(issues: ConsolidatedIssues): string {
  * Returns a structured summary of what it changed (best-effort).
  */
 export async function runFixPass(issues: ConsolidatedIssues): Promise<FixSummary> {
-  const prompt = `You are fixing layout-geometry defects on the sreeraj.dev site. Use the **layout-qa skill** — follow its contract exactly: fix the geometry, never alter the approved visual style, never delete required CSS classes, never mask overflow with hidden/clipping or by shrinking fonts.
-
+  const rules = layoutQaRules();
+  const prompt = `You are fixing layout-geometry defects on the sreeraj.dev site. Follow the layout-qa rules below exactly: fix the geometry, never alter the approved visual style, never delete required CSS classes, never mask overflow with hidden/clipping or by shrinking fonts.
+${rules ? `\n## layout-qa rules\n\n${rules}\n` : ''}
 The authoritative report is at \`automation/test-output/layout-report.json\`. Here is the consolidated issue list:
 
 ${renderIssues(issues)}
@@ -74,38 +87,19 @@ Steps:
 2. Make the smallest change that fixes each root cause, applying the same fix to both \`[data-theme="tech"]\` and \`[data-theme="trek"]\` where relevant. Prefer responsive rules (media queries, \`min()\`/\`clamp()\`, \`minmax(0, 1fr)\`) over hard overrides.
 3. Summarize what you changed.
 
-Do NOT run \`npm run build\` or the geometry analyzer — the orchestrator rebuilds and re-checks after you finish. Spend your turns editing, not building. Work from the repository root. Do not commit.`;
+Do NOT run \`npm run build\` or the geometry analyzer — the orchestrator rebuilds and re-checks after you finish. Spend your turns editing, not building. Work from the repository root. Do not commit. Never edit anything under automation/.`;
 
-  const summary: FixSummary = { filesChanged: [], changes: '', notes: '' };
-
-  for await (const message of query({
+  const result = await runAgent<Partial<FixSummary>>({
+    role: 'fixer',
+    label: 'layout-fixer',
     prompt,
-    options: {
-      cwd: CONFIG.projectRoot,
-      model: CONFIG.layoutQa.fixerModel,
-      maxTurns: CONFIG.layoutQa.fixerMaxTurns,
-      allowedTools: ['Read', 'Edit', 'Bash', 'Glob', 'Grep', 'Skill'],
-      permissionMode: 'acceptEdits',
-      env: agentEnv(),
-      settingSources: ['project'],
-      skills: ['layout-qa'],
-      outputFormat: {
-        type: 'json_schema',
-        schema: FIX_OUTPUT_SCHEMA,
-      },
-    },
-  })) {
-    if (
-      message.type === 'result' &&
-      (message as any).subtype === 'success' &&
-      (message as any).structured_output
-    ) {
-      const so = (message as any).structured_output as Partial<FixSummary>;
-      summary.filesChanged = so.filesChanged ?? [];
-      summary.changes = so.changes ?? '';
-      summary.notes = so.notes ?? '';
-    }
-  }
+    schema: FIX_OUTPUT_SCHEMA as unknown as Record<string, unknown>,
+  });
+  if (!result.ok) throw new Error(`fixer agent failed: ${result.error}`);
 
-  return summary;
+  return {
+    filesChanged: result.data?.filesChanged ?? [],
+    changes: result.data?.changes ?? '',
+    notes: result.data?.notes ?? '',
+  };
 }

@@ -2,7 +2,7 @@
 #
 # Monthly redesign runner for the Hetzner instance.
 #
-# Stages: trend discovery -> creative rebuild (claude -p) -> build
+# Stages: trend discovery -> creative rebuild (agent adapter) -> build
 #         -> [checkpoint] -> Layout QA & Fix stage -> open PR
 #
 # Resumable: after the expensive rebuild+build, the working-tree changes are
@@ -90,31 +90,32 @@ if [ "$MODE" = "check" ]; then
 fi
 
 # --- Auth ---
-# Generation (claude -p), the Agent SDK layout fixer, the vision gate and trend
-# discovery all run on the Claude Code SESSION (subscription/OAuth) — no API key.
+# Every agent step (rebuild, layout fixer, vision gate, trend research) runs through
+# automation/pipeline/agent.ts on the host's SUBSCRIPTION logins — Claude Code
+# (CLAUDE_CODE_OAUTH_TOKEN) first, Codex (ChatGPT login) as fallback. No API key.
 # An ANTHROPIC_API_KEY is OPTIONAL and only used by the non-blocking Webwright
-# reviewer. NOTE: if a key IS set, claude/the SDK switch to API-billing mode and
-# will fail on an invalid key — so leave it unset to use session auth.
+# reviewer. NOTE: if a key IS set, claude switches to API-billing mode and will
+# fail on an invalid key — so leave it unset to use the subscription.
 if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
   log "ANTHROPIC_API_KEY is set — API-billing mode (also used by Webwright)."
 else
   log "No ANTHROPIC_API_KEY — using Claude Code session auth; Webwright will skip."
 fi
 
-# Preflight: prove we can actually authenticate BEFORE mutating anything.
-# The Claude Code OAuth session expires periodically; without this gate an
-# expired session let the run continue and produce a bogus "redesign" PR that
-# only bumped the month (2026-08). Fail fast and loudly instead.
+# Preflight: prove at least one agent provider (Claude Code or Codex) can answer BEFORE
+# mutating anything. The Claude login expiring broke the 2026-10-01 run; with Codex as a
+# fallback, one expired login no longer stops the month.
+export REDESIGN_CLAUDE_MODEL="$CLAUDE_MODEL"
 if [ "$MODE" != "check" ]; then
-  AUTH_OUT="$(timeout 120 claude -p 'Reply with exactly: AUTHOK' --model "$CLAUDE_MODEL" --print 2>&1 || true)"
-  if ! printf '%s' "$AUTH_OUT" | grep -q 'AUTHOK'; then
-    log "FATAL: Claude Code auth preflight failed — no redesign attempted."
-    log "       Response: $(printf '%s' "$AUTH_OUT" | head -c 300)"
-    log "       Fix: run 'claude' interactively on $(hostname) and re-login, then:"
-    log "       systemctl --user start sreeraj-redesign.service"
+  if ! PROBE_OUT="$(cd automation && timeout 300 npx tsx pipeline/probe.ts 2>&1)"; then
+    log "FATAL: no agent provider can authenticate — no redesign attempted."
+    printf '%s\n' "$PROBE_OUT" | grep -E '^probe ' | while read -r l; do log "       $l"; done
+    log "       Fix: renew CLAUDE_CODE_OAUTH_TOKEN (claude setup-token) or run 'codex login --device-auth',"
+    log "       then: systemctl --user start sreeraj-redesign.service"
     exit 4
   fi
-  log "Auth preflight OK (model: $CLAUDE_MODEL)."
+  printf '%s\n' "$PROBE_OUT" | grep -E '^probe ' | while read -r l; do log "Preflight: $l"; done
+  log "Auth preflight OK (claude model: $CLAUDE_MODEL)."
 fi
 
 STAGE_FILE="$STATE_DIR/stage"
@@ -229,11 +230,12 @@ s = s.replace('{{TREND_SPEC}}', spec)
 open(p, 'w').write(s)
 PY
 
-  # 5. Creative rebuild (Claude Code session auth).
+  # 5. Creative rebuild (agent adapter: Claude Code, falling back to Codex).
   # A non-zero exit may still mean useful work (e.g. hit max-turns), so don't
   # abort on it alone — the substantive check is the src/ diff below.
   REBUILD_RC=0
-  claude -p "$(cat /tmp/rebuild-prompt.md)" --model "$CLAUDE_MODEL" --print --dangerously-skip-permissions --max-turns 50 \
+  # Runs on the implementer role's provider order (Claude, then Codex) — see pipeline/roles.json.
+  ( cd automation && npx tsx pipeline/rebuild.ts /tmp/rebuild-prompt.md ) \
     || REBUILD_RC=$?
   [ "$REBUILD_RC" -ne 0 ] && log "claude rebuild exited $REBUILD_RC"
 
