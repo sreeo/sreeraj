@@ -6,6 +6,8 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 import { parseReport } from './e2e-stage.js';
 import { restoreAutomation } from './guard.js';
+import { galleryMarkdown, repoSlug } from './publish-shots.js';
+import { blockingIssues, validateVerdict } from './visual-qa.js';
 
 describe('restoreAutomation', () => {
   it('undoes edits and new files under automation/, but keeps history/ and site changes', () => {
@@ -65,5 +67,35 @@ describe('parseReport', () => {
   });
   it('passes a clean report', () => {
     assert.equal(parseReport({ stats: { expected: 25, unexpected: 0 }, suites: [] }).passed, true);
+  });
+});
+
+describe('visual QA gate', () => {
+  const page = (name: string) => ({ name, path: `/${name}/` });
+  const issue = (severity: 'high' | 'medium' | 'low', kind: any) => ({ severity, kind, viewport: 'mobile' as const, where: 'x', description: 'y' });
+
+  it('blocks on pages that do not render and on high issues of blocking kinds only', () => {
+    const b = blockingIssues([
+      { page: page('home'), shots: [], verdict: { rendersOk: true, styleFidelity: 8, summary: '', issues: [issue('high', 'overlap'), issue('high', 'off-style'), issue('medium', 'clipped')] } },
+      { page: page('about'), shots: [], verdict: { rendersOk: false, styleFidelity: 2, summary: '', issues: [] } },
+      { page: page('tags'), shots: [], error: 'agent failed' },
+    ]);
+    assert.deepEqual(b.map(x => `${x.page}:${'kind' in x.issue ? x.issue.kind : 'render'}`), ['home:overlap', 'about:render']);
+  });
+  it('rejects out-of-range fidelity and unknown kinds', () => {
+    assert.throws(() => validateVerdict({ rendersOk: true, styleFidelity: 12, issues: [], summary: '' }), /0-10/);
+    assert.throws(() => validateVerdict({ rendersOk: true, styleFidelity: 5, issues: [issue('high', 'ugly')], summary: '' }), /bad kind/);
+  });
+});
+
+describe('screenshot gallery', () => {
+  it('reads the repo slug from https and ssh remotes', () => {
+    assert.equal(repoSlug('https://github.com/sreeo/sreeraj.git'), 'sreeo/sreeraj');
+    assert.equal(repoSlug('git@github.com:sreeo/sreeraj'), 'sreeo/sreeraj');
+  });
+  it('links raw images on the assets branch and marks missing ones', () => {
+    const md = galleryMarkdown('sreeo/sreeraj', '2026-11/run1', ['home', 'about'], new Set(['home-390.jpg', 'home-1280.jpg', 'about-1280.jpg']));
+    assert.match(md, /raw\.githubusercontent\.com\/sreeo\/sreeraj\/redesign-assets\/2026-11\/run1\/home-390\.jpg/);
+    assert.match(md, /\| about \| – \| <a href=/);
   });
 });

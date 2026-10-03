@@ -194,7 +194,10 @@ PY
   # pick-trend.ts (the style registry) is the fallback. Clear stale outputs first so
   # a manual REDESIGN_TREND override can't pick up last month's files.
   rm -f automation/history/current-trend.json automation/test-output/decision.json automation/test-output/decision-summary.md \
-        automation/test-output/e2e-summary.md automation/test-output/agent-calls.jsonl
+        automation/test-output/e2e-summary.md automation/test-output/agent-calls.jsonl \
+        automation/test-output/visual-qa-summary.md automation/test-output/visual-qa.json \
+        automation/test-output/gallery.md
+  rm -rf automation/test-output/visual
   TREND="${REDESIGN_TREND:-}"
   if [ -z "$TREND" ]; then
     TREND="$(cd automation && timeout 3600 npx tsx pipeline/ideation.ts 2>>/tmp/ideation.err)" || TREND=""
@@ -320,6 +323,12 @@ QA_RC=0
 ( cd automation && npx tsx layout-qa-stage.ts ) || QA_RC=$?
 log "layout-qa exit: $QA_RC"
 
+# --- 7b. Visual QA: 14 page templates at 390/1280px, a typed vision verdict per page, a
+# code gate (only high-severity layout breakage blocks) and a bounded fix loop.
+VQA_RC=0
+( cd automation && npx tsx pipeline/visual-qa.ts ) || VQA_RC=$?
+log "visual-qa exit: $VQA_RC"
+
 # --- 8. Record the design in the log (used by trend discovery to avoid repeats) ---
 # Record the ACTUAL outcome, not a hardcoded success — a design logged as
 # 'success' is treated as shipped and avoided by future trend discovery.
@@ -367,20 +376,22 @@ else
   git add -A
   git commit -m "Monthly redesign: ${TREND:0:60}"
   git push -u origin "$BRANCH"
-  E2E_SUMMARY="automation/test-output/e2e-summary.md"
-  [ -f "$E2E_SUMMARY" ] && BODY="$(printf '%b\n\n---\n\n' "$BODY"; cat "$E2E_SUMMARY")"
-  SUMMARY="automation/test-output/layout-qa-summary.md"
-  BODY="Automated monthly redesign on $(hostname).\n\n**Trend:** ${TREND}"
-  DECISION="automation/test-output/decision-summary.md"
-  [ -f "$DECISION" ] && BODY="$(printf '%b\n\n---\n\n' "$BODY"; cat "$DECISION")"
-  [ -f "$SUMMARY" ] && BODY="$(printf '%b\n\n---\n\n' "$BODY"; cat "$SUMMARY")"
+  # Screenshots go to the orphan branch redesign-assets (never main); gallery.md links them.
+  ( cd automation && npx tsx pipeline/publish-shots.ts "${NEW_MONTH:-$(date -u +%Y-%m)}" "${BRANCH#redesign/}" ) || true
+  # Build the body in a file: printf %b on accumulated markdown would eat backslashes.
+  BODY_FILE="$(mktemp)"
+  printf 'Automated monthly redesign on %s.\n\n**Trend:** %s\n' "$(hostname)" "$TREND" > "$BODY_FILE"
+  for part in decision-summary e2e-summary visual-qa-summary layout-qa-summary gallery; do
+    f="automation/test-output/$part.md"
+    if [ -f "$f" ]; then printf '\n---\n\n' >> "$BODY_FILE"; cat "$f" >> "$BODY_FILE"; fi
+  done
   DRAFT=()
-  if [ "$E2E_RC" -ne 0 ]; then
+  if [ "$E2E_RC" -ne 0 ] || [ "$VQA_RC" -ne 0 ]; then
     DRAFT=(--draft)
-    log "Blocking e2e checks still fail — opening a DRAFT PR for manual finishing."
+    log "Blocking checks still fail (e2e=$E2E_RC, visual=$VQA_RC) — opening a DRAFT PR for manual finishing."
   fi
   gh pr create "${DRAFT[@]}" --title "Monthly redesign: ${TREND:0:60}" \
-    --body "$BODY" --head "$BRANCH" --base "$BASE_BRANCH" \
+    --body-file "$BODY_FILE" --head "$BRANCH" --base "$BASE_BRANCH" \
     || log "PR creation failed (push succeeded; open the PR manually)"
 fi
 
