@@ -8,28 +8,34 @@ if (!contact) throw new Error('contact page missing from pages collection');
 const { Content } = await render(contact);
 ---
 
-<BaseLayout title="Contact — sreeraj.dev" description="How to reach Sreeraj Rajan." theme="tech">
-  <header class="page-poster">
-    <div class="wrap page-poster-grid">
-      <div>
-        <span class="stamp">Correspondence</span>
-        <h1 class="page-title">Write to the press</h1>
-        <p class="page-description">
-          Letters, corrections and trek plans are all welcome. Replies are
-          slower above 3,000 metres.
-        </p>
-      </div>
-      {contact.data.featureImage && (
-        <figure class="portrait-slab montage montage--mono" style={`--img:url('${contact.data.featureImage}')`} aria-label="A view from one of Sreeraj's treks">
-          <img src={contact.data.featureImage} alt="" loading="eager" />
-        </figure>
-      )}
-    </div>
-  </header>
+<BaseLayout
+  title="Contact — sreeraj.dev"
+  description="How to reach Sreeraj Rajan."
+  section={{ label: 'Epistolae', href: '/contact/' }}
+  runningTitle="Epistolae ad auctorem"
+>
+  <div class="folio">
+    <header class="page-head">
+      <span class="liber sc">Epistolae</span>
+      <h1 class="page-title">Correspondence</h1>
+      <p class="page-description">
+        Letters to the press are welcome — corrections, questions about a
+        treatise, and plans for a trek. Replies are slower above three thousand metres.
+      </p>
+      <span class="fleuron" aria-hidden="true">❧</span>
+    </header>
 
-  <section class="wrap">
-    <div class="prose" data-qa="contact">
+    {contact.data.featureImage ? (
+      <figure class="marg portrait">
+        <span class="frame"><img src={contact.data.featureImage} alt="A mountain view from one of Sreeraj's treks" loading="eager" width="400" height="500" /></span>
+        <figcaption class="fig-caption"><b>Fig. i.</b> Whence the slower replies are sent.</figcaption>
+      </figure>
+    ) : <span class="marg"></span>}
+
+    <div class="prose epistola" data-qa="contact">
+      <p>The printer may be reached by any of the following means:</p>
       <Content />
+      <p class="epistola-seal">Datum in officina Sreeraj — written in the officina, and answered as soon as the ink is dry.</p>
     </div>
-  </section>
+  </div>
 </BaseLayout>

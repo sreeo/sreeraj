@@ -1,21 +1,22 @@
 ---
-// Dates set the way Soviet presses set them: day · roman month · year.
+// Dates in three settings: the Arabic short form for tables, the long form
+// for marginalia, and the Roman form of a colophon.
+import { roman, romanLower, latinMonth } from '../utils/roman';
+
 interface Props {
   date: Date;
+  format?: 'short' | 'long' | 'roman';
 }
 
-const { date } = Astro.props;
-
-const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-const day = String(date.getUTCDate()).padStart(2, '0');
-const month = ROMAN[date.getUTCMonth()];
-const year = date.getUTCFullYear();
-const spoken = date.toLocaleDateString('en-GB', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
+const { date, format = 'short' } = Astro.props;
+const spoken = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const short = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const text =
+  format === 'roman'
+    ? `${romanLower(date.getUTCDate())} ${latinMonth(date)} ${roman(date.getUTCFullYear())}`
+    : format === 'long'
+      ? spoken
+      : short;
 ---
 
-<time datetime={date.toISOString()} aria-label={spoken} title={spoken}>{day}·{month}·{year}</time>
+<time datetime={date.toISOString()} title={spoken}>{text}</time>

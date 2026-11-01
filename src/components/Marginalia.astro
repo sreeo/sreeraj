@@ -1,0 +1,66 @@
+---
+// Marginalia: external references become lettered sidenotes and images get
+// "Fig. ii." captions. On wide screens they are set in the outer margin beside
+// their paragraph; below that they follow the paragraph inline.
+---
+
+<script>
+  const LETTERS = 'abcdefghiklmnopqrstvxyz';
+  const ROMAN = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv', 'xv', 'xvi', 'xvii', 'xviii', 'xix', 'xx'];
+  const prose = document.querySelector<HTMLElement>('.prose[data-marginalia]');
+  if (prose) {
+    let n = 0;
+    let fig = Number(prose.dataset.figStart || 1);
+    const note = (after: Element, html: string, cls = '') => {
+      const aside = document.createElement('aside');
+      aside.className = `sidenote ${cls}`;
+      aside.innerHTML = html;
+      after.after(aside);
+      return aside;
+    };
+    prose.querySelectorAll(':scope > p').forEach((p) => {
+      if (p.querySelector('img')) {
+        if (fig <= ROMAN.length) note(p, `<span class="sn-mark">Fig. ${ROMAN[fig - 1]}.</span>`, 'fig-note');
+        fig++;
+        return;
+      }
+      const links = [...p.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')].filter((a) => a.host !== location.host);
+      let anchor: Element = p;
+      for (const a of links) {
+        const mark = LETTERS[n++ % LETTERS.length];
+        const id = `sn-${n}`;
+        const host = a.host.replace(/^www\./, '');
+        a.dataset.note = mark;
+        a.setAttribute('aria-describedby', id);
+        const aside = note(anchor, `<span class="sn-mark">${mark}</span>`);
+        aside.id = id;
+        aside.append(document.createTextNode(host));
+        anchor = aside;
+        const lit = (on: boolean) => () => aside.classList.toggle('is-lit', on);
+        a.addEventListener('mouseenter', lit(true));
+        a.addEventListener('mouseleave', lit(false));
+        a.addEventListener('focus', lit(true));
+        a.addEventListener('blur', lit(false));
+      }
+    });
+
+    const wide = matchMedia('(min-width: 1100px)');
+    const place = () => {
+      const meta = document.querySelector('.post-header-meta');
+      let floor = meta && wide.matches ? meta.getBoundingClientRect().bottom - prose.getBoundingClientRect().top + 24 : 0;
+      prose.querySelectorAll<HTMLElement>(':scope > .sidenote').forEach((el) => {
+        if (!wide.matches) { el.style.top = ''; return; }
+        let ref = el.previousElementSibling as HTMLElement | null;
+        while (ref && ref.classList.contains('sidenote')) ref = ref.previousElementSibling as HTMLElement | null;
+        const top = Math.max(ref ? ref.offsetTop + (el.classList.contains('fig-note') ? ref.offsetHeight - el.offsetHeight - 8 : 4) : 0, floor);
+        el.style.top = `${top}px`;
+        floor = top + el.offsetHeight + 12;
+      });
+    };
+    place();
+    wide.addEventListener('change', place);
+    addEventListener('resize', place, { passive: true });
+    addEventListener('load', place);
+    document.fonts?.ready.then(place);
+  }
+</script>

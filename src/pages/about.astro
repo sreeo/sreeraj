@@ -8,31 +8,34 @@ if (!about) throw new Error('about page missing from pages collection');
 const { Content } = await render(about);
 ---
 
-<BaseLayout title="About — sreeraj.dev" description="Who Sreeraj Rajan is and what he does." theme="tech">
-  <header class="page-poster">
-    <div class="wrap page-poster-grid">
-      <div>
-        <span class="stamp">Dossier</span>
-        <h1 class="page-title">About the author</h1>
-        <p class="page-description">
-          Backend engineer, trekker, occasional open-source contributor.
-          Currently building at Medley Learning.
-        </p>
-      </div>
-      {about.data.featureImage && (
-        <figure class="portrait" aria-label="Portrait">
-          <div class="portrait-circle montage montage--mono" style={`--img:url('${about.data.featureImage}')`}>
-            <img src={about.data.featureImage} alt="Sreeraj's dog, looking directly at the camera" loading="eager" />
-          </div>
-          <div class="portrait-wedge" aria-hidden="true"></div>
-        </figure>
-      )}
-    </div>
-  </header>
+<BaseLayout
+  title="About — sreeraj.dev"
+  description="Who Sreeraj Rajan is and what he does."
+  section={{ label: 'De auctore', href: '/about/' }}
+  runningTitle="Vita auctoris"
+>
+  <div class="folio">
+    <header class="page-head">
+      <span class="liber sc">De auctore</span>
+      <h1 class="page-title">The Author</h1>
+      <p class="page-description">
+        Backend engineer, keeper of infrastructure, walker of high passes —
+        and, for this volume, its compositor and printer.
+      </p>
+      <span class="fleuron" aria-hidden="true">❧</span>
+    </header>
 
-  <section class="wrap">
-    <div class="prose">
+    {about.data.featureImage ? (
+      <figure class="marg portrait">
+        <span class="frame"><img src={about.data.featureImage} alt="Sreeraj's dog, looking directly at the camera" loading="eager" width="400" height="500" /></span>
+        <figcaption class="fig-caption"><b>Fig. i.</b> The guardian of the officina, who approves of nothing until it is fed.</figcaption>
+      </figure>
+    ) : <span class="marg"></span>}
+
+    <div class="prose" data-initial>
       <Content />
     </div>
-  </section>
+
+    <p class="catchword">Vale.</p>
+  </div>
 </BaseLayout>

@@ -1,42 +1,51 @@
 ---
-// The flag: a black band cut on the diagonal, carrying the wordmark and a
-// numbered index of the site — four across, two deep, like a poster's contents.
-const navItems = [
-  { label: 'Home', href: '/' },
-  { label: 'About', href: '/about/' },
-  { label: 'DevOps', href: '/devops/' },
-  { label: 'Treks', href: '/treks/' },
-  { label: 'Programming', href: '/programming/' },
-  { label: 'Postgres', href: '/postgres/' },
-  { label: 'Archive', href: '/archive/' },
-];
+// The running head: section on the left, the printer's mark in the middle,
+// the work's title and its signature mark (a.i, a.ii …) on the right.
+import Device from './Device.astro';
+import Signatures from './Signatures.astro';
 
-const currentPath = Astro.url.pathname;
-const isActive = (href: string) =>
-  href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+interface Props {
+  section?: { label: string; href: string };
+  runningTitle?: string;
+}
+
+const { section, runningTitle = 'sreeraj.dev' } = Astro.props;
+const path = Astro.url.pathname;
+
+const LINKS = [
+  { href: '/', label: 'Home', latin: 'Tabula' },
+  { href: '/about/', label: 'About', latin: 'De auctore' },
+  { href: '/devops/', label: 'DevOps', latin: 'Liber primus' },
+  { href: '/postgres/', label: 'Postgres', latin: 'Liber secundus' },
+  { href: '/programming/', label: 'Programming', latin: 'Liber tertius' },
+  { href: '/treks/', label: 'Treks', latin: 'Itinera' },
+  { href: '/archive/', label: 'Archive', latin: 'Catalogus editionum' },
+];
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
 ---
 
 <header class="nav-bar">
-  <div class="wrap nav-inner">
-    <div class="nav-mast">
-      <a href="/" class="nav-brand">sreeraj.dev</a>
-      <p class="nav-slogan">Dispatches on DevOps, Postgres, programming &amp; treks</p>
-    </div>
-    <nav class="nav-index" aria-label="Site" data-qa="site-nav">
-      {navItems.map((item, i) => (
-        <a
-          href={item.href}
-          class="nav-link"
-          aria-current={isActive(item.href) ? 'page' : undefined}
-        >
-          <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-          <span class="nav-label">{item.label}</span>
-        </a>
-      ))}
-      <a href="/rss.xml" class="nav-link">
-        <span class="num" aria-hidden="true">08</span>
-        <span class="nav-label">RSS</span>
-      </a>
-    </nav>
+  <div class="running-head">
+    <span class="rh-section sc">
+      {section ? <a href={section.href}>{section.label}</a> : <span>Tabula</span>}
+    </span>
+    <a href="/" class="nav-brand" aria-label="sreeraj.dev — home">
+      <Device letters={false} />
+      <span>Sreeraj</span>
+    </a>
+    <span class="rh-folio">
+      <span class="rh-title">{runningTitle}</span>
+      <span class="sig" id="sig" title="Signature mark — your place in the gathering">a.i</span>
+    </span>
   </div>
 </header>
+<nav aria-label="Main" data-qa="site-nav">
+  <ul class="nav-links">
+    {LINKS.map((l) => (
+      <li>
+        <a href={l.href} class="nav-link" title={l.latin} aria-current={isCurrent(l.href) ? 'page' : undefined}>{l.label}</a>
+      </li>
+    ))}
+  </ul>
+</nav>
+<Signatures />

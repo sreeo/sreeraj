@@ -3,49 +3,61 @@ import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
+import Device from '../components/Device.astro';
+import { roman } from '../utils/roman';
 
 interface Props {
   title: string;
   description?: string;
-  kicker?: string;
+  liber?: string;
+  rubric?: string;
   theme?: 'tech' | 'trek';
   posts: CollectionEntry<'blog'>[];
 }
 
-const { title, description, kicker = 'Section', theme = 'tech', posts } = Astro.props;
+const { title, description, liber = 'Rubrica', rubric, theme = 'tech', posts } = Astro.props;
 
-// Global dispatch numbers, so Nº 017 is 017 on every page it appears.
-const all = (await getCollection('blog'))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const numOf = (slug: string) =>
-  String(all.length - all.findIndex((p) => p.data.slug === slug)).padStart(3, '0');
-
-// Stagger: the lead spans two columns; everything after it steps down the diagonal.
-const staggerFor = (i: number) => (i === 0 ? 0 : i === 1 ? 2 : (i - 2) % 3);
+// Global chapter numbers, so a work is cap. xvii wherever it is listed.
+const all = (await getCollection('blog')).sort((a, b) => a.data.pubDate.valueOf() - b.data.pubDate.valueOf());
+const numOf = (slug: string) => all.findIndex((p) => p.data.slug === slug) + 1;
 const count = posts.length;
+const NUMBER_WORDS = ['nulla', 'unus', 'duo', 'tres', 'quattuor', 'quinque', 'sex', 'septem', 'octo', 'novem', 'decem'];
+const countWord = NUMBER_WORDS[count] ?? roman(count);
+const years = posts.map((p) => p.data.pubDate.getUTCFullYear());
+const span = years.length ? `${roman(Math.min(...years))}${Math.min(...years) !== Math.max(...years) ? ' – ' + roman(Math.max(...years)) : ''}` : '';
 ---
 
-<BaseLayout title={`${title} — sreeraj.dev`} description={description} theme={theme}>
-  <header class="page-poster">
-    <div class="wrap page-poster-grid">
-      <div>
-        <span class="stamp">{kicker}</span>
-        <h1 class="page-title">{title}</h1>
-        {description && <p class="page-description">{description}</p>}
-      </div>
-      <div class="count-stamp" aria-hidden="true">
-        <strong>{String(count).padStart(2, '0')}</strong>
-        <span>{count === 1 ? 'dispatch' : 'dispatches'}</span>
-      </div>
-    </div>
-  </header>
+<BaseLayout
+  title={`${title} — sreeraj.dev`}
+  description={description}
+  theme={theme}
+  section={{ label: rubric ?? title, href: Astro.url.pathname }}
+  runningTitle={liber}
+>
+  <div class="folio">
+    <header class="page-head">
+      <span class="liber sc">{liber}</span>
+      <h1 class="page-title">{title}</h1>
+      {description && (
+        <div data-initial>
+          <p class="page-description">{description}</p>
+        </div>
+      )}
+      <span class="fleuron" aria-hidden="true">❧</span>
+    </header>
 
-  <section class="wrap sec" aria-label={`${title} dispatches`}>
+    <aside class="marg head-note" aria-label="Contents of this book">
+      <Device class="device" letters={false} />
+      <strong>{count}</strong>
+      Continentur tractatus {countWord} — {count === 1 ? 'one work' : `${count} works`} herein{span && `, printed ${span}`}.
+    </aside>
+
     {count > 0 ? (
-      <ul class="poster-grid-3" data-qa="post-list">
-        {posts.map((post, i) => (
-          <li class:list={[i === 0 && 'is-lead']} style={`--stagger:${staggerFor(i)}`} data-reveal>
+      <ol class="register wide" data-qa="post-list">
+        {posts.map((post) => (
+          <li>
             <PostCard
+              variant="register"
               title={post.data.title}
               slug={post.data.slug}
               description={post.data.description}
@@ -54,13 +66,14 @@ const count = posts.length;
               readingTime={post.data.readingTime}
               featureImage={post.data.featureImage}
               num={numOf(post.data.slug)}
-              lead={i === 0}
             />
           </li>
         ))}
-      </ul>
+      </ol>
     ) : (
-      <p class="lost-text">Nothing has been printed under this heading yet.</p>
+      <p class="empty-note" data-qa="post-list">Nothing has yet been printed under this rubric.</p>
     )}
-  </section>
+
+    <p class="catchword">Finis libri.</p>
+  </div>
 </BaseLayout>

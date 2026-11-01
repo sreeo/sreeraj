@@ -1,6 +1,6 @@
 {
-  "trend": "Russian Constructivism",
-  "description": "Agitprop — the site as a 1920s poster. Red, black and aged cream only. A black header flag cut on the diagonal with a numbered 4×2 site index; a hero that shouts three imperatives (DEPLOY / INDEX / ASCEND!) stepping down the diagonal beside a lead 'film poster' whose photograph is a red-duotone montage that tears away to colour on hover; a Lissitzky red wedge and circle generated from the date that advance as you scroll; a skewed slogan ticker; staggered poster cards; a skewed black band of four sections; and the complete index as a stair-stepped ledger with Roman-numeral dates. Anton shouts, Oswald labels, Inter reads. Hard shadows, mechanical 160ms inversions, diagonal entrances.",
+  "trend": "Aldine Incunable (Venice 1499, Hypnerotomachia Poliphili)",
+  "description": "Aldine Incunable (Venice 1499, Hypnerotomachia Poliphili) — The late-15th-century Venetian printed book as Aldus Manutius and Francesco Griffo made it: humanist roman type, wide proportioned margins, woodcut initials, rubricated red-and-black, and text set in goblet and funnel shapes. It is close to the ideal reading page, so long posts stay comfortable, and a dev blog set like a 1499 Venetian folio is a real surprise after six modernist months.",
   "primaryColor": "#c4201a",
   "fonts": [
     "Anton",
@@ -8,5 +8,13 @@
     "Inter",
     "JetBrains Mono"
   ],
-  "month": "2026-10"
+  "month": "2026-11",
+  "fingerprint": {
+    "family": "pre-modern",
+    "era": "1490s–1500s Venice (Aldine press)",
+    "layoutArchetype": "single-column",
+    "typeClass": "serif",
+    "palette": "duotone",
+    "density": "sparse"
+  }
 }

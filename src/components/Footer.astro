@@ -1,42 +1,16 @@
 ---
-const year = new Date().getFullYear();
-const links = [
-  { label: 'RSS feed', href: '/rss.xml' },
-  { label: 'All tags', href: '/tags/' },
-  { label: 'Past editions', href: '/archive/' },
-  { label: 'Contact', href: '/contact/' },
-  { label: 'Twitter', href: 'https://twitter.com/bot_sree', external: true },
-];
+import Device from './Device.astro';
 ---
 
 <footer class="site-footer" data-qa="site-footer">
-  <div class="wrap footer-grid">
-    <div class="footer-mast">
-      <p class="footer-word">sreeraj<span>.dev</span></p>
-      <p class="footer-colophon">
-        Sreeraj Rajan — backend engineer at Medley Learning. Set in Anton,
-        Oswald &amp; Inter; printed with Astro in red, black and cream.
-        &copy; {year}.
-      </p>
-    </div>
-
-    <nav class="footer-links" aria-label="Footer">
-      {links.map((l, i) => (
-        <a href={l.href} rel={l.external ? 'me noopener' : undefined}>
-          <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-          <span>{l.label}</span>
-        </a>
-      ))}
-    </nav>
-
-    <div class="footer-stamp">
-      <span>Edition</span>
-      <strong>2026 · X</strong>
-      <span>Constructivism</span>
-    </div>
-  </div>
-
-  <div class="wrap">
-    <p class="footer-slogan">All power to the pipelines</p>
-  </div>
+  <Device letters={false} />
+  <p class="footer-imprint sc">Impressum in officina Sreeraj, MMXXVI</p>
+  <p class="footer-gloss">Set in Cardo &amp; EB Garamond after the types Francesco Griffo cut for Aldus Manutius; printed in two inks.</p>
+  <ul class="footer-links">
+    <li><a href="/tags/">Index rerum</a></li>
+    <li><a href="/archive/">Catalogus</a></li>
+    <li><a href="/contact/">Epistolae</a></li>
+    <li><a href="/rss.xml">RSS</a></li>
+  </ul>
+  <p class="registrum"><b>Registrum.</b> a b c d e f g h i k l m n o p — omnes sunt quaterni, praeter p qui est ternus.</p>
 </footer>

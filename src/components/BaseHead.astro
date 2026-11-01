@@ -7,7 +7,7 @@ interface Props {
 
 const {
   title,
-  description = 'The personal site of Sreeraj Rajan. DevOps, Postgres, programming, and Himalayan treks.',
+  description = 'The notebooks of Sreeraj Rajan — DevOps, Postgres, programming, and Himalayan treks.',
   image,
 } = Astro.props;
 
@@ -20,7 +20,9 @@ const ogImage = image ? new URL(image, Astro.site) : undefined;
 <title>{title}</title>
 <meta name="description" content={description} />
 <meta name="generator" content={Astro.generator} />
-<meta name="theme-color" content="#c4201a" />
+<meta name="theme-color" content="#F4EEDF" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1B1712" media="(prefers-color-scheme: dark)" />
+<meta name="color-scheme" content="light dark" />
 <link rel="canonical" href={canonicalURL} />
 
 <meta property="og:type" content="website" />
@@ -37,6 +39,6 @@ const ogImage = image ? new URL(image, Astro.site) : undefined;
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=IM+Fell+DW+Pica:ital@0;1&display=swap" rel="stylesheet" />
 <link rel="alternate" type="application/rss+xml" title="sreeraj.dev" href="/rss.xml" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

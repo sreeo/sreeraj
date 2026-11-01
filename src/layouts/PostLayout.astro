@@ -2,7 +2,12 @@
 import BaseLayout from './BaseLayout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import TagList from '../components/TagList.astro';
+import Goblet from '../components/Goblet.astro';
+import Device from '../components/Device.astro';
+import Marginalia from '../components/Marginalia.astro';
 import { sectionFor } from '../utils/sections';
+import { roman, romanLower, latinMonth } from '../utils/roman';
+import { trimWords } from '../utils/text';
 
 interface TrekStatsData {
   elevation?: string;
@@ -26,137 +31,157 @@ interface Props {
   author?: string;
   readingTime?: number;
   theme?: 'tech' | 'trek';
-  num?: string;
+  num: number;
   prevPost?: { slug: string; title: string } | null;
   nextPost?: { slug: string; title: string } | null;
   trekStats?: TrekStatsData;
 }
 
 const {
-  title, slug, description, pubDate, updatedDate, featureImage,
+  title, description, pubDate, updatedDate, featureImage,
   tags = [], author = 'Sreeraj', readingTime = 1, theme = 'tech',
   num, prevPost = null, nextPost = null, trekStats,
 } = Astro.props;
 
 const section = sectionFor(tags);
-const showUpdated = updatedDate && updatedDate.getTime() !== pubDate.getTime();
+const showUpdated = updatedDate && updatedDate.toISOString().slice(0, 10) !== pubDate.toISOString().slice(0, 10);
 
 const statRows: Array<[string, string]> = trekStats
   ? ([
-      ['Elevation', trekStats.elevation],
-      ['Distance', trekStats.distance],
-      ['Duration', trekStats.duration],
-      ['Difficulty', trekStats.difficulty],
-      ['Basecamp', trekStats.basecamp],
-      ['Season', trekStats.season],
+      ['Altitudo', trekStats.elevation],
+      ['Via', trekStats.distance],
+      ['Dies', trekStats.duration],
+      ['Labor', trekStats.difficulty],
+      ['Castra', trekStats.basecamp],
+      ['Tempus', trekStats.season],
     ].filter(([, v]) => v) as Array<[string, string]>)
   : [];
+
+// A small woodcut of the ascent, from start to peak altitude.
+const ascent = trekStats?.startAlt && trekStats?.peakAlt ? { from: trekStats.startAlt, to: trekStats.peakAlt } : null;
+
+const longDate = pubDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const colophon =
+  `Here ends the treatise ${title}, written by ${author} and imprinted in the officina of Sreeraj ` +
+  `on the ${romanLower(pubDate.getUTCDate())} day of ${latinMonth(pubDate)} in the year ${roman(pubDate.getUTCFullYear())}, ` +
+  `which is to say ${longDate}. Laus Deo.`;
+const catchword = nextPost?.title.split(/\s+/)[0] ?? prevPost?.title.split(/\s+/)[0];
+const catchTarget = nextPost ?? prevPost;
 ---
 
-<BaseLayout title={`${title} — sreeraj.dev`} description={description} image={featureImage} theme={theme}>
-  <div class="read-wedge" id="read-wedge" aria-hidden="true"></div>
-
-  <article class="post">
+<BaseLayout
+  title={`${title} — sreeraj.dev`}
+  description={description}
+  image={featureImage}
+  theme={theme}
+  section={section ? { label: section.rubric, href: section.href } : { label: 'Varia', href: '/tags/' }}
+  runningTitle={title}
+>
+  <article class="folio post">
     <header class="post-header">
-      <div class="wrap post-header-grid">
-        <div class="post-header-main">
-          <nav class="crumbs" aria-label="Breadcrumb">
-            <a href="/">Home</a>
-            <span class="sep" aria-hidden="true">/</span>
-            {section && (
-              <>
-                <a href={section.href}>{section.label}</a>
-                <span class="sep" aria-hidden="true">/</span>
-              </>
-            )}
-            <span>{num ? `Dispatch Nº ${num}` : slug}</span>
-          </nav>
-          <h1 class="post-header-title" data-qa="post-title">{title}</h1>
-          {description && <p class="page-description">{description}</p>}
-        </div>
-
-        <aside class="post-header-meta" aria-label="Post details">
-          <dl>
-            <dt>Printed</dt>
-            <dd><FormattedDate date={pubDate} /></dd>
-            {showUpdated && (
-              <>
-                <dt>Revised</dt>
-                <dd><FormattedDate date={updatedDate} /></dd>
-              </>
-            )}
-            <dt>By</dt>
-            <dd>{author}</dd>
-            <dt>Reading</dt>
-            <dd>{readingTime} min</dd>
-          </dl>
-          {tags.length > 0 && <TagList tags={tags} />}
-        </aside>
-      </div>
+      <span class="incipit sc">
+        Incipit {section ? <a href={section.href}>{section.rubric}</a> : 'Varia'} · capitulum {romanLower(num)}
+      </span>
+      <h1 class="post-header-title" data-qa="post-title">{title}</h1>
+      {description && <p class="page-description">{description.length > 220 ? `${trimWords(description, 200)} …` : description}</p>}
     </header>
 
-    {statRows.length > 0 && (
-      <section class="trek-journal" aria-label="Expedition data">
-        <div class="wrap trek-stats">
-          {statRows.map(([k, v]) => (
-            <div class="trek-stat">
-              <span class="k">{k}</span>
-              <span class="v">{v}</span>
-            </div>
-          ))}
+    <aside class="marg post-header-meta" aria-label="About this work">
+      <dl>
+        <div>
+          <dt>Impressum</dt>
+          <dd><FormattedDate date={pubDate} format="long" /><span class="roman-date"><FormattedDate date={pubDate} format="roman" /></span></dd>
         </div>
-      </section>
-    )}
+        {showUpdated && (
+          <div>
+            <dt>Emendatum</dt>
+            <dd><FormattedDate date={updatedDate} format="long" /></dd>
+          </div>
+        )}
+        <div>
+          <dt>Auctor</dt>
+          <dd>{author}</dd>
+        </div>
+        <div>
+          <dt>Lectio</dt>
+          <dd>{readingTime} {readingTime === 1 ? 'minute' : 'minutes'}</dd>
+        </div>
+        {tags.length > 0 && (
+          <div>
+            <dt>Rubricae</dt>
+            <dd><TagList tags={tags} /></dd>
+          </div>
+        )}
+      </dl>
+      {statRows.length > 0 && (
+        <section class="trek-journal" aria-label="Itinerarium">
+          <h2>Itinerarium</h2>
+          <dl>
+            {statRows.map(([k, v]) => (
+              <div>
+                <dt>{k}</dt>
+                <dd>{v}</dd>
+              </div>
+            ))}
+          </dl>
+          {ascent && (
+            <svg class="ascent" viewBox="0 0 200 70" role="img" aria-label={`Ascent from ${ascent.from} m to ${ascent.to} m`}>
+              <path d="M2 66 L40 52 L62 58 L96 30 L114 40 L150 8 L168 22 L198 66" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+              <path d="M150 8 v-6 l8 3 l-8 3" fill="currentColor" />
+              <text x="2" y="44" font-size="11" fill="currentColor" font-family="EB Garamond, serif" font-style="italic">{ascent.from} m</text>
+              <text x="142" y="12" font-size="11" fill="currentColor" font-family="EB Garamond, serif" font-style="italic" text-anchor="end">{ascent.to} m</text>
+            </svg>
+          )}
+        </section>
+      )}
+    </aside>
 
     {featureImage && (
-      <figure class="trek-hero-wrap montage montage--split" style={`--img:url('${featureImage}')`}>
-        <img class="trek-hero post-hero-image" src={featureImage} alt="" loading="eager" decoding="async" />
+      <figure class="trek-hero-wrap frame">
+        <img src={featureImage} alt="" loading="eager" />
+        <figcaption><b>Fig. i.</b> {title}.</figcaption>
       </figure>
     )}
 
-    <div class="wrap">
-      <div class:list={['prose', theme === 'trek' && 'trek-prose']} data-qa="post-body">
-        <slot />
-      </div>
+    <div
+      class:list={['prose', theme === 'trek' && 'trek-prose']}
+      data-qa="post-body"
+      data-initial
+      data-marginalia
+      data-fig-start={featureImage ? 2 : 1}
+    >
+      <slot />
     </div>
 
-    <nav class="post-nav" aria-label="Adjacent dispatches">
+    <footer class="colophon">
+      <span class="colophon-label sc">Colophon</span>
+      <Goblet text={colophon} shape="funnel" tag="p" />
+      <Device />
+      {catchword && catchTarget && (
+        <span class="catchword">
+          <a href={`/${catchTarget.slug}/`} aria-label={`Next: ${catchTarget.title}`}>{catchword}</a>
+        </span>
+      )}
+    </footer>
+
+    <nav class="post-nav" aria-label="Adjacent works">
       {prevPost ? (
         <a href={`/${prevPost.slug}/`} class="post-nav-link">
-          <span class="post-nav-border">&larr; Older dispatch</span>
+          <span class="post-nav-border">&larr; Liber prior</span>
           <span class="post-nav-title">{prevPost.title}</span>
         </a>
       ) : (
-        <div class="post-nav-empty">The first dispatch</div>
+        <div class="post-nav-empty">The first work in the volume.</div>
       )}
       {nextPost ? (
         <a href={`/${nextPost.slug}/`} class="post-nav-link">
-          <span class="post-nav-border">Newer dispatch &rarr;</span>
+          <span class="post-nav-border">Liber sequens &rarr;</span>
           <span class="post-nav-title">{nextPost.title}</span>
         </a>
       ) : (
-        <div class="post-nav-empty">The latest dispatch</div>
+        <div class="post-nav-empty">The latest work in the volume.</div>
       )}
     </nav>
   </article>
-
-  <script>
-    // The reading wedge: a red bar that drives across the top as you read.
-    const wedge = document.getElementById('read-wedge');
-    if (wedge) {
-      let ticking = false;
-      const draw = () => {
-        const h = document.documentElement;
-        const max = h.scrollHeight - h.clientHeight;
-        wedge.style.setProperty('--p', String(max > 0 ? Math.min(1, h.scrollTop / max) : 0));
-        ticking = false;
-      };
-      const onScroll = () => {
-        if (!ticking) { ticking = true; requestAnimationFrame(draw); }
-      };
-      draw();
-      document.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', onScroll, { passive: true });
-    }
-  </script>
+  <Marginalia />
 </BaseLayout>
