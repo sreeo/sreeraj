@@ -1,0 +1,50 @@
+{
+  "2026-10": {
+    "family": "modern-movement",
+    "era": "1920s Soviet Russia",
+    "layoutArchetype": "collage",
+    "typeClass": "display",
+    "palette": "duotone",
+    "density": "balanced"
+  },
+  "2026-09": {
+    "family": "modern-movement",
+    "era": "1917–1931 Netherlands",
+    "layoutArchetype": "grid",
+    "typeClass": "sans",
+    "palette": "limited",
+    "density": "balanced"
+  },
+  "2026-08": {
+    "family": "digital-subculture",
+    "era": "2010s web",
+    "layoutArchetype": "index",
+    "typeClass": "mono",
+    "palette": "duotone",
+    "density": "dense"
+  },
+  "2026-07": {
+    "family": "medium",
+    "era": "20th-century broadsheet print",
+    "layoutArchetype": "magazine",
+    "typeClass": "serif",
+    "palette": "duotone",
+    "density": "dense"
+  },
+  "2026-06": {
+    "family": "modern-movement",
+    "era": "1950s–60s Switzerland",
+    "layoutArchetype": "grid",
+    "typeClass": "sans",
+    "palette": "duotone",
+    "density": "balanced"
+  },
+  "2026-05": {
+    "family": "digital-subculture",
+    "era": "2020s developer terminal",
+    "layoutArchetype": "scroll-narrative",
+    "typeClass": "mono",
+    "palette": "duotone",
+    "density": "balanced"
+  }
+}

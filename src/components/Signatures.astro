@@ -1,0 +1,41 @@
+---
+// Signature marks as a reading-progress indicator. A gathering is a quire of
+// eight leaves; the mark advances a.i → a.viii → b.i … as the page is read.
+---
+
+<script>
+  const ALPHA = 'abcdefghiklmnopqrstvxyz'; // the printer's alphabet: no j, u or w
+  const ROMAN = ['i', 'ii', 'iii', 'iiii', 'v', 'vi', 'vii', 'viii'];
+  const start = () => {
+    const sig = document.getElementById('sig');
+    if (!sig) return;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let last = '';
+    let ticking = false;
+    const draw = () => {
+      ticking = false;
+      const h = document.documentElement;
+      const max = Math.max(1, h.scrollHeight - h.clientHeight);
+      const leaves = Math.max(2, Math.min(32, Math.round(h.scrollHeight / Math.max(1, h.clientHeight * 0.75))));
+      const leaf = Math.min(leaves - 1, Math.floor((h.scrollTop / max) * leaves));
+      const mark = `${ALPHA[Math.floor(leaf / 8)]}.${ROMAN[leaf % 8]}`;
+      if (mark === last) return;
+      last = mark;
+      sig.textContent = mark;
+      sig.setAttribute('aria-label', `Leaf ${leaf + 1} of ${leaves}`);
+      if (!reduce) {
+        sig.classList.remove('cursor-blink');
+        void sig.offsetWidth;
+        sig.classList.add('cursor-blink');
+      }
+    };
+    const onScroll = () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(draw); }
+    };
+    draw();
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll, { passive: true });
+  };
+  if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 600 });
+  else setTimeout(start, 120);
+</script>

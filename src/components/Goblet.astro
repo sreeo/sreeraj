@@ -1,0 +1,32 @@
+---
+// Shaped text after the Hypnerotomachia: words broken into lines that follow
+// a profile (a goblet that narrows to a point, or a colophon's funnel).
+import { shapeLines, PROFILES } from '../utils/text';
+
+interface Props {
+  text: string;
+  shape?: keyof typeof PROFILES;
+  lead?: number;
+  end?: string;
+  class?: string;
+  tag?: 'p' | 'div';
+}
+
+const { text, shape = 'goblet', lead = 0, end = '❧', class: cls = '', tag: Tag = 'p' } = Astro.props;
+const { lines, width } = shapeLines(text, PROFILES[shape]);
+---
+
+<div class:list={['goblet', cls]} style={`--w:${width}`}>
+  <Tag class="goblet-text">
+    {lines.map((line, i) => {
+      if (i === 0 && lead > 0) {
+        const words = line.split(' ');
+        return (
+          <span class="goblet-line"><span class="goblet-lead">{words.slice(0, lead).join(' ')}</span> {words.slice(lead).join(' ')} </span>
+        );
+      }
+      return <span class="goblet-line">{line} </span>;
+    })}
+    {end && <span class="goblet-end" aria-hidden="true">{end}</span>}
+  </Tag>
+</div>

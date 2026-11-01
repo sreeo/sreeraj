@@ -1,50 +1,54 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Device from '../../components/Device.astro';
 import registryData from '../../../public/archive/registry.json';
+import { roman } from '../../utils/roman';
 
 const archives = registryData.archives || [];
-const fmt = (iso: string) => iso.slice(0, 10);
+const fmt = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const yearOf = (month: string) => roman(Number(month.slice(0, 4)));
 ---
 
 <BaseLayout
   title="Archive — sreeraj.dev"
-  description="Every past monthly redesign of sreeraj.dev, preserved as deployed."
-  theme="tech"
+  description="Catalogus editionum: every past monthly edition of sreeraj.dev, preserved as it was printed."
+  section={{ label: 'Catalogus', href: '/archive/' }}
+  runningTitle="Catalogus editionum"
 >
-  <header class="page-poster">
-    <div class="wrap page-poster-grid">
-      <div>
-        <span class="stamp">Museum</span>
-        <h1 class="page-title">Past editions</h1>
-        <p class="page-description">
-          This site is reprinted in a new idiom every month. Each earlier
-          edition is preserved exactly as it was deployed.
-        </p>
-      </div>
-      <div class="count-stamp" aria-hidden="true">
-        <strong>{String(archives.length).padStart(2, '0')}</strong>
-        <span>{archives.length === 1 ? 'edition' : 'editions'}</span>
-      </div>
-    </div>
-  </header>
+  <div class="folio">
+    <header class="page-head">
+      <span class="liber sc">Bibliotheca</span>
+      <h1 class="page-title">Catalogus editionum</h1>
+      <p class="page-description">
+        This book is reset in a new manner every month. The earlier editions
+        are kept here as a bibliographer would describe them — each preserved
+        exactly as it left the press.
+      </p>
+      <span class="fleuron" aria-hidden="true">❧</span>
+    </header>
 
-  <section class="wrap sec" aria-label="Past editions">
-    <ol class="editions">
-      {archives.map((edition) => (
-        <li data-reveal>
-          <a href={`/archive/${edition.month}/`} class="edition" style={`--swatch:${edition.primaryColor}`}>
-            <span class="edition-swatch" aria-hidden="true"></span>
-            <span class="edition-month">{edition.month}</span>
-            <span class="edition-trend">{edition.trend}</span>
-            <span class="edition-desc">{edition.description}</span>
-            <span class="edition-date">Deployed {fmt(edition.deployedAt)} — view &rarr;</span>
+    <aside class="marg head-note" aria-label="About the catalogue">
+      <Device class="device" letters={false} />
+      <strong>{archives.length}</strong>
+      editiones priores. The present edition, after Aldus (Venetiis, 1499), joins them when the next is printed.
+    </aside>
+
+    <ol class="catalogus git-log-timeline">
+      {archives.map((e) => (
+        <li class="gl-entry">
+          <a href={`/archive/${e.month}/`} class="edition" style={`--swatch:${e.primaryColor}`}>
+            <span class="gl-hash">{e.month}</span>
+            <span class="gl-tag">{e.trend}.</span>
+            {' '}[sreeraj.dev: the officina of Sreeraj, {yearOf(e.month)}].
+            <span class="gl-msg">{e.description}</span>
+            <span class="gl-date sc">
+              Printed {fmt(e.deployedAt)} · ink <span class="swatch" aria-hidden="true"></span>{e.primaryColor} ·
+              <span class="inspice">inspice editionem &rarr;</span>
+            </span>
           </a>
         </li>
       ))}
     </ol>
-    <p class="sec-sub" style="margin-top: var(--s-7);">
-      The current Constructivist edition joins the museum when November's
-      poster replaces it.
-    </p>
-  </section>
+  </div>
 </BaseLayout>

@@ -1,7 +1,9 @@
 ---
-// A film poster: red-duotone montage above, title plate below.
+// A post in two settings: a line of the Tabula (small caps, dotted leader to
+// its date) or a register entry with its woodcut in the outer margin.
 import FormattedDate from './FormattedDate.astro';
-import { catFor, isTrek } from '../utils/sections';
+import { romanLower } from '../utils/roman';
+import { sectionFor } from '../utils/sections';
 
 interface Props {
   title: string;
@@ -11,48 +13,43 @@ interface Props {
   tags?: string[];
   readingTime?: number;
   featureImage?: string;
-  num?: string;
-  lead?: boolean;
+  num: number;
+  variant?: 'tabula' | 'register';
 }
 
-const {
-  title,
-  slug,
-  description = '',
-  pubDate,
-  tags = [],
-  readingTime = 1,
-  featureImage = '',
-  num,
-  lead = false,
-} = Astro.props;
-
-const cat = catFor(tags);
-const trek = isTrek(tags);
+const { title, slug, description, pubDate, tags = [], readingTime = 1, featureImage, num, variant = 'tabula' } = Astro.props;
+const section = sectionFor(tags);
 ---
 
-<a
-  href={`/${slug}/`}
-  class:list={['post-card', lead && 'post-card--lead', trek && 'trek-card']}
-  data-cat={cat.toLowerCase()}
-  data-qa="post-card"
->
-  <div class="post-card-visual montage" style={featureImage ? `--img:url('${featureImage}')` : undefined}>
-    {featureImage ? (
-      <img class="post-card-image" src={featureImage} alt="" loading="lazy" decoding="async" />
-    ) : (
-      <div class="post-card-blank" aria-hidden="true"></div>
-    )}
-    {num && <span class="post-card-no">N&ordm; {num}</span>}
-  </div>
-  <div class="post-card-body">
-    <span class="post-card-cat">{cat}</span>
-    <h3 class="post-card-title">{title}</h3>
-    {description && <p class="post-card-description">{description}</p>}
-    <div class="post-card-meta">
-      <FormattedDate date={pubDate} />
-      <span aria-hidden="true">/</span>
-      <span>{readingTime} min</span>
+{variant === 'tabula' ? (
+  <a href={`/${slug}/`} class="post-card tabula-line" data-qa="post-card">
+    <span class="tl-num" aria-hidden="true">{romanLower(num)}</span>
+    <span class="gl-msg">{title}</span>
+    <span class="tl-leader" aria-hidden="true"></span>
+    <span class="gl-hash"><FormattedDate date={pubDate} /></span>
+  </a>
+) : (
+  <article class="post-card post-card--register" data-qa="post-card">
+    <div class="pc-body">
+      <span class="pc-num" aria-hidden="true">Cap. {romanLower(num)}</span>
+      <h2 class="post-card-title"><a href={`/${slug}/`}>{title}</a></h2>
+      {description && <p class="post-card-desc">{description}</p>}
+      <div class="post-card-meta sc">
+        <FormattedDate date={pubDate} format="long" />
+        <span class="sep" aria-hidden="true">·</span>
+        <span>Lectio {readingTime} min</span>
+        {section && (
+          <>
+            <span class="sep" aria-hidden="true">·</span>
+            <span>{section.rubric}</span>
+          </>
+        )}
+      </div>
     </div>
-  </div>
-</a>
+    {featureImage && (
+      <figure class="pc-figure frame" aria-hidden="true">
+        <img src={featureImage} alt="" width="400" height="300" />
+      </figure>
+    )}
+  </article>
+)}

@@ -2,157 +2,153 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
+import Goblet from '../components/Goblet.astro';
+import Device from '../components/Device.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import RedWedge from '../components/RedWedge.astro';
-import Ticker from '../components/Ticker.astro';
-import { SECTIONS, catFor } from '../utils/sections';
+import { SECTIONS, VARIA, sectionFor } from '../utils/sections';
+import { plainText, trimWords } from '../utils/text';
+import { roman } from '../utils/roman';
 
 const posts = (await getCollection('blog'))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const featured = posts.filter((p) => p.data.featured);
+const lead = featured[0] ?? posts[0];
+const leadSection = sectionFor(lead.data.tags);
 
-const total = posts.length;
-const numOf = (i: number) => String(total - i).padStart(3, '0');
+// Chapter numbers run in order of printing, oldest first.
+const numOf = (slug: string) => posts.length - posts.findIndex((p) => p.data.slug === slug);
 
-const leadIndex = Math.max(0, posts.findIndex((p) => p.data.featured));
-const lead = posts[leadIndex];
-const fresh = posts.filter((_, i) => i !== leadIndex).slice(0, 3);
+// The goblet: the lead work's description and its opening, ~520 characters.
+const opening = plainText(`${lead.data.description} ${lead.body ?? ''}`);
+const gobletText = trimWords(opening, 560).replace(/[^.!?]$/, (c) => c + '.');
 
-const firstYear = Math.min(...posts.map((p) => p.data.pubDate.getUTCFullYear()));
+// The Tabula: every work under exactly one rubric, the miscellany last.
+const groups = [...SECTIONS, VARIA]
+  .map((s) => ({
+    section: s,
+    posts: posts.filter((p) => (sectionFor(p.data.tags)?.name ?? 'varia') === s.name),
+  }))
+  .filter((g) => g.posts.length > 0);
 
-const sections = SECTIONS.map((s) => ({
-  ...s,
-  n: posts.filter((p) => s.match.some((m) => p.data.tags.includes(m))).length,
-}));
-
-const slogans = [
-  'Deploy · Index · Ascend',
-  'Dispatches on DevOps, Postgres, programming & Himalayan treks',
-  'All power to the pipelines',
-  `${total} dispatches printed since ${firstYear}`,
-  'Red, black & cream — nothing else',
-  'Read it. Ship it. Climb it.',
-];
+// Split the groups across the verso and recto of the second spread.
+const half = posts.length / 2;
+let running = 0;
+const verso: typeof groups = [];
+const recto: typeof groups = [];
+for (const g of groups) {
+  (running < half - 1 ? verso : recto).push(g);
+  running += g.posts.length;
+}
+const catchword = recto[0]?.section.rubric ?? '';
+const year = roman(new Date().getUTCFullYear());
 ---
 
-<BaseLayout title="sreeraj.dev — DevOps, Postgres, programming & treks" theme="tech">
-  <!-- ============ the poster ============ -->
-  <section class="poster" aria-labelledby="shout">
-    <RedWedge />
-    <div class="wrap poster-grid">
-      <div class="poster-copy">
-        <p class="poster-kicker">Sreeraj Rajan · Backend engineer · Medley Learning</p>
-        <h1 class="shout" id="shout">
-          <span class="shout-row shout-row--1"><a class="shout-line shout-line--1" href="/devops/">Deploy</a></span>
-          <span class="shout-row shout-row--2"><a class="shout-line shout-line--2" href="/postgres/">Index</a></span>
-          <span class="shout-row shout-row--3"><a class="shout-line shout-line--3" href="/treks/">Ascend<span class="shout-bang">!</span></a></span>
-          <span class="sr-only">sreeraj.dev — DevOps, Postgres, programming and Himalayan treks</span>
-        </h1>
-        <p class="poster-manifesto">
-          Dispatches from a backend engineer: Kubernetes pipelines, Postgres
-          benchmarks, Django internals and the occasional Himalayan pass.
-        </p>
-        <p class="poster-facts">
-          <span>{total} dispatches</span>
-          <span>4 sections</span>
-          <span>Since {firstYear}</span>
-          <span>Last printed <FormattedDate date={posts[0].data.pubDate} /></span>
-        </p>
-      </div>
-
-      <article class="lead">
-        <a href={`/${lead.data.slug}/`} class="lead-link">
-          <div class="lead-visual montage" style={`--img:url('${lead.data.featureImage}')`}>
-            <img src={lead.data.featureImage} alt="" loading="eager" decoding="async" />
-          </div>
-          <div class="lead-plate">
-            <span class="stamp stamp--paper">Lead dispatch</span>
-            <h2 class="lead-title">{lead.data.title}</h2>
-            {lead.data.description && <p class="lead-desc">{lead.data.description}</p>}
-            <p class="lead-meta">
-              <span class="num">N&ordm; {numOf(leadIndex)}</span>
-              <span>{catFor(lead.data.tags)}</span>
-              <FormattedDate date={lead.data.pubDate} />
-              <span>{lead.data.readingTime} min</span>
-            </p>
-          </div>
-        </a>
-      </article>
-    </div>
-  </section>
-
-  <Ticker items={slogans} />
-
-  <!-- ============ fresh off the press ============ -->
-  <section class="wrap sec" aria-labelledby="fresh-title">
-    <header class="sec-head">
-      <h2 class="section-title" id="fresh-title">Fresh off the press</h2>
-      <p class="sec-sub">The three newest dispatches after the lead — each one a poster of its own.</p>
-    </header>
-    <ul class="poster-grid-3" data-qa="post-list">
-      {fresh.map((post, i) => (
-        <li style={`--stagger:${i}`} data-reveal>
-          <PostCard
-            title={post.data.title}
-            slug={post.data.slug}
-            description={post.data.description}
-            pubDate={post.data.pubDate}
-            tags={post.data.tags}
-            readingTime={post.data.readingTime}
-            featureImage={post.data.featureImage}
-            num={numOf(posts.indexOf(post))}
+<BaseLayout
+  title="sreeraj.dev — the notebooks of Sreeraj Rajan"
+  description="DevOps, Postgres, programming and Himalayan treks — set as a Venetian book of 1499."
+  ground="field"
+  runningTitle="Opera omnia"
+>
+  <section class="spread" aria-label="Title page">
+    <div class="spread-inner">
+      <div class="leaf leaf--verso">
+        <div class="title-page">
+          <span class="tp-kicker sc">Opera omnia · editio Aldina</span>
+          <h1 class="tp-title">Sreeraj<span class="dot">·</span>dev</h1>
+          <Goblet
+            class="tp-sub goblet--italic"
+            shape="funnel"
+            end=""
+            text="Being the notebooks of Sreeraj Rajan, on DevOps, Postgres and the craft of programming, with certain journeys among the mountains"
           />
-        </li>
-      ))}
-    </ul>
-  </section>
-
-  <!-- ============ the four sections ============ -->
-  <section class="sect-band" aria-labelledby="sect-title">
-    <div class="wrap">
-      <div class="sect-band-head">
-        <h2 class="sect-band-title" id="sect-title">Four sections</h2>
-        <p class="sect-band-sub">Choose your front</p>
+          <Device class="tp-device" title="The printer's device: an anchor and dolphin, the dolphin coiled as an S" />
+          <p class="tp-imprint sc">
+            Impressum in officina Sreeraj, {year}
+            <span>{posts.length} works in {SECTIONS.length} books and a miscellany</span>
+          </p>
+        </div>
+        <div class="leaf-foot" aria-hidden="true">
+          <span class="catch">Proœmium</span>
+        </div>
       </div>
-      <div class="sect-grid">
-        {sections.map((s) => (
-          <a href={s.href} class="sect">
-            <span class="sect-count">{String(s.n).padStart(2, '0')}</span>
-            <span class="sect-name">{s.label}</span>
-            <span class="sect-desc">{s.blurb}</span>
-          </a>
-        ))}
+
+      <div class="leaf leaf--recto">
+        <article class="proem">
+          <span class="liber sc">Proœmium</span>
+          <h2 class="proem-title"><a href={`/${lead.data.slug}/`}>{lead.data.title}</a></h2>
+          <div class="proem-meta sc">
+            <FormattedDate date={lead.data.pubDate} format="long" />
+            <span class="sep" aria-hidden="true">·</span>
+            {leadSection?.rubric ?? 'Varia'}
+            <span class="sep" aria-hidden="true">·</span>
+            Lectio {lead.data.readingTime} min
+          </div>
+          <Goblet text={gobletText} shape="goblet" lead={2} />
+          <a class="proem-more ruled" href={`/${lead.data.slug}/`}>Read the whole treatise &rarr;</a>
+        </article>
+        <div class="leaf-foot" aria-hidden="true">
+          <span class="sigmark">a.ii</span>
+          <span class="catch">Tabula</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ the complete index ============ -->
-  <section class="wrap sec" aria-labelledby="index-title">
-    <header class="sec-head">
-      <h2 class="section-title" id="index-title">The complete index</h2>
-      <p class="sec-sub">All {total} dispatches, newest first, stepping down the diagonal four at a time.</p>
-    </header>
-    <ol class="ledger" reversed>
-      {posts.map((post, i) => {
-        const year = post.data.pubDate.getUTCFullYear();
-        const newYear = i === 0 || year !== posts[i - 1].data.pubDate.getUTCFullYear();
-        return (
-          <li class="ledger-row" style={`--step:${i % 4}`} data-reveal>
-            {newYear && <span class="ledger-year">{year}</span>}
-            <a href={`/${post.data.slug}/`} class="ledger-link">
-              <span class="ledger-no" aria-hidden="true">{numOf(i)}</span>
-              <div class="ledger-main">
-                <h3 class="ledger-title">{post.data.title}</h3>
-                {post.data.description && <span class="ledger-desc">{post.data.description}</span>}
-              </div>
-              <div class="ledger-side">
-                <span class="ledger-cat">{catFor(post.data.tags)}</span>
-                <FormattedDate date={post.data.pubDate} />
-                <span>{post.data.readingTime} min</span>
-              </div>
-            </a>
-          </li>
-        );
-      })}
-    </ol>
+  <section class="spread" aria-labelledby="tabula-title">
+    <div class="spread-inner" data-qa="post-list">
+      <div class="leaf leaf--verso">
+        <header class="tabula-head">
+          <span class="liber sc">Index</span>
+          <h2 class="page-title" id="tabula-title">Tabula</h2>
+          <p>of the works contained in this volume, by book</p>
+        </header>
+        {verso.map((g) => (
+          <div class="tabula-group">
+            <h3 class="tabula-rubric">
+              {g.section.name === 'varia' ? <span>{g.section.rubric}</span> : <a href={g.section.href}>{g.section.rubric}</a>}
+              <small>{g.section.liber}</small>
+            </h3>
+            <ol class="git-log-timeline">
+              {g.posts.map((p) => (
+                <li class="gl-entry">
+                  <PostCard title={p.data.title} slug={p.data.slug} pubDate={p.data.pubDate} tags={p.data.tags} num={numOf(p.data.slug)} />
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+        <div class="leaf-foot" aria-hidden="true">
+          <span class="sigmark">a.iii</span>
+          <span class="catch">{catchword}</span>
+        </div>
+      </div>
+
+      <div class="leaf leaf--recto">
+        {recto.map((g) => (
+          <div class="tabula-group">
+            <h3 class="tabula-rubric">
+              {g.section.name === 'varia' ? <span>{g.section.rubric}</span> : <a href={g.section.href}>{g.section.rubric}</a>}
+              <small>{g.section.liber}</small>
+            </h3>
+            <ol class="git-log-timeline">
+              {g.posts.map((p) => (
+                <li class="gl-entry">
+                  <PostCard title={p.data.title} slug={p.data.slug} pubDate={p.data.pubDate} tags={p.data.tags} num={numOf(p.data.slug)} />
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+        <p class="tabula-sum">
+          The works are numbered in the order they were printed. Every rubric is
+          gathered in the <a class="ruled" href="/tags/">Index rerum</a>; past
+          editions of this book are kept in the <a class="ruled" href="/archive/">Catalogus</a>.
+        </p>
+        <span class="fleuron" aria-hidden="true">❧</span>
+        <div class="leaf-foot" aria-hidden="true">
+          <span class="sigmark">a.iiii</span>
+        </div>
+      </div>
+    </div>
   </section>
 </BaseLayout>

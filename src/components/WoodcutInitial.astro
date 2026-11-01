@@ -1,0 +1,88 @@
+---
+// Signature detail: every opening paragraph gets a woodcut initial whose
+// foliage is cut afresh from a seed (the page's path) — hedera vines for the
+// technical books, a mountain block for the itinera. It is pulled first as a
+// blind impression (no ink) and inked red when the paragraph comes into view.
+---
+
+<script>
+  const hash = (s: string) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+  const rng = (a: number) => () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const f = (n: number) => n.toFixed(1);
+  const LEAF = 'M0 0C-4-3-6-8-2-10C0-11 0-9 0-8C0-9 0-11 2-10C6-8 4-3 0 0Z';
+  const FRAME = '<rect x="1" y="1" width="98" height="98" fill="none" stroke-width="1.6"/><rect x="5" y="5" width="90" height="90" fill="none" stroke-width=".6"/>';
+
+  function vines(r: () => number) {
+    let s = FRAME;
+    for (const [x, y, dx, dy] of [[9, 9, 1, 1], [91, 9, -1, 1], [9, 91, 1, -1], [91, 91, -1, -1]]) {
+      for (const k of [0, 1]) {
+        const a = 16 + r() * 14, b = 5 + r() * 9, rr = 1.8 + r() * 2.2;
+        const ex = x + dx * (k ? b : a), ey = y + dy * (k ? a : b);
+        const cx = x + dx * (k ? 1 : a * 0.6), cy = y + dy * (k ? a * 0.6 : 1);
+        s += `<path d="M${x} ${y}Q${f(cx)} ${f(cy)} ${f(ex)} ${f(ey)}a${f(rr)} ${f(rr)} 0 1 ${k} ${f(dx * rr)} ${f(dy * rr)}" fill="none" stroke-width="1.1"/>`;
+        s += `<path d="${LEAF}" transform="translate(${f((x + ex) / 2 + dx * 2.5)} ${f((y + ey) / 2 + dy * 2.5)}) rotate(${f(r() * 360)}) scale(${f(0.5 + r() * 0.3)})" fill="currentColor" stroke="none"/>`;
+      }
+      s += `<circle cx="${f(x + dx * (12 + r() * 6))}" cy="${f(y + dy * (12 + r() * 6))}" r="1.3" fill="currentColor" stroke="none"/>`;
+    }
+    for (const [x, y, rot] of [[50, 7, 180], [50, 93, 0], [7, 50, 90], [93, 50, -90]]) {
+      s += `<path d="${LEAF}" transform="translate(${x} ${y}) rotate(${rot + (r() - 0.5) * 30}) scale(.45)" fill="currentColor" stroke="none"/>`;
+    }
+    return s;
+  }
+
+  function ridges(r: () => number) {
+    let s = FRAME, x = 6, up = true, pts = '6,95';
+    const peaks: number[][] = [];
+    while (x < 92) {
+      x = Math.min(94, x + 7 + r() * 9);
+      const y = up ? 70 + r() * 10 : 86 + r() * 6;
+      if (up) peaks.push([x, y]);
+      pts += ` ${f(x)},${f(y)}`;
+      up = !up;
+    }
+    s += `<polyline points="${pts} 94,95" fill="none" stroke-width="1.2" stroke-linejoin="round"/>`;
+    for (const [px, py] of peaks) for (let i = 1; i < 4; i++) s += `<path d="M${f(px - i * 1.6)} ${f(py + i * 3)}l${f(2.4)} ${f(3)}" stroke-width=".7"/>`;
+    s += `<circle cx="${f(74 + r() * 10)}" cy="${f(18 + r() * 6)}" r="5" fill="none" stroke-width="1"/>`;
+    for (let i = 0; i < 3; i++) s += `<path d="M${f(14 + r() * 24)} ${f(16 + r() * 14)}q2.5-2.5 5 0q2.5-2.5 5 0" fill="none" stroke-width=".8"/>`;
+    return s;
+  }
+
+  const letterIt = () => {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const trek = document.documentElement.dataset.theme === 'trek';
+    const io = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) {
+        io!.unobserve(e.target);
+        setTimeout(() => { e.target.classList.remove('is-blind'); e.target.classList.add('is-inked'); }, 220);
+      }
+    }, { threshold: 0.6 }) : null;
+    document.querySelectorAll<HTMLElement>('[data-initial]').forEach((box) => {
+      // A bold run-in label ("**Pro Tips**") heading a list is not an opening
+      // paragraph: lettering it would eat its first letter and spill the
+      // initial into the list below. Take the first real paragraph instead.
+      const isLabel = (el: HTMLElement) => {
+        const t = (el.textContent || '').trim();
+        const b = el.querySelector(':scope > strong, :scope > b');
+        return !!b && (b.textContent || '').trim() === t;
+      };
+      const p = [...box.querySelectorAll('p')].find((el) => /[A-Za-z0-9]/.test(el.textContent || '') && !el.closest('.sidenote') && !el.closest('li') && !isLabel(el));
+      if (!p || p.querySelector('.woodcut-initial')) return;
+      const walk = document.createTreeWalker(p, NodeFilter.SHOW_TEXT);
+      let node: Text | null;
+      while ((node = walk.nextNode() as Text | null) && !/[A-Za-z0-9]/.test(node.data));
+      if (!node) return;
+      const at = node.data.search(/[A-Za-z0-9]/);
+      const letterNode = node.splitText(at);
+      letterNode.splitText(1);
+      const cap = document.createElement('span');
+      cap.className = 'woodcut-initial' + (reduce || !io ? '' : ' is-blind');
+      const svg = `<svg viewBox="0 0 100 100" aria-hidden="true" stroke="currentColor">${(trek ? ridges : vines)(rng(hash(location.pathname + letterNode.data)))}</svg>`;
+      cap.innerHTML = `${svg}<span class="wi-letter"></span>`;
+      cap.lastElementChild!.textContent = letterNode.data;
+      letterNode.replaceWith(cap);
+      box.classList.add('is-lettered');
+      io?.observe(cap);
+    });
+  };
+  letterIt();
+</script>

@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="en" data-theme="tech"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reducing our Deployment times by 87% — sreeraj.dev</title><meta name="description" content="Leveraging github actions by using state to determine whether to build a dockerimage or not."><meta name="generator" content="Astro v5.17.3"><meta name="theme-color" content="#c4201a"><link rel="canonical" href="https://sreeraj.dev/reducing-deploy-times/"><meta property="og:type" content="website"><meta property="og:title" content="Reducing our Deployment times by 87% — sreeraj.dev"><meta property="og:description" content="Leveraging github actions by using state to determine whether to build a dockerimage or not."><meta property="og:url" content="https://sreeraj.dev/reducing-deploy-times/"><meta property="og:image" content="https://sreeraj.dev/images/reducing-deploy-times/PXL_20211230_121955872.jpeg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Reducing our Deployment times by 87% — sreeraj.dev"><meta name="twitter:description" content="Leveraging github actions by using state to determine whether to build a dockerimage or not."><meta name="twitter:image" content="https://sreeraj.dev/images/reducing-deploy-times/PXL_20211230_121955872.jpeg"><script defer src="https://cloud.umami.is/script.js" data-website-id="057ff310-3cdd-46d1-9862-aabd77ec1613"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600&display=swap" rel="stylesheet"><link rel="alternate" type="application/rss+xml" title="sreeraj.dev" href="/archive/2026-10/rss.xml"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/archive/2026-10/_astro/_slug_.BGIdZJc2.css"></head> <body><a href="/" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#000;color:#fff;text-align:center;padding:6px 12px;font-size:13px;font-family:system-ui,sans-serif;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.92;">
+  <span>You're viewing the <strong>October 2026</strong> archived design</span>
+  <span style="background:#fff;color:#000;padding:2px 10px;border-radius:4px;font-weight:600;">View Current Site &rarr;</span>
+</a>
+<div style="height:32px;"></div> <a href="#main" class="skip-link">Skip to content</a> <!-- Print filters for the photomontage: tritone (ink → red → cream) and duotone (ink → cream). --> <svg aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden"> <defs> <filter id="tritone" color-interpolation-filters="sRGB"> <feColorMatrix type="saturate" values="0"></feColorMatrix> <feComponentTransfer> <feFuncR type="linear" slope="1.2" intercept="-0.1"></feFuncR> <feFuncG type="linear" slope="1.2" intercept="-0.1"></feFuncG> <feFuncB type="linear" slope="1.2" intercept="-0.1"></feFuncB> </feComponentTransfer> <feComponentTransfer> <feFuncR type="table" tableValues="0.086 0.769 0.941"></feFuncR> <feFuncG type="table" tableValues="0.078 0.125 0.910"></feFuncG> <feFuncB type="table" tableValues="0.071 0.102 0.839"></feFuncB> </feComponentTransfer> </filter> <filter id="duotone" color-interpolation-filters="sRGB"> <feColorMatrix type="saturate" values="0"></feColorMatrix> <feComponentTransfer> <feFuncR type="linear" slope="1.25" intercept="-0.12"></feFuncR> <feFuncG type="linear" slope="1.25" intercept="-0.12"></feFuncG> <feFuncB type="linear" slope="1.25" intercept="-0.12"></feFuncB> </feComponentTransfer> <feComponentTransfer> <feFuncR type="table" tableValues="0.086 0.941"></feFuncR> <feFuncG type="table" tableValues="0.078 0.910"></feFuncG> <feFuncB type="table" tableValues="0.071 0.839"></feFuncB> </feComponentTransfer> </filter> </defs> </svg> <header class="nav-bar"> <div class="wrap nav-inner"> <div class="nav-mast"> <a href="/archive/2026-10/" class="nav-brand">sreeraj.dev</a> <p class="nav-slogan">Dispatches on DevOps, Postgres, programming &amp; treks</p> </div> <nav class="nav-index" aria-label="Site" data-qa="site-nav"> <a href="/archive/2026-10/" class="nav-link"> <span class="num" aria-hidden="true">01</span> <span class="nav-label">Home</span> </a><a href="/archive/2026-10/about/" class="nav-link"> <span class="num" aria-hidden="true">02</span> <span class="nav-label">About</span> </a><a href="/archive/2026-10/devops/" class="nav-link"> <span class="num" aria-hidden="true">03</span> <span class="nav-label">DevOps</span> </a><a href="/archive/2026-10/treks/" class="nav-link"> <span class="num" aria-hidden="true">04</span> <span class="nav-label">Treks</span> </a><a href="/archive/2026-10/programming/" class="nav-link"> <span class="num" aria-hidden="true">05</span> <span class="nav-label">Programming</span> </a><a href="/archive/2026-10/postgres/" class="nav-link"> <span class="num" aria-hidden="true">06</span> <span class="nav-label">Postgres</span> </a><a href="/archive/" class="nav-link"> <span class="num" aria-hidden="true">07</span> <span class="nav-label">Archive</span> </a> <a href="/archive/2026-10/rss.xml" class="nav-link"> <span class="num" aria-hidden="true">08</span> <span class="nav-label">RSS</span> </a> </nav> </div> </header> <main id="main">  <div class="read-wedge" id="read-wedge" aria-hidden="true"></div> <article class="post"> <header class="post-header"> <div class="wrap post-header-grid"> <div class="post-header-main"> <nav class="crumbs" aria-label="Breadcrumb"> <a href="/archive/2026-10/">Home</a> <span class="sep" aria-hidden="true">/</span>  <a href="/archive/2026-10/devops/">DevOps</a> <span class="sep" aria-hidden="true">/</span>  <span>Dispatch Nº 007</span> </nav> <h1 class="post-header-title" data-qa="post-title">Reducing our Deployment times by 87%</h1> <p class="page-description">Leveraging github actions by using state to determine whether to build a dockerimage or not.</p> </div> <aside class="post-header-meta" aria-label="Post details"> <dl> <dt>Printed</dt> <dd><time datetime="2022-01-03T17:41:31.000Z" aria-label="3 January 2022" title="3 January 2022">03·I·2022</time></dd>  <dt>Revised</dt> <dd><time datetime="2022-01-03T17:47:53.000Z" aria-label="3 January 2022" title="3 January 2022">03·I·2022</time></dd>  <dt>By</dt> <dd>Sreeraj Rajan</dd> <dt>Reading</dt> <dd>2 min</dd> </dl> <ul class="tag-list" aria-label="Tags" data-qa="tag-list"> <li> <a href="/archive/2026-10/tags/devops/" class="tag-pill">devops</a> </li><li> <a href="/archive/2026-10/tags/django/" class="tag-pill">django</a> </li><li> <a href="/archive/2026-10/tags/k8s/" class="tag-pill">k8s</a> </li><li> <a href="/archive/2026-10/tags/kubernetes/" class="tag-pill">kubernetes</a> </li><li> <a href="/archive/2026-10/tags/aws/" class="tag-pill">aws</a> </li> </ul> </aside> </div> </header>  <figure class="trek-hero-wrap montage montage--split" style="--img:url('/images/reducing-deploy-times/PXL_20211230_121955872.jpeg')"> <img class="trek-hero post-hero-image" src="/images/reducing-deploy-times/PXL_20211230_121955872.jpeg" alt="" loading="eager" decoding="async"> </figure> <div class="wrap"> <div class="prose" data-qa="post-body">  <p>We run a healthcare EMR application on k8s. We used to auto-deploy to prod/uat whenever a new commit was merged to the main/uat branch via Github Actions.</p>
+<p>Our deployment script had the following the set of actions:</p>
+<ol>
+<li>
+<p>Build and tag the docker image.</p>
+</li>
+<li>
+<p>Upload the image to ECR.</p>
+</li>
+<li>
+<p>Update the k8s deployments with the new image.</p>
+</li>
+</ol>
+<p>Of the above steps, 1 &#x26; 2 took almost 6-7 minutes to finish. On every trigger, all requirements and dependencies were compiled/installed.  </p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>....</span></span>
+<span class="line"><span>RUN apt-get install -y pgbouncer \</span></span>
+<span class="line"><span>	&#x26;&#x26; pip install awscli</span></span>
+<span class="line"><span>...</span></span>
+<span class="line"><span>COPY ./requirements /requirements</span></span>
+<span class="line"><span>...</span></span>
+<span class="line"><span>RUN pip install --no-cache-dir -r /requirements/uat.txt \</span></span>
+<span class="line"><span>  &#x26;&#x26; rm -rf /requirements</span></span>
+<span class="line"><span>...</span></span></code></pre>
+<p><img src="/images/reducing-deploy-times/image.png" alt=""></p>
+<p>We decided to add a base dockerfile that’d be built only when the requirements changed/modified. The actual docker image that’d be used to deploy would refer to the base dockerfile and only contains steps to copy application code and other time-irrelevant steps.</p>
+<p>We needed to figure out a way to detect if the requirements/dependencies changed, which would trigger the base image build.</p>
+<p>We added <a href="https://github.com/marketplace/actions/stateful-action?ref=sreeraj.dev">jorgebg/stateful-action@v0.1</a> to our deploy script. This allows us to set state between github actions. Any state modification is written to the state branch by default.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>name: UAT deployment</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>on:</span></span>
+<span class="line"><span>  push:</span></span>
+<span class="line"><span>    branches:</span></span>
+<span class="line"><span>      - uat</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>jobs:</span></span>
+<span class="line"><span>  deploy:</span></span>
+<span class="line"><span>    runs-on: ubuntu-latest</span></span>
+<span class="line"><span>    steps:</span></span>
+<span class="line"><span>      - uses: actions/checkout@v2</span></span>
+<span class="line"><span>      - uses: jorgebg/stateful-action@v0.1</span></span>
+<span class="line"><span>      - name: Check and build base docker image</span></span>
+<span class="line"><span>        run:  |</span></span>
+<span class="line"><span>          echo "get existing hash"</span></span>
+<span class="line"><span>          FILE=.state/requirements-hash.txt</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>          if [ -f "$FILE" ]; then</span></span>
+<span class="line"><span>            echo "$FILE exists.";</span></span>
+<span class="line"><span>            read -r existing_hash&#x3C;$FILE;</span></span>
+<span class="line"><span>            echo "Existing hash $existing_hash";</span></span>
+<span class="line"><span>            new_base_hash=($(md5sum requirements/base.txt))</span></span>
+<span class="line"><span>            new_production_hash=($(md5sum requirements/production.txt))</span></span>
+<span class="line"><span>            echo "$new_base_hash$new_production_hash" > "$FILE"</span></span>
+<span class="line"><span>            read -r new_hash&#x3C;$FILE;</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>            echo "Current hash $new_hash";</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>            if [ "$new_hash" != "$existing_hash" ]; then</span></span>
+<span class="line"><span>              echo "Hash does not match, rebuilding docker image"</span></span>
+<span class="line"><span>              bash ./deploy_scripts/base.sh -i ...</span></span>
+<span class="line"><span>            else</span></span>
+<span class="line"><span>              echo "Hash matches no rebuilding required"</span></span>
+<span class="line"><span>            fi</span></span>
+<span class="line"><span>          else</span></span>
+<span class="line"><span>            echo "File does not exist in state"</span></span>
+<span class="line"><span>            new_base_hash=($(md5sum requirements/base.txt))</span></span>
+<span class="line"><span>            new_production_hash=($(md5sum requirements/production.txt))</span></span>
+<span class="line"><span>            echo "$new_base_hash$new_production_hash" > "$FILE"</span></span>
+<span class="line"><span>            bash ./deploy_scripts/base.sh -i ...</span></span>
+<span class="line"><span>          fi</span></span></code></pre>
+<p>On every trigger, we compared the hash of the requirements file with the hash stored in the state, and triggered a build of the base docker image if there was a mismatch. The new hash value is written to the state once the build finishes.</p>
+<p>Since, we do not add/modify dependencies to our django application frequently, it made sense to have a base docker image with all the dependencies already installed and use it as a base to the actual application docker image.</p>
+<p><img src="/images/reducing-deploy-times/image-1.png" alt=""></p>
+<p>We reduced our deploy times from 6-7 minutes to less than a minute. This allows us to be more confident while pushing to production since we know rolling back/releasing a hotfix would take less than a minute.</p>  </div> </div> <nav class="post-nav" aria-label="Adjacent dispatches"> <a href="/archive/2026-10/nginx-ingress-k8s/" class="post-nav-link"> <span class="post-nav-border">&larr; Older dispatch</span> <span class="post-nav-title">Moving from AWS Loadbalancers to Nginx</span> </a> <a href="/archive/2026-10/kedarkantha-trek/" class="post-nav-link"> <span class="post-nav-border">Newer dispatch &rarr;</span> <span class="post-nav-title">Kedarkantha Trek</span> </a> </nav> </article> <script type="module">const i=document.getElementById("read-wedge");if(i){let e=!1;const n=()=>{const t=document.documentElement,o=t.scrollHeight-t.clientHeight;i.style.setProperty("--p",String(o>0?Math.min(1,t.scrollTop/o):0)),e=!1},s=()=>{e||(e=!0,requestAnimationFrame(n))};n(),document.addEventListener("scroll",s,{passive:!0}),window.addEventListener("resize",s,{passive:!0})}</script>  </main> <footer class="site-footer" data-qa="site-footer"> <div class="wrap footer-grid"> <div class="footer-mast"> <p class="footer-word">sreeraj<span>.dev</span></p> <p class="footer-colophon">
+Sreeraj Rajan — backend engineer at Medley Learning. Set in Anton,
+        Oswald &amp; Inter; printed with Astro in red, black and cream.
+        &copy; 2026.
+</p> </div> <nav class="footer-links" aria-label="Footer"> <a href="/archive/2026-10/rss.xml"> <span class="num" aria-hidden="true">01</span> <span>RSS feed</span> </a><a href="/archive/2026-10/tags/"> <span class="num" aria-hidden="true">02</span> <span>All tags</span> </a><a href="/archive/"> <span class="num" aria-hidden="true">03</span> <span>Past editions</span> </a><a href="/archive/2026-10/contact/"> <span class="num" aria-hidden="true">04</span> <span>Contact</span> </a><a href="https://twitter.com/bot_sree" rel="me noopener"> <span class="num" aria-hidden="true">05</span> <span>Twitter</span> </a> </nav> <div class="footer-stamp"> <span>Edition</span> <strong>2026 · X</strong> <span>Constructivism</span> </div> </div> <div class="wrap"> <p class="footer-slogan">All power to the pipelines</p> </div> </footer> <script type="module">const r=Array.from(document.querySelectorAll("[data-reveal]"));if(r.length)if(window.matchMedia("(prefers-reduced-motion: reduce)").matches||!("IntersectionObserver"in window))r.forEach(t=>t.classList.add("is-in"));else{document.documentElement.classList.add("js-reveal");const t=new IntersectionObserver(e=>{e.forEach(s=>{s.isIntersecting&&(s.target.classList.add("is-in"),t.unobserve(s.target))})},{rootMargin:"0px 0px -6% 0px",threshold:.06});r.forEach((e,s)=>{e.style.setProperty("--i",String(s%6)),t.observe(e)}),window.setTimeout(()=>r.forEach(e=>e.classList.add("is-in")),4e3)}</script> </body></html>

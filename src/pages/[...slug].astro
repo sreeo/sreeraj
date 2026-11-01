@@ -10,13 +10,9 @@ export async function getStaticPaths() {
     params: { slug: post.data.slug },
     props: {
       post,
-      num: String(posts.length - i).padStart(3, '0'),
-      prevPost:
-        i < posts.length - 1
-          ? { slug: posts[i + 1].data.slug, title: posts[i + 1].data.title }
-          : null,
-      nextPost:
-        i > 0 ? { slug: posts[i - 1].data.slug, title: posts[i - 1].data.title } : null,
+      num: posts.length - i,
+      prevPost: i < posts.length - 1 ? { slug: posts[i + 1].data.slug, title: posts[i + 1].data.title } : null,
+      nextPost: i > 0 ? { slug: posts[i - 1].data.slug, title: posts[i - 1].data.title } : null,
     },
   }));
 }

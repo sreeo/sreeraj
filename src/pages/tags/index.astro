@@ -1,46 +1,62 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Device from '../../components/Device.astro';
+import { romanLower } from '../../utils/roman';
 
 const posts = await getCollection('blog');
 const tagCounts = new Map<string, number>();
 for (const post of posts) {
-  for (const tag of post.data.tags) {
-    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-  }
+  for (const tag of post.data.tags) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
 }
-const tags = [...tagCounts.entries()].sort(
-  (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
-);
+const tags = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+const letters = new Map<string, Array<[string, number]>>();
+for (const t of tags) {
+  const L = t[0][0].toUpperCase();
+  letters.set(L, [...(letters.get(L) ?? []), t]);
+}
 ---
 
-<BaseLayout title="Tags — sreeraj.dev" description="Every tag on sreeraj.dev." theme="tech">
-  <header class="page-poster">
-    <div class="wrap page-poster-grid">
-      <div>
-        <span class="stamp">Taxonomy</span>
-        <h1 class="page-title">Every tag</h1>
-        <p class="page-description">
-          {tags.length} tags across {posts.length} dispatches, largest first.
-        </p>
-      </div>
-      <div class="count-stamp" aria-hidden="true">
-        <strong>{String(tags.length).padStart(2, '0')}</strong>
-        <span>tags</span>
-      </div>
-    </div>
-  </header>
+<BaseLayout
+  title="Index rerum — sreeraj.dev"
+  description="Every rubric on sreeraj.dev, in alphabetical order."
+  section={{ label: 'Index rerum', href: '/tags/' }}
+  runningTitle="Index rerum"
+>
+  <div class="folio">
+    <header class="page-head">
+      <span class="liber sc">Index rerum</span>
+      <h1 class="page-title">Index</h1>
+      <p class="page-description">
+        Of the matters treated in this volume, in the order of the alphabet,
+        with the number of works that touch upon each.
+      </p>
+      <span class="fleuron" aria-hidden="true">❧</span>
+    </header>
 
-  <section class="wrap sec" aria-label="All tags">
-    <ul class="tag-wall">
-      {tags.map(([tag, count]) => (
-        <li>
-          <a href={`/tags/${tag}/`} class="tag-pill">
-            <span>{tag}</span>
-            <span class="n">{String(count).padStart(2, '0')}</span>
-          </a>
-        </li>
+    <aside class="marg head-note" aria-label="Summary">
+      <Device class="device" letters={false} />
+      <strong>{tags.length}</strong>
+      rubricae across {posts.length} works; the numbers are given in Roman.
+    </aside>
+
+    <div class="index-rerum">
+      {[...letters.entries()].map(([L, list]) => (
+        <section class="index-letter" aria-label={`Letter ${L}`}>
+          <h2>{L}</h2>
+          <ul>
+            {list.map(([tag, count]) => (
+              <li>
+                <a href={`/tags/${tag}/`}>
+                  <span class="il-name">{tag}</span>
+                  <span class="tl-leader" aria-hidden="true"></span>
+                  <span class="il-count">{romanLower(count)}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       ))}
-    </ul>
-  </section>
+    </div>
+  </div>
 </BaseLayout>
