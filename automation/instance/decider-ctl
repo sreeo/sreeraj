@@ -1,0 +1,11 @@
+#!/bin/sh
+# Stop, start or check the redesign decider container. The redesign runner (user
+# sreeraj, no docker access) calls this through sudo; see /etc/sudoers.d/decider-ctl.
+set -eu
+container=redesign-n8n-decider-1
+case "${1:-}" in
+  stop)   exec /usr/bin/docker stop "$container" ;;
+  start)  exec /usr/bin/docker start "$container" ;;
+  status) exec /usr/bin/docker ps -q -f "name=^${container}\$" ;;
+  *)      echo "usage: decider-ctl stop|start|status" >&2; exit 2 ;;
+esac
