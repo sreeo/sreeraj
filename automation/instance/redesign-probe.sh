@@ -47,7 +47,7 @@ if printf '%s\n' "${problems[@]}" | grep -q 'probe claude' && printf '%s\n' "${p
 hints=()
 printf '%s\n' "${problems[@]}" | grep -q 'probe claude' && hints+=("Claude: renew CLAUDE_CODE_OAUTH_TOKEN with 'claude setup-token' and update ~/.config/sreeraj-redesign/env")
 printf '%s\n' "${problems[@]}" | grep -q 'probe codex' && hints+=("Codex: run 'codex login --device-auth' as sreeraj")
-printf '%s\n' "${problems[@]}" | grep -q -E 'decider|n8n' && hints+=("Services: cd ~/n8n && docker compose up -d, then docker compose ps")
+printf '%s\n' "${problems[@]}" | grep -q -E 'decider|n8n' && hints+=("Services, as root: cd /home/sreeraj/n8n && docker compose up -d, then docker compose ps")
 printf '%s\n' "${problems[@]}" | grep -q 'node_modules' && hints+=("Run the redesign service once (or npm ci in the clone's automation/)")
 notify "$level" "Redesign health check: ${#problems[@]} problem(s)" \
   "$(printf -- '- %s\n' "${problems[@]}")

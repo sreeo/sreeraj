@@ -76,6 +76,12 @@ REDESIGN_DRY_RUN=1 ~/.local/share/sreeraj-redesign/redesign-run.sh full
 The run pauses the 3 GB decider container after the style decision and starts it again on exit:
 the host has 7.7 GB and no swap, and a Chrome was OOM-killed when both ran at once.
 
+The runner user has no sudo or docker access. It stops and starts the decider through
+`decider-ctl`, a root-owned helper that one sudoers rule allows and nothing else. Install both
+as root: `install -m 755 decider-ctl /usr/local/bin/` and
+`install -m 440 sudoers-decider-ctl /etc/sudoers.d/decider-ctl`. Run `docker compose` for n8n
+as root.
+
 ## Health check and alerts
 
 `sreeraj-redesign-probe.timer` runs `redesign-probe.sh` every Monday at 09:00 UTC. It checks both

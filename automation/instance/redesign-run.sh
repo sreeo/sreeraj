@@ -59,17 +59,18 @@ notify() {  # level title message [url]
 
 # The 3 GB CPU decider is only needed while the style is decided. Pausing it frees memory for
 # the build, e2e and visual QA stages on this 7.7 GB host without swap (a Chrome was
-# OOM-killed on 2026-10-03). The EXIT trap always starts it again.
-DECIDER_CONTAINER="${DECIDER_CONTAINER:-redesign-n8n-decider-1}"
+# OOM-killed on 2026-10-03). The EXIT trap always starts it again. This user has no docker
+# access: decider-ctl, a root-owned helper allowed by /etc/sudoers.d/decider-ctl, does it.
 DECIDER_PAUSED=0
+decider() { sudo -n /usr/local/bin/decider-ctl "$1"; }
 pause_decider() {
   [ "${REDESIGN_PAUSE_DECIDER:-1}" = "1" ] || return 0
-  if docker ps -q -f "name=^${DECIDER_CONTAINER}$" 2>/dev/null | grep -q .; then
-    docker stop "$DECIDER_CONTAINER" >/dev/null 2>&1 && DECIDER_PAUSED=1 && log "Paused the decider to free memory for the build and QA stages."
+  if decider status 2>/dev/null | grep -q .; then
+    decider stop >/dev/null 2>&1 && DECIDER_PAUSED=1 && log "Paused the decider to free memory for the build and QA stages."
   fi
 }
 
-trap 'rc=$?; [ "$DECIDER_PAUSED" = 1 ] && docker start "$DECIDER_CONTAINER" >/dev/null 2>&1; if [ $rc -ne 0 ]; then hc "/fail"; log "FAILED rc=$rc (state kept in '"$STATE_DIR"'; run: redesign-run.sh resume)"; notify error "Monthly redesign failed (rc=$rc)" "$(journalctl --user -u sreeraj-redesign.service -n 12 --no-pager -o cat 2>/dev/null | grep -E "^\[20" | tail -6)
+trap 'rc=$?; [ "$DECIDER_PAUSED" = 1 ] && decider start >/dev/null 2>&1; if [ $rc -ne 0 ]; then hc "/fail"; log "FAILED rc=$rc (state kept in '"$STATE_DIR"'; run: redesign-run.sh resume)"; notify error "Monthly redesign failed (rc=$rc)" "$(journalctl --user -u sreeraj-redesign.service -n 12 --no-pager -o cat 2>/dev/null | grep -E "^\[20" | tail -6)
 Run viewer: http://100.104.153.63:8790"; fi' EXIT
 hc "/start"
 log "=== Monthly redesign (mode=$MODE, dry=$DRY_RUN, host=$(hostname)) ==="

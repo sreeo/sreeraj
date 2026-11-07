@@ -1,0 +1,2 @@
+# The redesign runner (user sreeraj) may stop, start and check the decider container, nothing else.
+sreeraj ALL=(root) NOPASSWD: /usr/local/bin/decider-ctl stop, /usr/local/bin/decider-ctl start, /usr/local/bin/decider-ctl status
